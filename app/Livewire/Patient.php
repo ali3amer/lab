@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\SubAnalysis;
+use App\Models\VisitAnalysis;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -10,6 +12,7 @@ class Patient extends Component
 {
     public $header = "المرضى";
     public $id = 0;
+    public $visitId = 0;
     public $searchName = "";
     public $searchAge = "";
     public $searchPhone = "";
@@ -20,9 +23,14 @@ class Patient extends Component
     public $patientName = "";
     public $duration = "years";
     public $gender = "male";
+    public $insurance_id = null;
+    public $visit_date = "";
+    public $doctor = "";
     public $age = 0;
     public $phone = 0;
     public Collection $patients;
+    public Collection $visits;
+    public Collection $insurances;
     public array $durations = [
         'years' => 'سنوات',
         'months' => 'اشهر',
@@ -31,16 +39,26 @@ class Patient extends Component
         'hours' => 'ساعات',
     ];
     public $firstVisitDate = '';
+    public array $currentPatient = [];
+    public array $currentVisit = [];
+    public array $visitAnalyses = [];
+    public Collection $subAnalyses;
 
     public function mount()
     {
         $this->patients = \App\Models\Patient::all();
+        $this->insurances = \App\Models\Insurance::all();
         $this->firstVisitDate = date('Y-m-d');
     }
 
     public function getPatients()
     {
         $this->patients = \App\Models\Patient::all();
+    }
+
+    public function getVisits($id)
+    {
+        $this->visits = \App\Models\Visit::where("patient_id", $id)->get();
     }
 
     public function search()
@@ -101,6 +119,7 @@ class Patient extends Component
         $this->resetData();
     }
 
+
     public function edit($patient)
     {
         $this->id = $patient['id'];
@@ -116,10 +135,64 @@ class Patient extends Component
         $this->getPatients();
     }
 
+    public function choosePatient($patient)
+    {
+        $this->currentPatient = $patient;
+        $this->edit($patient);
+        $this->getVisits($patient['id']);
+    }
+
+    public function saveVisit()
+    {
+        if ($this->visitId == 0) {
+            \App\Models\Visit::create([
+                'patient_id' => $this->currentPatient['id'],
+                'insurance_id' => null,
+                'doctor' => $this->doctor,
+                'visit_date' => $this->visit_date,
+            ]);
+        } else {
+            \App\Models\Visit::where('id', $this->visitId)->update([
+                'insurance_id' => null,
+                'doctor' => $this->doctor,
+                'visit_date' => $this->visit_date,
+            ]);
+        }
+
+        $this->resetVisitData();
+        $this->getVisits($this->currentPatient['id']);
+
+    }
+
+    public function editVisit($visit)
+    {
+        $this->visitId = $visit['id'];
+        $this->insurance_id = $visit['insurance_id'];
+        $this->visit_date = $visit['visit_date'];
+        $this->doctor = $visit['doctor'];
+    }
+
+    public function chooseVisit($visit)
+    {
+        $this->currentVisit = $visit;
+        $this->editVisit($visit);
+        $this->getAnalyses($visit['id']);
+    }
+
+    public function getAnalyses($id)
+    {
+        $this->subAnalyses = SubAnalysis::all();
+        $this->visitAnalyses = VisitAnalysis::where("visit_id", $id)->get()->toArray();
+    }
 
     public function resetData()
     {
-        $this->reset('id', 'patientName', 'gender', 'age', 'phone');
+        $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'currentPatient');
+    }
+
+    public function resetVisitData()
+    {
+        $this->reset('visitId', 'currentVisit', 'doctor', 'insurance_id', 'visit_date');
     }
 
     public function render()

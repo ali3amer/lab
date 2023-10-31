@@ -17,9 +17,11 @@ return new class extends Migration
             $table->foreign('patient_id')->references('id')->on('patients');
             $table->unsignedBigInteger('insurance_id')->nullable();
             $table->foreign('insurance_id')->references('id')->on('insurances');
-            $table->decimal("discount", 10, 8);
-            $table->decimal("total_amount", 10, 8);
+            $table->decimal("discount", 10, 8)->nullable();
+            $table->decimal("total_amount", 10, 8)->nullable();
+            $table->string("doctor")->nullable();
             $table->string("comment")->nullable();
+            $table->date("visit_date");
             $table->timestamps();
         });
     }
