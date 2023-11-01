@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('sub_analysis_id');
             $table->foreign('sub_analysis_id')->references('id')->on('sub_analyses');
             $table->enum("gender", ['all', 'male', 'female']);
-            $table->enum("age", ["years", "months", "days", "hours"]);
+            $table->enum("age", ["all", "years", "months", "days", "hours"])->nullable();
             $table->enum("result_types", ["text_and_multable_choice", "multable_choice", "number", "text"]);
             $table->integer("age_from")->nullable();
             $table->integer("age_to")->nullable();

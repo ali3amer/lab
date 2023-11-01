@@ -4,6 +4,7 @@
 
     <!-- component -->
     <!-- Code block starts -->
+    <!--
     <div class="">
         <div wire:ignore.self
              class="py-12 bg-gray-700 opacity-5 hidden transition duration-150 ease-in-out z-10 absolute top-0 right-0 bottom-0 left-0"
@@ -64,6 +65,7 @@
         </button>
     </div>
 
+-->
     <!-- Code block ends -->
 
     <div class="p-5 text-cyan-800 bg-white font-extrabold max-w-full border-2 border-dashed rounded-2xl my-2 mx-5">
@@ -226,7 +228,7 @@
         <div class="p-5 text-cyan-800 bg-white font-extrabold max-w-full border-2 border-dashed rounded-2xl my-2 mx-5">
             <form class="w-full" wire:submit="saveVisit()">
                 <div class="flex flex-wrap -mx-3">
-                    <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                    <div class="w-1/3 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="visit_date">
                             التاريخ
@@ -237,22 +239,21 @@
                         <span class="text-red-500">@error('visit_date') {{ $message }} @enderror</span>
                     </div>
 
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                    <div class="w-1/3 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="insurance_id">
                             التأمين
                         </label>
                         <select wire:model="insurance_id" @disabled(!empty($currentVisit))
-                                class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                        class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                 id="insurance_id">
                             @foreach($insurances as $insurance)
                                 <option value="{{$insurance->id}}">{{$insurance->insuranceName}}</option>
                             @endforeach
                         </select>
-
                     </div>
 
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-1/3 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="doctor">
                             الدكتور
                         </label>
@@ -261,17 +262,56 @@
                                id="doctor" type="text" placeholder="الدكتور">
                     </div>
 
-                    <div class="w-full md:w-1/6 px-2  flex items-center ">
-                        @if(empty($currentVisit))
+                    <div class="w-1/4 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="amount">
+                            المبلغ
+                        </label>
+                        <input autocomplete="off" disabled wire:model="amount"
+                               class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="amount" type="text" placeholder="المبلغ ...">
+                    </div>
+
+                    <div class="w-1/4 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                               for="discount">
+                            التخفيض
+                        </label>
+                        <input autocomplete="off" wire:model="discount"
+                               class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="discount" type="text" placeholder="التخفيض ...">
+                    </div>
+
+                    <div class="w-1/4 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                               for="total_amount">
+                            الصافي
+                        </label>
+                        <input autocomplete="off" disabled wire:model="total_amount"
+                               class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="total_amount" type="text" placeholder="الصافي ...">
+                    </div>
+
+
+                    @if(empty($currentVisit))
+                        <div class="w-1/4 px-2  flex items-end ">
                             <button type="submit"
                                     class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{$visitId == 0 ? 'حفظ': 'تعديل'}}</button>
-                        @else
-                            <button type="button" wire:click="resetVisitData()"
-                                    class=" py-2.5 bg-red-800 hover:bg-red-700 w-full mt-2 rounded text-white"><i
-                                    class="fa fa-close"></i></button>
+                        </div>
+                    @else
+                        <div class="w-1/4 flex">
+                            <div class="w-1/2 px-2  flex items-end ">
+                                <button type="button" wire:click="saveVisitAnalyses()"
+                                        class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"><i
+                                        class="fa fa-save"></i></button>
+                            </div>
+                            <div class="w-1/2 px-2  flex items-end ">
+                                <button type="button" wire:click="resetVisitData()"
+                                        class=" py-2.5 bg-red-800 hover:bg-red-700 w-full mt-2 rounded text-white"><i
+                                        class="fa fa-close"></i></button>
+                            </div>
+                        </div>
+                    @endif
 
-                        @endif
-                    </div>
                 </div>
 
             </form>
@@ -302,7 +342,8 @@
                                         <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                 wire:click="editVisit({{$visit}})"><i class="fa fa-pen"></i></button>
                                         <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                wire:click="deleteVisit({{$visit->id}})"><i class="fa fa-trash"></i></button>
+                                                wire:click="deleteVisit({{$visit->id}})"><i class="fa fa-trash"></i>
+                                        </button>
                                         <button class="bg-yellow-400 p-2 rounded text-xs text-white"
                                                 wire:click="chooseVisit({{$visit}})"><i class="fa fa-eye"></i></button>
                                     </td>
@@ -316,7 +357,8 @@
             </div>
         @else
             <div class="flex">
-                <div class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                <div
+                    class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
                     <div class="overflow-auto h-80">
                         <table class="table-fixed w-full">
@@ -326,11 +368,19 @@
                             </tr>
                             </thead>
                             <tbody class="text-center">
-
+                            <tr>
+                                <td>
+                                    <input autocomplete="off" type="text" wire:model.live="searchAnalysis" wire:keydown="searchAnalyses()"
+                                           class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                           placeholder="إسم الفحص ...">
+                                </td>
+                            </tr>
                             @foreach($subAnalyses as $analysis)
-                                <tr class="border-b-2">
-                                    <td class="py-2">{{$analysis->subAnalysisName}}</td>
-                                </tr>
+                                @if(!key_exists($analysis->id, $visitAnalyses))
+                                    <tr class="border-b-2 cursor-pointer" wire:click="addAnalysis({{$analysis}})">
+                                        <td class="py-2">{{$analysis->subAnalysisName}}</td>
+                                    </tr>
+                                @endif
                             @endforeach
                             </tbody>
                         </table>
@@ -338,7 +388,8 @@
 
                 </div>
 
-                <div class="p-5 w-2/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                <div
+                    class="p-5 w-2/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
                     <div class="overflow-auto h-80">
                         <table class="table-fixed w-full">
@@ -354,12 +405,17 @@
 
                             @foreach($visitAnalyses as $analysis)
                                 <tr class="border-b-2">
-                                    <td>{{$analysis->sub_analysis_id}}</td>
-                                    <td>{{$analysis->result}}</td>
-                                    <td>{{$analysis->price}}</td>
+                                    <td>{{$analysis['subAnalysisName']}}</td>
+                                    <td>
+                                        <input autocomplete="off" type="text" wire:model.live="visitAnalyses.{{$analysis['id']}}.result"
+                                               class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                               placeholder="النتيجه ...">
+                                    </td>
+                                    <td>{{$analysis['price']}}</td>
                                     <td>
                                         <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                wire:click="deleteAnalysis({{$analysis->id}})"><i class="fa fa-trash"></i></button>
+                                                wire:click="deleteAnalysis({{$analysis['id']}})"><i
+                                                class="fa fa-trash"></i></button>
                                     </td>
                                 </tr>
                             @endforeach

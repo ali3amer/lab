@@ -35,8 +35,8 @@ class Analysis extends Component
     public $ages = ["all" => "الكل", "years" => "سنوات", "months" => "شهور", "weeks" => "أسابيع", "days" => "أيام"];
     public $age = "all";
     public $age_range = "all";
-    public $age_from = "";
-    public $age_to = "";
+    public $age_from = null;
+    public $age_to = null;
     public $range_from = "";
     public $range_to = "";
     public Collection $categories;
@@ -65,11 +65,16 @@ class Analysis extends Component
 
     public function saveReferenceRange()
     {
+        if ($this->age_range == "all") {
+        $this->age_from = null;
+        $this->age_to = null;
+        $this->age = "all";
+        }
         if ($this->referenceId == 0) {
             ReferenceRange::create([
                 "sub_analysis_id" => $this->currentSubAnalysis['id'],
                 "gender" => $this->gender,
-                "age" => "years",
+                "age" => $this->age,
                 "result_types" => $this->result_types,
                 "age_from" => $this->age_from,
                 "age_to" => $this->age_to,

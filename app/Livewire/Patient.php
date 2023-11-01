@@ -13,6 +13,7 @@ class Patient extends Component
     public $header = "المرضى";
     public $id = 0;
     public $visitId = 0;
+    public $searchAnalysis = "";
     public $searchName = "";
     public $searchAge = "";
     public $searchPhone = "";
@@ -56,6 +57,10 @@ class Patient extends Component
         $this->patients = \App\Models\Patient::all();
     }
 
+    public function searchAnalyses()
+    {
+        $this->subAnalyses = SubAnalysis::where('subAnalysisName', 'LIKE', '%'.$this->searchAnalysis.'%')->get();
+    }
     public function getVisits($id)
     {
         $this->visits = \App\Models\Visit::where("patient_id", $id)->get();
@@ -164,6 +169,18 @@ class Patient extends Component
 
     }
 
+    public function saveVisitAnalyses()
+    {
+        foreach ($this->visitAnalyses as $analysis) {
+            VisitAnalysis::create([
+                'visit_id' => $this->currentVisit['id'],
+                'sub_analysis_id' => $analysis['sub_analysis_id'],
+                'price' => $analysis['price'],
+                'result' => $analysis['result'],
+            ]);
+        }
+    }
+
     public function editVisit($visit)
     {
         $this->visitId = $visit['id'];
@@ -183,6 +200,19 @@ class Patient extends Component
     {
         $this->subAnalyses = SubAnalysis::all();
         $this->visitAnalyses = VisitAnalysis::where("visit_id", $id)->get()->toArray();
+    }
+
+    public function addAnalysis($analysis)
+    {
+        $this->visitAnalyses[$analysis['id']] = $analysis;
+        $this->visitAnalyses[$analysis['id']]['sub_analysis_id'] = $analysis['id'];
+        $this->visitAnalyses[$analysis['id']]['price'] = 0;
+        $this->visitAnalyses[$analysis['id']]['result'] = null;
+    }
+
+    public function deleteAnalysis($id)
+    {
+        unset($this->visitAnalyses[$id]);
     }
 
     public function resetData()
