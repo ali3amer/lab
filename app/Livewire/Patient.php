@@ -14,11 +14,13 @@ class Patient extends Component
     public $id = 0;
     public $visitId = 0;
     public $searchAnalysis = "";
+    public $searchSubAnalysis = "";
     public $searchName = "";
     public $searchAge = "";
     public $searchPhone = "";
     public $searchGender = "choose";
     public $searchDuration = "choose";
+    public $searchCategory = "";
 
     #[Rule('required', message: 'أدخل إسم المريض')]
     public $patientName = "";
@@ -27,8 +29,10 @@ class Patient extends Component
     public $insurance_id = null;
     public $visit_date = "";
     public $doctor = "";
+    public $option = "";
     public $age = 0;
     public $phone = 0;
+    public Collection $categories;
     public Collection $patients;
     public Collection $visits;
     public Collection $insurances;
@@ -44,9 +48,14 @@ class Patient extends Component
     public array $currentVisit = [];
     public array $visitAnalyses = [];
     public Collection $subAnalyses;
+    public Collection $analyses;
+    public array $currentCategory = [];
+    public array $currentAnalysis = [];
+    public array $analysesSelectArray = [];
 
     public function mount()
     {
+        $this->categories = \App\Models\Category::all();
         $this->patients = \App\Models\Patient::all();
         $this->insurances = \App\Models\Insurance::all();
         $this->firstVisitDate = date('Y-m-d');
@@ -57,10 +66,21 @@ class Patient extends Component
         $this->patients = \App\Models\Patient::all();
     }
 
+    public function searchCategories()
+    {
+        $this->categories = \App\Models\Category::where('categoryName', 'LIKE', '%' . $this->searchCategory . '%')->get();
+    }
+
     public function searchAnalyses()
     {
-        $this->subAnalyses = SubAnalysis::where('subAnalysisName', 'LIKE', '%'.$this->searchAnalysis.'%')->get();
+        $this->analyses = \App\Models\Analysis::where('analysisName', 'LIKE', '%' . $this->searchAnalysis . '%')->get();
     }
+
+    public function searchSubAnalyses()
+    {
+        $this->subAnalyses = SubAnalysis::where("analysis_id", $this->currentAnalysis['id'])->where('subAnalysisName', 'LIKE', '%' . $this->searchSubAnalysis . '%')->get();
+    }
+
     public function getVisits($id)
     {
         $this->visits = \App\Models\Visit::where("patient_id", $id)->get();
@@ -147,6 +167,23 @@ class Patient extends Component
         $this->getVisits($patient['id']);
     }
 
+    public function chooseCategory($category)
+    {
+        $this->currentCategory = $category;
+        $this->analyses = \App\Models\Analysis::where('category_id', $category["id"])->get();
+    }
+
+    public function chooseAnalysis($analysis)
+    {
+        $this->currentAnalysis = $analysis;
+        $this->analysesSelectArray[$analysis["id"]] = $analysis["analysisName"];
+        $this->getSubAnalyses($analysis["id"]);
+        $this->option = $analysis['id'];
+        if (empty($this->visitAnalyses[$this->option])) {
+            $this->visitAnalyses[$this->option] = [];
+        }
+    }
+
     public function saveVisit()
     {
         if ($this->visitId == 0) {
@@ -171,13 +208,15 @@ class Patient extends Component
 
     public function saveVisitAnalyses()
     {
-        foreach ($this->visitAnalyses as $analysis) {
-            VisitAnalysis::create([
-                'visit_id' => $this->currentVisit['id'],
-                'sub_analysis_id' => $analysis['sub_analysis_id'],
-                'price' => $analysis['price'],
-                'result' => $analysis['result'],
-            ]);
+        foreach ($this->visitAnalyses as $analyses) {
+            foreach ($analyses as $analysis) {
+                VisitAnalysis::create([
+                    'visit_id' => $this->currentVisit['id'],
+                    'sub_analysis_id' => $analysis['sub_analysis_id'],
+                    'price' => $analysis['price'],
+                    'result' => $analysis['result'],
+                ]);
+            }
         }
     }
 
@@ -193,31 +232,46 @@ class Patient extends Component
     {
         $this->currentVisit = $visit;
         $this->editVisit($visit);
-        $this->getAnalyses($visit['id']);
+        $visitAnalysis = VisitAnalysis::where("visit_id", $visit['id'])->get();
+        $this->visitAnalyses = [];
+        foreach ($visitAnalysis as $analysis) {
+            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id] = $analysis->toArray();
+            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id]["subAnalysisName"] = $analysis->subAnalysis->subAnalysisName;
+            $this->analysesSelectArray[$analysis->subAnalysis->analysis->id] = $analysis->subAnalysis->analysis->category->categoryName;
+            $this->option = $analysis->subAnalysis->analysis->id;
+        }
     }
 
-    public function getAnalyses($id)
+    public function getSubAnalyses($id)
     {
-        $this->subAnalyses = SubAnalysis::all();
-        $this->visitAnalyses = VisitAnalysis::where("visit_id", $id)->get()->toArray();
+        $this->subAnalyses = SubAnalysis::where("analysis_id", $this->currentAnalysis['id'])->get();
     }
 
-    public function addAnalysis($analysis)
+    public function addSubAnalysis($analysis)
     {
-        $this->visitAnalyses[$analysis['id']] = $analysis;
-        $this->visitAnalyses[$analysis['id']]['sub_analysis_id'] = $analysis['id'];
-        $this->visitAnalyses[$analysis['id']]['price'] = 0;
-        $this->visitAnalyses[$analysis['id']]['result'] = null;
+        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']] = $analysis;
+        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]["sub_analysis_id"] = $analysis["id"];
+        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = null;
     }
 
     public function deleteAnalysis($id)
     {
-        unset($this->visitAnalyses[$id]);
+        unset($this->visitAnalyses[$this->option][$id]);
     }
 
     public function resetData()
     {
         $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'currentPatient');
+    }
+
+    public function resetAnalysisData()
+    {
+        $this->reset('currentAnalysis');
+    }
+
+    public function resetCategoryData()
+    {
+        $this->reset('currentCategory');
     }
 
     public function resetVisitData()

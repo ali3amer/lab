@@ -22,6 +22,7 @@ class Analysis extends Component
     public $searchAnalysisShortcut = "";
     public $shortcut = "";
     public $choice = "";
+    public $price = 0;
     public $result_text = "";
     public $result_types = "number";
 
@@ -70,6 +71,7 @@ class Analysis extends Component
         $this->age_to = null;
         $this->age = "all";
         }
+
         if ($this->referenceId == 0) {
             ReferenceRange::create([
                 "sub_analysis_id" => $this->currentSubAnalysis['id'],
@@ -150,11 +152,13 @@ class Analysis extends Component
         if ($this->subId == 0) {
             \App\Models\SubAnalysis::create([
                 'subAnalysisName' => $this->subAnalysisName,
+                'price' => $this->price,
                 'analysis_id' => $this->currentAnalysis['id']
             ]);
         } else {
             \App\Models\SubAnalysis::where('id', $this->subId)->update([
                 'subAnalysisName' => $this->subAnalysisName,
+                'price' => $this->price,
             ]);
         }
 
@@ -204,6 +208,7 @@ class Analysis extends Component
     {
         $this->subId = $subAnalysis['id'];
         $this->subAnalysisName = $subAnalysis['subAnalysisName'];
+        $this->price = $subAnalysis['price'];
     }
 
     public function deleteSubAnalysis($id)
@@ -227,7 +232,7 @@ class Analysis extends Component
 
     public function resetSubAnalysisData()
     {
-        $this->reset('subId', 'subAnalysisName');
+        $this->reset('subId', 'subAnalysisName', 'price');
     }
 
     public function resetAnalysisData()

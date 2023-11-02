@@ -12,4 +12,9 @@ class ReferenceRange extends Model
     protected $casts = [
         'result_multable_choice' => 'array',
     ];
+
+    public function subAnalysis()
+    {
+        return $this->belongsTo(SubAnalysis::class);
+    }
 }

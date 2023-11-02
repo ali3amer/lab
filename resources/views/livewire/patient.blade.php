@@ -360,37 +360,105 @@
                 <div
                     class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
-                    <div class="overflow-auto h-80">
-                        <table class="table-fixed w-full">
-                            <thead class="bg-cyan-700 text-white">
-                            <tr>
-                                <th class="py-2 rounded-r-2xl rounded-l-2xl">إسم الفحص</th>
-                            </tr>
-                            </thead>
-                            <tbody class="text-center">
-                            <tr>
-                                <td>
-                                    <input autocomplete="off" type="text" wire:model.live="searchAnalysis" wire:keydown="searchAnalyses()"
-                                           class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                           placeholder="إسم الفحص ...">
-                                </td>
-                            </tr>
-                            @foreach($subAnalyses as $analysis)
-                                @if(!key_exists($analysis->id, $visitAnalyses))
-                                    <tr class="border-b-2 cursor-pointer" wire:click="addAnalysis({{$analysis}})">
-                                        <td class="py-2">{{$analysis->subAnalysisName}}</td>
+                    @if(!empty($currentCategory))
+                        @if(!empty($currentAnalysis))
+                            <div class="overflow-auto h-80">
+                                <table class="table-fixed w-full">
+                                    <thead class="bg-cyan-700 text-white">
+                                    <tr>
+                                        <th class="py-2 rounded-r-2xl">إسم الفحص الفرعي</th>
+                                        <th class="py-2 rounded-l-2xl">سعر</th>
                                     </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                    <tr>
+                                        <td>
+                                            <input autocomplete="off" type="text" wire:model.live="searchSubAnalysis"
+                                                   wire:keydown="searchSubAnalyses()"
+                                                   class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                   placeholder="إسم الفحص الفرعي ...">
+                                        </td>
+                                        <td wire:click="resetAnalysisData()"><i class="fa fa-backward"></i></td>
+                                    </tr>
+                                    @foreach($subAnalyses as $analysis)
+                                        @if(!key_exists($analysis->id, $visitAnalyses[$option]))
+                                            <tr class="border-b-2 cursor-pointer" wire:click="addSubAnalysis({{$analysis}})">
+                                                <td class="py-2">{{$analysis->subAnalysisName}}</td>
+                                                <td class="py-2">{{$analysis->price}}</td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="overflow-auto h-80">
+                                <table class="table-fixed w-full">
+                                    <thead class="bg-cyan-700 text-white">
+                                    <tr>
+                                        <th class="py-2 rounded-l-2xl rounded-r-2xl">إسم الفحص</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                    <tr>
+                                        <td>
+                                            <input autocomplete="off" type="text" wire:model.live="searchAnalysis"
+                                                   wire:keydown="searchAnalyses()"
+                                                   class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                   placeholder="إسم الفحص ...">
+                                        </td>
+                                        <td wire:click="resetCategoryData()"><i class="fa fa-backward"></i></td>
+                                    </tr>
+                                    @foreach($analyses as $analysis)
+                                            <tr class="border-b-2 cursor-pointer" wire:click="chooseAnalysis({{$analysis}})">
+                                                <td class="py-2">{{$analysis->analysisName}}</td>
+                                            </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    @else
+                        <div class="overflow-auto h-80">
+                            <table class="table-fixed w-full">
+                                <thead class="bg-cyan-700 text-white">
+                                <tr>
+                                    <th class="py-2 rounded-l-2xl rounded-r-2xl">إسم القسم</th>
+                                </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                <tr>
+                                    <td>
+                                        <input autocomplete="off" type="text" wire:model.live="searchCategory"
+                                               wire:keydown="searchCategories()"
+                                               class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                               placeholder="إسم القسم ...">
+                                    </td>
+                                </tr>
+                                @if(!empty($categories))
+                                    @foreach($categories as $category)
+                                        <tr class="border-b-2 cursor-pointer"
+                                            wire:click="chooseCategory({{$category}})">
+                                            <td class="py-2">{{$category->categoryName}}</td>
+                                        </tr>
+                                    @endforeach
                                 @endif
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
 
                 </div>
 
                 <div
                     class="p-5 w-2/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-
+                    <select wire:model.live="option"
+                            class="block appearance-none w-1/3 mb-2 text-center border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                            id="result">
+                        @foreach($analysesSelectArray as $key => $optionSelected)
+                            <option value="{{$key}}">{{$optionSelected}}</option>
+                        @endforeach
+                    </select>
                     <div class="overflow-auto h-80">
                         <table class="table-fixed w-full">
                             <thead class="bg-cyan-700 text-white">
@@ -402,23 +470,37 @@
                             </tr>
                             </thead>
                             <tbody class="text-center">
-
-                            @foreach($visitAnalyses as $analysis)
-                                <tr class="border-b-2">
-                                    <td>{{$analysis['subAnalysisName']}}</td>
-                                    <td>
-                                        <input autocomplete="off" type="text" wire:model.live="visitAnalyses.{{$analysis['id']}}.result"
-                                               class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                               placeholder="النتيجه ...">
-                                    </td>
-                                    <td>{{$analysis['price']}}</td>
-                                    <td>
-                                        <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                wire:click="deleteAnalysis({{$analysis['id']}})"><i
-                                                class="fa fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            @endforeach
+                            @if(!empty($visitAnalyses[$option]))
+                                @foreach($visitAnalyses[$option] as $analysis)
+                                    <tr class="border-b-2">
+                                        <td>{{$analysis['subAnalysisName']}}</td>
+                                        <td>
+                                            @php $result_type = \App\Models\ReferenceRange::where('sub_analysis_id', $analysis['id'])->first() @endphp
+                                            @if($result_type->result_types == 'number' || $result_type->result_types == 'text')
+                                                <input autocomplete="off" type="text"
+                                                       wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
+                                                       class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                       placeholder="النتيجه ...">
+                                            @elseif($result_type->result_types == 'multable_choice')
+                                                <select wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
+                                                        class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                                        id="result">
+                                                    @foreach($result_type->result_multable_choice as $key => $choice)
+                                                        <option value="{{$key}}">{{$choice}}</option>
+                                                    @endforeach
+                                                </select>
+                                            @elseif($result_type == 'text_and_multable_choice')
+                                            @endif
+                                        </td>
+                                        <td>{{$analysis['price']}}</td>
+                                        <td>
+                                            <button class="bg-red-400 p-2 rounded text-xs text-white"
+                                                    wire:click="deleteAnalysis({{$analysis['id']}})"><i
+                                                    class="fa fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
                             </tbody>
                         </table>
                     </div>

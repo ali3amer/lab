@@ -36,24 +36,38 @@
         <div class="flex">
             <div class="w-1/2">
                 <div class="p-2 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                    <div class="flex flex-wrap -mx-2">
-                        <div class="w-1/2 px-3 ">
-                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                   for="analysisName">
-                                إسم التحليل
-                            </label>
-                            <input autocomplete="off" wire:keydown.enter="saveSubAnalysis()" required
-                                   wire:model.live="subAnalysisName"
-                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                                   id="subAnalysisName" type="text" placeholder="إسم التحليل">
-                            <span class="text-red-500">@error('subAnalysisName') {{ $message }} @enderror</span>
-                        </div>
+                    <div class="">
+                        <form wire:submit="saveSubAnalysis()" class="flex flex-wrap -mx-2">
+                            <div class="w-1/3 px-3 ">
+                                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                       for="analysisName">
+                                    إسم التحليل
+                                </label>
+                                <input autocomplete="off" required
+                                       wire:model.live="subAnalysisName"
+                                       class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                       id="subAnalysisName" type="text" placeholder="إسم التحليل">
+                                <span class="text-red-500">@error('subAnalysisName') {{ $message }} @enderror</span>
+                            </div>
 
-                        <div class="w-1/3 px-2  flex items-center ">
-                            <button type="button" wire:click="saveSubAnalysis()"
-                                    class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"><i
-                                    class="fa fa-save"></i></button>
-                        </div>
+                            <div class="w-1/3 px-3 ">
+                                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                       for="analysisName">
+                                    السعر
+                                </label>
+                                <input autocomplete="off" wire:keydown.enter="saveSubAnalysis()" required
+                                       wire:model.live="price"
+                                       class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                       id="price" type="text" placeholder="السعر ...">
+                                <span class="text-red-500">@error('price') {{ $message }} @enderror</span>
+                            </div>
+
+                            <div class="w-1/4 px-2  flex items-center ">
+                                <button type="submit"
+                                        class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"><i
+                                        class="fa fa-save"></i></button>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
@@ -62,6 +76,7 @@
                             <thead class="bg-cyan-700 text-white">
                             <tr>
                                 <th class="rounded-r-2xl py-2">إسم التحليل</th>
+                                <th>السعر</th>
                                 <th class="rounded-l-2xl">التحكم</th>
                             </tr>
                             </thead>
@@ -73,14 +88,15 @@
                                            class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                            placeholder="إسم التحليل">
                                 </td>
-                                <td>
-                                </td>
+                                <td></td>
+                                <td></td>
                             </tr>
 
                             @if(!empty($subAnalyzes))
                                 @foreach($subAnalyzes as $analysis)
                                     <tr class="border-b-2">
                                         <td>{{$analysis->subAnalysisName}}</td>
+                                        <td>{{$analysis->price}}</td>
                                         <td>
                                             <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                     wire:click="editSubAnalysis({{$analysis}})"><i
@@ -362,7 +378,7 @@
 
                             <div class="w-48 px-3 mb-6 md:mb-0">
                                 <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                       for="analysisName">
+                                       for="shortcut">
                                     الإختصار
                                 </label>
                                 <input autocomplete="off" required
@@ -442,7 +458,6 @@
 
                 </div>
             </div>
-
 
         </div>
     @endif
