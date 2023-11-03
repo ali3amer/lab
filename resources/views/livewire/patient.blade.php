@@ -4,48 +4,62 @@
 
     <!-- component -->
     <!-- Code block starts -->
-    <!--
+
     <div class="">
         <div wire:ignore.self
              class="py-12 bg-gray-700 opacity-5 hidden transition duration-150 ease-in-out z-10 absolute top-0 right-0 bottom-0 left-0"
              id="modal">
-            <div role="alert" class="container mx-auto w-11/12 md:w-2/3 max-w-lg">
+            <div role="alert" class="container mx-auto w-11/12">
                 <div class="relative py-8 px-5 md:px-10 bg-white shadow-md rounded border border-gray-400">
-                    <h1 class="text-gray-800 font-lg font-bold tracking-normal leading-tight mb-4">Enter Billing
-                        Details</h1>
-                    <label for="name" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">Owner
-                        Name</label>
-                    <input id="name" wire:model.live="patientName"
-                           class="mb-5 mt-2 text-gray-600 focus:outline-none focus:border focus:border-indigo-700 font-normal w-full h-10 flex items-center pl-3 text-sm border-gray-300 text-center rounded border"
-                           placeholder="James"/>
-                    <label for="email2" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">Card
-                        Number</label>
-                    <div class="relative mb-5 mt-2">
-                        <input id="email2"
-                               class="text-gray-600 focus:outline-none focus:border focus:border-indigo-700 font-normal w-full h-10 flex items-center pl-16 text-sm border-gray-300 text-center rounded border"
-                               placeholder="XXXX - XXXX - XXXX - XXXX"/>
-                    </div>
-                    <label for="expiry" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">Expiry
-                        Date</label>
-                    <div class="relative mb-5 mt-2">
-                        <input id="expiry"
-                               class="text-gray-600 focus:outline-none focus:border focus:border-indigo-700 font-normal w-full h-10 flex items-center pl-3 text-sm border-gray-300 text-center rounded border"
-                               placeholder="MM/YY"/>
-                    </div>
-                    <label for="cvc" class="text-gray-800 text-sm font-bold leading-tight tracking-normal">CVC</label>
-                    <div class="relative mb-5 mt-2">
-                        <input id="cvc"
-                               class="mb-8 text-gray-600 focus:outline-none focus:border focus:border-indigo-700 font-normal w-full h-10 flex items-center pl-3 text-sm border-gray-300 text-center rounded border"
-                               placeholder="MM/YY"/>
+                    <div class="h-80 overflow-auto">
+                        <div class="header p-5 text-center font-bold border-2 border-solid border-black">
+                            <h5>معمل النخبة</h5>
+                            <h5>للإنتاج الإعلامي خخخ :)</h5>
+                        </div>
+                        <div class="body" dir="ltr">
+                            @if(!empty($results))
+                                @foreach($results as $key => $printAnalyses)
+                                    <div
+                                        class="my-2 p-2 text-center text-white bg-gray-700 font-extrabold">{{$key}}</div>
+
+                                    @foreach($printAnalyses as $index => $analysis)
+                                        <div
+                                            class="my-2 p-2 text-white bg-gray-700 font-extrabold">{{$index}}</div>
+
+                                        <table class="table-fixed w-full">
+                                            <thead class="bg-gray-700 text-white">
+                                            <tr>
+                                                <th class="py-2">Test</th>
+                                                <th>Result</th>
+                                                <th>N/H</th>
+                                                <th>Ref. Range</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody class="text-center">
+                                            @foreach($analysis as $subAnalysis)
+                                                <tr class="border-b-2 border-gray-400">
+                                                    <td class="py-2">{{ $subAnalysis->subAnalysis->subAnalysisName }}</td>
+                                                    <td>{{ $subAnalysis->result }}</td>
+                                                    <td>{{ $subAnalysis["N/H"] }}</td>
+                                                    <td>{{ $subAnalysis->range }}</td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    @endforeach
+
+                                @endforeach
+                            @endif
+                        </div>
                     </div>
                     <div class="flex items-center justify-start w-full">
                         <button
-                            class="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm">
-                            Submit
+                            class="focus:outline-none ml-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm">
+                            طباعه
                         </button>
                         <button
                             class="focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 ml-3 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm"
-                            onclick="modalHandler()">Cancel
+                            onclick="modalHandler()">إلغاء
                         </button>
                     </div>
                     <button
@@ -58,6 +72,7 @@
         </div>
 
     </div>
+    <!--
     <div class="w-full flex justify-center py-12" id="button">
         <button
             class="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 mx-auto transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-4 sm:px-8 py-2 text-xs sm:text-sm"
@@ -266,7 +281,7 @@
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="amount">
                             المبلغ
                         </label>
-                        <input autocomplete="off" disabled wire:model="amount"
+                        <input autocomplete="off" disabled wire:model.live="amount"
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="amount" type="text" placeholder="المبلغ ...">
                     </div>
@@ -276,7 +291,7 @@
                                for="discount">
                             التخفيض
                         </label>
-                        <input autocomplete="off" wire:model="discount"
+                        <input autocomplete="off" wire:model.live="discount" wire:keydown="calcDiscount()"
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="discount" type="text" placeholder="التخفيض ...">
                     </div>
@@ -286,7 +301,7 @@
                                for="total_amount">
                             الصافي
                         </label>
-                        <input autocomplete="off" disabled wire:model="total_amount"
+                        <input autocomplete="off" disabled wire:model.live="total_amount"
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="total_amount" type="text" placeholder="الصافي ...">
                     </div>
@@ -299,15 +314,21 @@
                         </div>
                     @else
                         <div class="w-1/4 flex">
-                            <div class="w-1/2 px-2  flex items-end ">
+                            <div class="w-1/3 px-2  flex items-end ">
                                 <button type="button" wire:click="saveVisitAnalyses()"
                                         class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"><i
                                         class="fa fa-save"></i></button>
                             </div>
-                            <div class="w-1/2 px-2  flex items-end ">
+                            <div class="w-1/3 px-2  flex items-end ">
                                 <button type="button" wire:click="resetVisitData()"
                                         class=" py-2.5 bg-red-800 hover:bg-red-700 w-full mt-2 rounded text-white"><i
                                         class="fa fa-close"></i></button>
+                            </div>
+                            <div class="w-1/3 px-2  flex items-end ">
+                                <button type="button" wire:click="printResult({{$currentVisit['id']}})"
+                                        class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"
+                                        onclick="modalHandler(true)"><i
+                                        class="fa fa-print"></i></button>
                             </div>
                         </div>
                     @endif
@@ -382,7 +403,8 @@
                                     </tr>
                                     @foreach($subAnalyses as $analysis)
                                         @if(!key_exists($analysis->id, $visitAnalyses[$option]))
-                                            <tr class="border-b-2 cursor-pointer" wire:click="addSubAnalysis({{$analysis}})">
+                                            <tr class="border-b-2 cursor-pointer"
+                                                wire:click="addSubAnalysis({{$analysis}})">
                                                 <td class="py-2">{{$analysis->subAnalysisName}}</td>
                                                 <td class="py-2">{{$analysis->price}}</td>
                                             </tr>
@@ -410,9 +432,10 @@
                                         <td wire:click="resetCategoryData()"><i class="fa fa-backward"></i></td>
                                     </tr>
                                     @foreach($analyses as $analysis)
-                                            <tr class="border-b-2 cursor-pointer" wire:click="chooseAnalysis({{$analysis}})">
-                                                <td class="py-2">{{$analysis->analysisName}}</td>
-                                            </tr>
+                                        <tr class="border-b-2 cursor-pointer"
+                                            wire:click="chooseAnalysis({{$analysis}})">
+                                            <td class="py-2">{{$analysis->analysisName}}</td>
+                                        </tr>
                                     @endforeach
                                     </tbody>
                                 </table>
@@ -475,16 +498,17 @@
                                     <tr class="border-b-2">
                                         <td>{{$analysis['subAnalysisName']}}</td>
                                         <td>
-                                            @php $result_type = \App\Models\ReferenceRange::where('sub_analysis_id', $analysis['id'])->first() @endphp
+                                            @php $result_type = \App\Models\ReferenceRange::where('sub_analysis_id', $analysis['sub_analysis_id'])->first() @endphp
                                             @if($result_type->result_types == 'number' || $result_type->result_types == 'text')
                                                 <input autocomplete="off" type="text"
                                                        wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
                                                        class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                                        placeholder="النتيجه ...">
                                             @elseif($result_type->result_types == 'multable_choice')
-                                                <select wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
-                                                        class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                                        id="result">
+                                                <select
+                                                    wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
+                                                    class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                                    id="result">
                                                     @foreach($result_type->result_multable_choice as $key => $choice)
                                                         <option value="{{$key}}">{{$choice}}</option>
                                                     @endforeach
@@ -495,7 +519,7 @@
                                         <td>{{$analysis['price']}}</td>
                                         <td>
                                             <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                    wire:click="deleteAnalysis({{$analysis['id']}})"><i
+                                                    wire:click="deleteAnalysis({{$analysis['sub_analysis_id']}})"><i
                                                     class="fa fa-trash"></i></button>
                                         </td>
                                     </tr>

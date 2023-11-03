@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\SubAnalysis;
+use App\Models\Visit;
 use App\Models\VisitAnalysis;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
@@ -52,6 +53,11 @@ class Patient extends Component
     public array $currentCategory = [];
     public array $currentAnalysis = [];
     public array $analysesSelectArray = [];
+    public $discount = 0;
+    public $amount = 0;
+    public $total_amount = 0;
+    public Collection $printVisitAnalyses;
+    public array $results = [];
 
     public function mount()
     {
@@ -226,6 +232,9 @@ class Patient extends Component
         $this->insurance_id = $visit['insurance_id'];
         $this->visit_date = $visit['visit_date'];
         $this->doctor = $visit['doctor'];
+        $this->discount = floatval($visit['discount']);
+        $this->amount = floatval($visit['amount']);
+        $this->total_amount = floatval($visit['total_amount']);
     }
 
     public function chooseVisit($visit)
@@ -252,11 +261,104 @@ class Patient extends Component
         $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']] = $analysis;
         $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]["sub_analysis_id"] = $analysis["id"];
         $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = null;
+        $this->amount += $analysis["price"];
+        $this->calcDiscount();
+    }
+
+    public function calcDiscount()
+    {
+        $this->total_amount = $this->amount - floatval($this->discount);
+    }
+
+
+    public function printResult($id)
+    {
+        $this->printVisitAnalyses = VisitAnalysis::where("visit_id", $id)->get();
+        foreach ($this->printVisitAnalyses as $printVisitAnalysis) {
+            $rangesResultArray = [];
+            $ranges = $printVisitAnalysis->subAnalysis->ranges;
+            $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id] = $printVisitAnalysis;
+            $currentResult = $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id];
+            if ($ranges->count() == 1) {
+                $range = $ranges->first();
+                if ($range->result_types == "number") {
+                    $currentResult["range"] = $range->range_from . " - " . $range->range_to;
+                    if ($printVisitAnalysis > $range->range_to) {
+                        $currentResult["N/H"] = "H";
+                    } elseif ($printVisitAnalysis < $range->range_from) {
+                        $currentResult["N/H"] = "L";
+                    } else {
+                        $currentResult["N/H"] = "N";
+                    }
+                } elseif ($range->result_types == "text") {
+                    $currentResult["range"] = "";
+                    $currentResult["N/H"] = "";
+                } elseif ($range->result_types == "multable_choice") {
+                    $currentResult["range"] = $range->result_multable_choice;
+                    $currentResult["N/H"] = "";
+                }
+            } else {
+                $range = $ranges->first();
+
+                if ($range->result_types == "number") {
+                    if ($range->gender == "all") {
+                        if ($range->age_from == null) {
+                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->first();
+                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                            if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                $currentResult["N/H"] = "H";
+                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                $currentResult["N/H"] = "L";
+                            } else {
+                                $currentResult["N/H"] = "N";
+                            }
+                        } else {
+                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
+                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                            if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                $currentResult["N/H"] = "H";
+                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                $currentResult["N/H"] = "L";
+                            } else {
+                                $currentResult["N/H"] = "N";
+                            }
+                        }
+                    } else {
+                        if ($range->age_from == null) {
+                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->first();
+                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                            if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                $currentResult["N/H"] = "H";
+                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                $currentResult["N/H"] = "L";
+                            } else {
+                                $currentResult["N/H"] = "N";
+                            }
+                        } else {
+                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
+                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                            if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                $currentResult["N/H"] = "H";
+                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                $currentResult["N/H"] = "L";
+                            } else {
+                                $currentResult["N/H"] = "N";
+                            }
+                        }
+                    }
+                } elseif ($range->result_types == "text" || $range->result_types == "multable_choice") {
+                    $currentResult["range"] = "";
+                    $currentResult["N/H"] = "";
+                }
+            }
+
+        }
     }
 
     public function deleteAnalysis($id)
     {
         unset($this->visitAnalyses[$this->option][$id]);
+        $this->calcDiscount();
     }
 
     public function resetData()

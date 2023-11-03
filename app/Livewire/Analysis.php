@@ -64,6 +64,11 @@ class Analysis extends Component
         }
     }
 
+    public function deleteChoice($index)
+    {
+        unset($this->choices[$index]);
+    }
+
     public function saveReferenceRange()
     {
         if ($this->age_range == "all") {
@@ -72,7 +77,7 @@ class Analysis extends Component
         $this->age = "all";
         }
 
-        if ($this->referenceId == 0) {
+        if ($this->rangeId == 0) {
             ReferenceRange::create([
                 "sub_analysis_id" => $this->currentSubAnalysis['id'],
                 "gender" => $this->gender,
@@ -85,7 +90,21 @@ class Analysis extends Component
                 "result_multable_choice" => $this->choices,
                 "result_text" => $this->result_text,
             ]);
+        } else {
+            ReferenceRange::where("id", $this->rangeId)->update([
+                "gender" => $this->gender,
+                "age" => $this->age,
+                "result_types" => $this->result_types,
+                "age_from" => $this->age_from,
+                "age_to" => $this->age_to,
+                "range_from" => $this->range_from,
+                "range_to" => $this->range_to,
+                "result_multable_choice" => $this->choices,
+                "result_text" => $this->result_text,
+            ]);
         }
+        $this->getReferenceRange();
+        $this->resetRangeData();
     }
 
     public function getAnalyses()
@@ -189,6 +208,12 @@ class Analysis extends Component
         $this->result_text = $range['result_text'];
     }
 
+    public function deleteRange($id)
+    {
+        ReferenceRange::where("id", $id)->delete();
+        $this->getReferenceRange();
+    }
+
     public function deleteAnalysis($id)
     {
         \App\Models\Analysis::where("id", $id)->delete();
@@ -238,6 +263,11 @@ class Analysis extends Component
     public function resetAnalysisData()
     {
         $this->reset('id', 'analysisName', 'currentAnalysis', 'shortcut');
+    }
+
+    public function resetRangeData()
+    {
+        $this->reset('gender', 'age', 'result_types', 'age_from', 'age_to', 'range_from', 'range_to', 'choices', 'result_text');
     }
 
     public function render()

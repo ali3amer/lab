@@ -256,7 +256,7 @@
 
                     <div class="w-full px-2 ">
                         @foreach($choices as $index => $item)
-                            <button class="px-2 py-1 border-2 border-solid border-red-300 rounded">{{$item}}</button>
+                            <button class="px-2 py-1 border-2 border-solid border-red-300 rounded" wire:click="deleteChoice({{$index}})">{{$item}}</button>
                         @endforeach
                     </div>
 
