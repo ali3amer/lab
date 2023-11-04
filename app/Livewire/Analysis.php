@@ -30,8 +30,9 @@ class Analysis extends Component
         'number' => 'مدى رقمي',
         'text' => 'نص',
         'multable_choice' => 'خيارات',
+        'text_and_multable_choice' => 'نص وخيارات',
     ];
-    public $genders = ["all" => "الكل", "ذكر" => "male", "أنثى" => "female"];
+    public $genders = ["all" => "الكل", "male" => "ذكر", "female" => "أنثى"];
     public $gender = "all";
     public $ages = ["all" => "الكل", "years" => "سنوات", "months" => "شهور", "weeks" => "أسابيع", "days" => "أيام"];
     public $age = "all";
@@ -66,6 +67,7 @@ class Analysis extends Component
 
     public function deleteChoice($index)
     {
+        dd(5);
         unset($this->choices[$index]);
     }
 
@@ -75,6 +77,11 @@ class Analysis extends Component
         $this->age_from = null;
         $this->age_to = null;
         $this->age = "all";
+        }
+
+        if ($this->result_types != "number") {
+            $this->range_to = null;
+            $this->range_from = null;
         }
 
         if ($this->rangeId == 0) {
@@ -245,6 +252,7 @@ class Analysis extends Component
 
     public function chooseSubAnalysis($subAnalysis)
     {
+        $this->currentSubAnalysis = [];
         $this->currentSubAnalysis = $subAnalysis;
         $this->getReferenceRange();
     }

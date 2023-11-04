@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("insuranceName");
             $table->decimal("companyEndurance", 8, 2);
             $table->decimal("patientEndurance", 8, 2);
+            $table->date("contractDate");
             $table->timestamps();
         });
     }

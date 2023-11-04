@@ -9,4 +9,9 @@ class Insurance extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function insuranceDebts()
+    {
+        return $this->hasMany(InsuranceDebt::class);
+    }
 }

@@ -227,19 +227,7 @@
                                    id="range_to" type="text" placeholder="أقل من">
                             <span class="text-red-500">@error('range_to') {{ $message }} @enderror</span>
                         </div>
-                    @elseif($result_types == "text")
-                        <div class="w-1/2 px-3 ">
-                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                   for="result_text">
-                                نص
-                            </label>
-                            <input autocomplete="off"
-                                   wire:model.live="result_text"
-                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                                   id="result_text" type="text" placeholder="نص">
-                            <span class="text-red-500">@error('result_text') {{ $message }} @enderror</span>
-                        </div>
-                    @elseif($result_types == "multable_choice")
+                    @elseif($result_types == "multable_choice" || $result_types == "text_and_multable_choice")
                         <div class="w-1/2 px-3 ">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                    for="multable_choice">
@@ -251,7 +239,6 @@
                                    id="text" type="text" placeholder="إضغط Enter">
                             <span class="text-red-500">@error('multable_choice') {{ $message }} @enderror</span>
                         </div>
-                    @elseif($result_types == "text_and_multable_choice")
                     @endif
 
                     <div class="w-full px-2 ">
@@ -261,7 +248,7 @@
                     </div>
 
                     <div class="w-full px-2  flex items-center ">
-                        <button type="button" wire:click="saveReferenceRange()"
+                        <button type="button" wire:click="saveReferenceRange()" @disabled($result_types == "number" && ($range_from == null || $range_to == null))
                                 class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">حفظ
                         </button>
                     </div>
@@ -295,7 +282,7 @@
                                         @if($range->result_types == "number")
                                             {{ $range->range_from . " - " . $range->range_to }}
                                         @elseif($range->result_types == "text")
-                                        @elseif($range->result_types == "multable_choice")
+                                        @elseif($range->result_types == "multable_choice" || $range->result_types == "text_and_multable_choice")
                                             @if(is_array($range->result_multable_choice) || is_object($range->result_multable_choice))
                                                 @foreach($range->result_multable_choice as $ch)
                                                     <span>{{$ch . ", "}}</span>

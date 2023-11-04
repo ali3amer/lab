@@ -15,7 +15,9 @@
         {{ $slot }}
     </div>
 </div>
-
+<script src="{{asset('js/jquery.min.js')}}"></script>
+<script src="{{asset('js/printThis.js')}}"></script>
+<script src="{{asset('js/scripts.js')}}"></script>
 <script>
     let modal = document.getElementById("modal");
 

@@ -13,11 +13,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
+Route::get('/', \App\Livewire\Patient::class);
+Route::get('/home', \App\Livewire\Patient::class);
 Route::get('patient', \App\Livewire\Patient::class);
 Route::get('analysis', \App\Livewire\Analysis::class);
 Route::get('category', \App\Livewire\Category::class);
 Route::get('insurance', \App\Livewire\Insurance::class);
+
+Auth::routes();
+

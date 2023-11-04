@@ -18,7 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('sub_analysis_id');
             $table->foreign('sub_analysis_id')->references('id')->on('sub_analyses');
             $table->decimal("price", 10, 2);
-            $table->string("result");
+            $table->string("result")->nullable();
+            $table->string("result_choice")->nullable();
             $table->timestamps();
         });
     }

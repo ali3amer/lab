@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\ReferenceRange;
 use App\Models\SubAnalysis;
 use App\Models\Visit;
 use App\Models\VisitAnalysis;
@@ -195,13 +196,15 @@ class Patient extends Component
         if ($this->visitId == 0) {
             \App\Models\Visit::create([
                 'patient_id' => $this->currentPatient['id'],
-                'insurance_id' => null,
+                'insurance_id' => $this->insurance_id,
+                'patientEndurance' => $this->insurance_id != null ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
                 'doctor' => $this->doctor,
                 'visit_date' => $this->visit_date,
             ]);
         } else {
             \App\Models\Visit::where('id', $this->visitId)->update([
-                'insurance_id' => null,
+                'insurance_id' => $this->insurances,
+                'patientEndurance' => $this->insurance_id != null ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
                 'doctor' => $this->doctor,
                 'visit_date' => $this->visit_date,
             ]);
@@ -214,20 +217,40 @@ class Patient extends Component
 
     public function saveVisitAnalyses()
     {
+        VisitAnalysis::where("visit_id", $this->currentVisit['id'])->delete();
         foreach ($this->visitAnalyses as $analyses) {
             foreach ($analyses as $analysis) {
-                VisitAnalysis::create([
-                    'visit_id' => $this->currentVisit['id'],
-                    'sub_analysis_id' => $analysis['sub_analysis_id'],
-                    'price' => $analysis['price'],
-                    'result' => $analysis['result'],
-                ]);
+                dd($analysis);
+                $range = ReferenceRange::where("sub_analysis_id", $analysis['id'])->first();
+                if ($range->result_types == "number" || $range->result_types == "text") {
+                    if ($analysis['result'] != null) {
+                        VisitAnalysis::create([
+                            'visit_id' => $this->currentVisit['id'],
+                            'sub_analysis_id' => $analysis['sub_analysis_id'],
+                            'price' => $analysis['price'],
+                            'result' => $analysis['result'],
+                        ]);
+                    }
+                } else {
+                    if ($analysis['result_choice'] != null) {
+                        VisitAnalysis::create([
+                            'visit_id' => $this->currentVisit['id'],
+                            'sub_analysis_id' => $analysis['sub_analysis_id'],
+                            'price' => $analysis['price'],
+                            'result' => $analysis['result'],
+                            'result_choice' => $analysis['result_choice'],
+                        ]);
+                    }
+                }
+
             }
         }
+        $this->chooseVisit($this->currentVisit);
     }
 
     public function editVisit($visit)
     {
+        $this->printResult($visit['id']);
         $this->visitId = $visit['id'];
         $this->insurance_id = $visit['insurance_id'];
         $this->visit_date = $visit['visit_date'];
@@ -244,10 +267,13 @@ class Patient extends Component
         $visitAnalysis = VisitAnalysis::where("visit_id", $visit['id'])->get();
         $this->visitAnalyses = [];
         foreach ($visitAnalysis as $analysis) {
-            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id] = $analysis->toArray();
-            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id]["subAnalysisName"] = $analysis->subAnalysis->subAnalysisName;
-            $this->analysesSelectArray[$analysis->subAnalysis->analysis->id] = $analysis->subAnalysis->analysis->category->categoryName;
-            $this->option = $analysis->subAnalysis->analysis->id;
+            $this->option = $analysis->subAnalysis->analysis_id;
+            $analysis->subAnalysis->toArray()["result"] = $analysis->result;
+            $analysis->subAnalysis->toArray()["result_choice"] = $analysis->result_choice;
+            $this->addSubAnalysis($analysis);
+//            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id] = $analysis->toArray();
+//            $this->visitAnalyses[$analysis->subAnalysis->analysis->id][$analysis->sub_analysis_id]["subAnalysisName"] = $analysis->subAnalysis->subAnalysisName;
+            $this->analysesSelectArray[$analysis->subAnalysis->analysis->id] = $analysis->subAnalysis->analysis->analysisName;
         }
     }
 
@@ -258,9 +284,15 @@ class Patient extends Component
 
     public function addSubAnalysis($analysis)
     {
+        $result = $analysis->result ?? null;
+        $result_choice = $analysis->result_choice ?? null;
+        if (!is_array($analysis)) {
+            $analysis = $analysis->subAnalysis->toArray();
+        }
         $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']] = $analysis;
         $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]["sub_analysis_id"] = $analysis["id"];
-        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = null;
+        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = $result;
+        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result_choice'] = $result_choice;
         $this->amount += $analysis["price"];
         $this->calcDiscount();
     }
@@ -273,9 +305,9 @@ class Patient extends Component
 
     public function printResult($id)
     {
+        $this->results = [];
         $this->printVisitAnalyses = VisitAnalysis::where("visit_id", $id)->get();
         foreach ($this->printVisitAnalyses as $printVisitAnalysis) {
-            $rangesResultArray = [];
             $ranges = $printVisitAnalysis->subAnalysis->ranges;
             $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id] = $printVisitAnalysis;
             $currentResult = $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id];
@@ -283,9 +315,9 @@ class Patient extends Component
                 $range = $ranges->first();
                 if ($range->result_types == "number") {
                     $currentResult["range"] = $range->range_from . " - " . $range->range_to;
-                    if ($printVisitAnalysis > $range->range_to) {
+                    if ($currentResult->result > $range->range_to) {
                         $currentResult["N/H"] = "H";
-                    } elseif ($printVisitAnalysis < $range->range_from) {
+                    } elseif ($currentResult->result < $range->range_from) {
                         $currentResult["N/H"] = "L";
                     } else {
                         $currentResult["N/H"] = "N";
@@ -293,7 +325,7 @@ class Patient extends Component
                 } elseif ($range->result_types == "text") {
                     $currentResult["range"] = "";
                     $currentResult["N/H"] = "";
-                } elseif ($range->result_types == "multable_choice") {
+                } elseif ($range->result_types == "multable_choice" || $range->result_types == "text_and_multable_choice") {
                     $currentResult["range"] = $range->result_multable_choice;
                     $currentResult["N/H"] = "";
                 }
@@ -305,9 +337,9 @@ class Patient extends Component
                         if ($range->age_from == null) {
                             $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->first();
                             $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
-                            if ($currentResult['result'] > $rangeFromTo->range_to) {
+                            if ($currentResult->result > $rangeFromTo->range_to) {
                                 $currentResult["N/H"] = "H";
-                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                            } elseif ($currentResult->result < $rangeFromTo->from) {
                                 $currentResult["N/H"] = "L";
                             } else {
                                 $currentResult["N/H"] = "N";
@@ -378,7 +410,7 @@ class Patient extends Component
 
     public function resetVisitData()
     {
-        $this->reset('visitId', 'currentVisit', 'doctor', 'insurance_id', 'visit_date');
+        $this->reset('visitId', 'currentVisit', 'printVisitAnalyses', 'doctor', 'results', 'visitAnalyses', 'insurance_id', 'visit_date');
     }
 
     public function render()

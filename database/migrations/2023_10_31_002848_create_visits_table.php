@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal("total_amount", 10, 8)->nullable();
             $table->string("doctor")->nullable();
             $table->string("comment")->nullable();
+            $table->decimal("patientEndurance", 8, 2);
             $table->date("visit_date");
             $table->timestamps();
         });

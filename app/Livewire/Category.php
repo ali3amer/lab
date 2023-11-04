@@ -32,7 +32,7 @@ class Category extends Component
 
     public function searchCategory()
     {
-        $this->categories = \App\Models\Category::where('shortcut', 'LIKE', '%' . $this->searchCategoryShortcut . '%')->where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->get();
+        $this->categories = \App\Models\Category::where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->get();
     }
 
     public function saveCategory()

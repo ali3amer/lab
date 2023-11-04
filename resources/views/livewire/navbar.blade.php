@@ -3,7 +3,7 @@
         ['patient' , 'المرضى', 'face-frown'],
         ['category' , 'الاقسام', 'cubes'],
         ['analysis' , 'التحاليل', 'flask'],
-        ['insurance' , 'التأمينات', 'flask'],
+        ['insurance' , 'التأمينات', 'cash-register'],
 ];
 @endphp
 
