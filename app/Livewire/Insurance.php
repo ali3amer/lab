@@ -5,9 +5,10 @@ namespace App\Livewire;
 use App\Models\InsuranceDebt;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
-
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 class Insurance extends Component
 {
+    use LivewireAlert;
     public $header = "التأمينات";
     public Collection $insurances;
     public $searchName = "";

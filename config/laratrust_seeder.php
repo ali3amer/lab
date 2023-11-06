@@ -9,6 +9,7 @@ return [
             'sub_analyses' => 'c,r,u,d',
             'insurances' => 'c,r,u,d',
             'visits' => 'c,r,u,d',
+            'users' => 'c,r,u,d',
         ],
         'user' => []
     ],

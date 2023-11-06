@@ -21,7 +21,7 @@
                            class="">إسم المستخدم</label>
 
                     <div class="col-md-6">
-                        <input id="username" type="text" class="rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        <input id="username" autocomplete="off" type="text" class="rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                name="username" value="{{ old('username') }}" required autocomplete="username" autofocus>
 
                         @error('username')
@@ -37,7 +37,7 @@
                            class="">كلمة المرور</label>
 
                     <div class="col-md-6">
-                        <input id="password" type="password"
+                        <input id="password" autocomplete="off" type="password"
                                class="rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" name="password"
                                required autocomplete="current-password">
 

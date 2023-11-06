@@ -55,14 +55,26 @@
                                        for="analysisName">
                                     السعر
                                 </label>
-                                <input autocomplete="off" wire:keydown.enter="saveSubAnalysis()" required
+                                <input autocomplete="off" required
                                        wire:model.live="price"
                                        class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                        id="price" type="text" placeholder="السعر ...">
                                 <span class="text-red-500">@error('price') {{ $message }} @enderror</span>
                             </div>
 
-                            <div class="w-1/4 px-2  flex items-center ">
+                            <div class="w-1/6 px-3 ">
+                                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                       for="analysisName">
+                                    الوحده
+                                </label>
+                                <input autocomplete="off"
+                                       wire:model.live="unit"
+                                       class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                       id="unit" type="text" placeholder="الوحده">
+                                <span class="text-red-500">@error('unit') {{ $message }} @enderror</span>
+                            </div>
+
+                            <div class="w-1/6 px-2  flex items-center ">
                                 <button type="submit"
                                         class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white"><i
                                         class="fa fa-save"></i></button>
@@ -76,6 +88,7 @@
                             <thead class="bg-cyan-700 text-white">
                             <tr>
                                 <th class="rounded-r-2xl py-2">إسم التحليل</th>
+                                <th>الوحده</th>
                                 <th>السعر</th>
                                 <th class="rounded-l-2xl">التحكم</th>
                             </tr>
@@ -90,12 +103,14 @@
                                 </td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                             </tr>
 
                             @if(!empty($subAnalyzes))
                                 @foreach($subAnalyzes as $analysis)
                                     <tr class="border-b-2">
                                         <td>{{$analysis->subAnalysisName}}</td>
+                                        <td>{{$analysis->unit}}</td>
                                         <td>{{$analysis->price}}</td>
                                         <td>
                                             <button class="bg-cyan-400 p-2 rounded text-xs text-white"
@@ -111,6 +126,7 @@
                                                     class="fa fa-eye"></i>
                                             </button>
                                         </td>
+                                    </tr>
                                     </tr>
                                 @endforeach
                             @endif
@@ -154,7 +170,7 @@
                                for="age_range">
                             الفئة العمرية
                         </label>
-                        <select wire:model.live="age"
+                        <select wire:model="age"
                                 class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                 id="age_range">
                             <option value="all">الكل</option>
@@ -173,7 +189,7 @@
                         <input autocomplete="off"
                                wire:model.live="age_from"
                                class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                               id="range_from" @disabled($age == "all") type="text" placeholder="عمر أكبر من">
+                               id="range_from" type="text" placeholder="عمر أكبر من">
                         <span class="text-red-500">@error('age_from') {{ $message }} @enderror</span>
                     </div>
 
@@ -183,7 +199,7 @@
                             عمر أقل من
                         </label>
                         <input autocomplete="off"
-                               wire:model.live="age_to" @disabled($age == "all")
+                               wire:model.live="age_to"
                                class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                id="age_to" type="text" placeholder="عمر أقل من">
                         <span class="text-red-500">@error('age_to') {{ $message }} @enderror</span>
@@ -368,7 +384,7 @@
                                        for="shortcut">
                                     الإختصار
                                 </label>
-                                <input autocomplete="off" required
+                                <input autocomplete="off"
                                        @disabled(empty($currentCategory)) wire:model.live="shortcut"
                                        class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                        id="shortcut" type="text" placeholder="الإختصار">

@@ -1,10 +1,11 @@
-
-$(document).ready(function(){
+$(document).ready(function () {
 
     $("#print").click(function () {
         $('.invoice').printThis({
             // importStyle: true,
             importStyle: true,
+            header: $('#myHeader'),
+            footer: $('#myFooter'),
         });
     });
 

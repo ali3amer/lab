@@ -20,6 +20,9 @@ Route::get('patient', \App\Livewire\Patient::class);
 Route::get('analysis', \App\Livewire\Analysis::class);
 Route::get('category', \App\Livewire\Category::class);
 Route::get('insurance', \App\Livewire\Insurance::class);
+Route::get('user', \App\Livewire\User::class);
+Route::get('expense', \App\Livewire\Expense::class);
+Route::get('employee', \App\Livewire\Employee::class);
 
 Auth::routes();
 

@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use function MongoDB\BSON\toJSON;
-
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 class Analysis extends Component
 {
+    use LivewireAlert;
     public $header = "التحاليل";
     public $id = 0;
     public $subId = 0;
@@ -21,6 +22,7 @@ class Analysis extends Component
     public $searchAnalysisName = "";
     public $searchAnalysisShortcut = "";
     public $shortcut = "";
+    public $unit = "";
     public $choice = "";
     public $price = 0;
     public $result_text = "";
@@ -67,22 +69,21 @@ class Analysis extends Component
 
     public function deleteChoice($index)
     {
-        dd(5);
         unset($this->choices[$index]);
     }
 
     public function saveReferenceRange()
     {
-        if ($this->age_range == "all") {
+        if ($this->age == "all") {
         $this->age_from = null;
         $this->age_to = null;
-        $this->age = "all";
         }
 
         if ($this->result_types != "number") {
             $this->range_to = null;
             $this->range_from = null;
         }
+
 
         if ($this->rangeId == 0) {
             ReferenceRange::create([
@@ -179,12 +180,14 @@ class Analysis extends Component
             \App\Models\SubAnalysis::create([
                 'subAnalysisName' => $this->subAnalysisName,
                 'price' => $this->price,
+                'unit' => $this->unit,
                 'analysis_id' => $this->currentAnalysis['id']
             ]);
         } else {
             \App\Models\SubAnalysis::where('id', $this->subId)->update([
                 'subAnalysisName' => $this->subAnalysisName,
                 'price' => $this->price,
+                'unit' => $this->unit,
             ]);
         }
 
@@ -241,6 +244,7 @@ class Analysis extends Component
         $this->subId = $subAnalysis['id'];
         $this->subAnalysisName = $subAnalysis['subAnalysisName'];
         $this->price = $subAnalysis['price'];
+        $this->unit = $subAnalysis['unit'];
     }
 
     public function deleteSubAnalysis($id)
@@ -265,7 +269,7 @@ class Analysis extends Component
 
     public function resetSubAnalysisData()
     {
-        $this->reset('subId', 'subAnalysisName', 'price');
+        $this->reset('subId', 'subAnalysisName', 'unit', 'price');
     }
 
     public function resetAnalysisData()
@@ -275,7 +279,7 @@ class Analysis extends Component
 
     public function resetRangeData()
     {
-        $this->reset('gender', 'age', 'result_types', 'age_from', 'age_to', 'range_from', 'range_to', 'choices', 'result_text');
+        $this->reset('gender', 'age', 'rangeId', 'result_types', 'age_from', 'age_to', 'range_from', 'range_to','choice', 'choices', 'result_text');
     }
 
     public function render()

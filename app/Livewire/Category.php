@@ -5,9 +5,10 @@ namespace App\Livewire;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
-
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 class Category extends Component
 {
+    use LivewireAlert;
     public $header = "الاقسام";
     public $id = 0;
     #[Rule('required', message: 'أدخل إسم القسم')]

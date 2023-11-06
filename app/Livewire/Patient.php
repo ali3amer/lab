@@ -9,9 +9,15 @@ use App\Models\VisitAnalysis;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 
 class Patient extends Component
 {
+    use LivewireAlert;
+
+    protected $listeners = [
+        'delete',
+    ];
     public $header = "المرضى";
     public $id = 0;
     public $visitId = 0;
@@ -39,11 +45,11 @@ class Patient extends Component
     public Collection $visits;
     public Collection $insurances;
     public array $durations = [
-        'years' => 'سنوات',
-        'months' => 'اشهر',
-        'weeks' => 'اسابيع',
-        'days' => 'ايام',
-        'hours' => 'ساعات',
+        'years' => 'سنة',
+        'months' => 'شهر',
+        'weeks' => 'أسبوع',
+        'days' => 'يوم',
+        'hours' => 'ساعه',
     ];
     public $firstVisitDate = '';
     public array $currentPatient = [];
@@ -63,14 +69,14 @@ class Patient extends Component
     public function mount()
     {
         $this->categories = \App\Models\Category::all();
-        $this->patients = \App\Models\Patient::all();
+        $this->patients = \App\Models\Patient::latest()->get();
         $this->insurances = \App\Models\Insurance::all();
         $this->firstVisitDate = date('Y-m-d');
     }
 
     public function getPatients()
     {
-        $this->patients = \App\Models\Patient::all();
+        $this->patients = \App\Models\Patient::latest()->get();
     }
 
     public function searchCategories()
@@ -90,7 +96,7 @@ class Patient extends Component
 
     public function getVisits($id)
     {
-        $this->visits = \App\Models\Visit::where("patient_id", $id)->get();
+        $this->visits = \App\Models\Visit::where("patient_id", $id)->latest()->get();
     }
 
     public function search()
@@ -99,25 +105,25 @@ class Patient extends Component
             if ($this->searchDuration == 'choose') {
                 $this->patients = \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->
                 where('phone', 'LIKE', '%' . $this->searchPhone . '%')->
-                where('age', 'LIKE', '%' . $this->searchAge . '%')->get();
+                where('age', 'LIKE', '%' . $this->searchAge . '%')->latest()->get();
             } else {
                 $this->patients = \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->
                 where('phone', 'LIKE', '%' . $this->searchPhone . '%')->
                 where('age', 'LIKE', '%' . $this->searchAge . '%')->
-                where('duration', '=', $this->searchDuration)->get();
+                where('duration', '=', $this->searchDuration)->latest()->get();
             }
         } else {
             if ($this->searchDuration == 'choose') {
                 $this->patients = \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->
                 where('phone', 'LIKE', '%' . $this->searchPhone . '%')->
                 where('age', 'LIKE', '%' . $this->searchAge . '%')->
-                where('gender', '=', $this->searchGender)->get();
+                where('gender', '=', $this->searchGender)->latest()->get();
             } else {
                 $this->patients = \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->
                 where('phone', 'LIKE', '%' . $this->searchPhone . '%')->
                 where('age', 'LIKE', '%' . $this->searchAge . '%')->
                 where('gender', '=', $this->searchGender)->
-                where('duration', '=', $this->searchDuration)->get();
+                where('duration', '=', $this->searchDuration)->latest()->get();
             }
         }
 
@@ -135,6 +141,10 @@ class Patient extends Component
                 'phone' => $this->phone,
                 'firstVisitDate' => $this->firstVisitDate,
             ]);
+
+
+            $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
+
         } else {
             \App\Models\Patient::where('id', $this->id)->update([
                 'patientName' => $this->patientName,
@@ -144,8 +154,10 @@ class Patient extends Component
                 'phone' => $this->phone,
                 'firstVisitDate' => $this->firstVisitDate,
             ]);
-        }
 
+            $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
+
+        }
         $this->getPatients();
 
         $this->resetData();
@@ -161,9 +173,26 @@ class Patient extends Component
         $this->phone = $patient['phone'];
     }
 
-    public function delete($id)
+    public function deletePatientMessage($id)
     {
-        \App\Models\Patient::where("id", $id)->delete();
+        $this->confirm("  هل توافق على الحذف ؟  ", [
+            'inputAttributes' => ["id" => $id],
+            'toast' => false,
+            'showConfirmButton' => true,
+            'confirmButtonText' => 'موافق',
+            'onConfirmed' => "delete",
+            'showCancelButton' => true,
+            'cancelButtonText' => 'إلغاء',
+            'confirmButtonColor' => '#dc2626',
+            'cancelButtonColor' => '#4b5563'
+        ]);
+    }
+
+    public function delete($data)
+    {
+        \App\Models\Patient::where("id", $data['inputAttributes']['id'])->delete();
+        $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
+
         $this->getPatients();
     }
 
@@ -197,16 +226,18 @@ class Patient extends Component
             \App\Models\Visit::create([
                 'patient_id' => $this->currentPatient['id'],
                 'insurance_id' => $this->insurance_id,
-                'patientEndurance' => $this->insurance_id != null ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
+                'patientEndurance' => $this->insurance_id != null || $this->insurance_id != "" ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
                 'doctor' => $this->doctor,
                 'visit_date' => $this->visit_date,
+                'user_id' => auth()->id(),
             ]);
         } else {
             \App\Models\Visit::where('id', $this->visitId)->update([
-                'insurance_id' => $this->insurances,
-                'patientEndurance' => $this->insurance_id != null ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
+                'insurance_id' => $this->insurance_id,
+                'patientEndurance' => $this->insurance_id != null || $this->insurance_id != "" ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
                 'doctor' => $this->doctor,
                 'visit_date' => $this->visit_date,
+                'user_id' => auth()->id(),
             ]);
         }
 
@@ -220,27 +251,32 @@ class Patient extends Component
         VisitAnalysis::where("visit_id", $this->currentVisit['id'])->delete();
         foreach ($this->visitAnalyses as $analyses) {
             foreach ($analyses as $analysis) {
-                dd($analysis);
                 $range = ReferenceRange::where("sub_analysis_id", $analysis['id'])->first();
-                if ($range->result_types == "number" || $range->result_types == "text") {
-                    if ($analysis['result'] != null) {
+                if (isset($range->result_types)) {
+                    if ($range->result_types == "number" || $range->result_types == "text") {
                         VisitAnalysis::create([
                             'visit_id' => $this->currentVisit['id'],
                             'sub_analysis_id' => $analysis['sub_analysis_id'],
                             'price' => $analysis['price'],
                             'result' => $analysis['result'],
+                        ]);
+                    } else {
+                        $result = $analysis['result_choice'] == null ? array_key_first($range->result_multable_choice) : $analysis['result_choice'];
+                        VisitAnalysis::create([
+                            'visit_id' => $this->currentVisit['id'],
+                            'sub_analysis_id' => $analysis['sub_analysis_id'],
+                            'price' => $analysis['price'],
+                            'result' => $analysis['result'],
+                            'result_choice' => $result,
                         ]);
                     }
                 } else {
-                    if ($analysis['result_choice'] != null) {
-                        VisitAnalysis::create([
-                            'visit_id' => $this->currentVisit['id'],
-                            'sub_analysis_id' => $analysis['sub_analysis_id'],
-                            'price' => $analysis['price'],
-                            'result' => $analysis['result'],
-                            'result_choice' => $analysis['result_choice'],
-                        ]);
-                    }
+                    VisitAnalysis::create([
+                        'visit_id' => $this->currentVisit['id'],
+                        'sub_analysis_id' => $analysis['sub_analysis_id'],
+                        'price' => $analysis['price'],
+                        'result' => $analysis['result'],
+                    ]);
                 }
 
             }
@@ -277,6 +313,16 @@ class Patient extends Component
         }
     }
 
+
+    public function addAllAnalysis($subAnalyses)
+    {
+        foreach ($subAnalyses as $analysis) {
+            $analysis["result"] = null;
+            $analysis["result_choice"] = null;
+            $this->addSubAnalysis($analysis);
+        }
+    }
+
     public function getSubAnalyses($id)
     {
         $this->subAnalyses = SubAnalysis::where("analysis_id", $this->currentAnalysis['id'])->get();
@@ -284,8 +330,39 @@ class Patient extends Component
 
     public function addSubAnalysis($analysis)
     {
-        $result = $analysis->result ?? null;
-        $result_choice = $analysis->result_choice ?? null;
+        $id = $analysis['sub_analysis_id'] ?? $analysis['id'];
+        $range = ReferenceRange::where("sub_analysis_id", $id)->first();
+        $result = $analysis['result'] ?? null;
+        if (isset($range->result_types)) {
+            if ($range->result_types == "multable_choice" || $range->result_types == "text_and_multable_choice") {
+                if (isset($analysis['result_choice'])) {
+                    if ($analysis['result_choice'] != null) {
+                        $result_choice = $analysis['result_choice'];
+                    } else {
+                        $result_choice = array_key_first($range->result_multable_choice);
+                    }
+                } else {
+                    if (isset($range->result_multable_choice["nil"])) {
+                        $result_choice = $range->result_multable_choice["nil"];
+                    } elseif (isset($range->result_multable_choice["yellow"])) {
+                        $result_choice = $range->result_multable_choice["yellow"];
+                    } elseif (isset($range->result_multable_choice["acidic"])) {
+                        $result_choice = $range->result_multable_choice["acidic"];
+                    } elseif (isset($range->result_multable_choice["negative"])) {
+                        $result_choice = $range->result_multable_choice["negative"];
+                    } else {
+                        $result_choice = array_key_first($range->result_multable_choice);
+                    }
+                }
+            } else {
+                $result_choice = null;
+            }
+        } else {
+            $result_choice = null;
+
+        }
+
+
         if (!is_array($analysis)) {
             $analysis = $analysis->subAnalysis->toArray();
         }
@@ -311,77 +388,87 @@ class Patient extends Component
             $ranges = $printVisitAnalysis->subAnalysis->ranges;
             $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id] = $printVisitAnalysis;
             $currentResult = $this->results[$printVisitAnalysis->subAnalysis->analysis->category->categoryName][$printVisitAnalysis->subAnalysis->analysis->analysisName][$printVisitAnalysis->id];
-            if ($ranges->count() == 1) {
-                $range = $ranges->first();
-                if ($range->result_types == "number") {
-                    $currentResult["range"] = $range->range_from . " - " . $range->range_to;
-                    if ($currentResult->result > $range->range_to) {
-                        $currentResult["N/H"] = "H";
-                    } elseif ($currentResult->result < $range->range_from) {
-                        $currentResult["N/H"] = "L";
+            if (isset($ranges->first()->result_types)) {
+                if ($ranges->count() == 1) {
+                    $range = $ranges->first();
+                    if ($range->result_types == "number") {
+                        $currentResult["range"] = $range->range_from . " - " . $range->range_to;
+                        if ($currentResult->result > $range->range_to) {
+                            $currentResult["N/H"] = "H";
+                        } elseif ($currentResult->result < $range->range_from) {
+                            $currentResult["N/H"] = "L";
+                        } else {
+                            $currentResult["N/H"] = "N";
+                        }
                     } else {
-                        $currentResult["N/H"] = "N";
+                        $currentResult["range"] = "";
+                        $currentResult["N/H"] = "";
                     }
-                } elseif ($range->result_types == "text") {
+                } elseif ($ranges->count() == 0) {
                     $currentResult["range"] = "";
                     $currentResult["N/H"] = "";
-                } elseif ($range->result_types == "multable_choice" || $range->result_types == "text_and_multable_choice") {
-                    $currentResult["range"] = $range->result_multable_choice;
-                    $currentResult["N/H"] = "";
+                }
+                else {
+                    $range = $ranges->first();
+
+                    if ($range->result_types == "number") {
+                        if ($range->gender == "all") {
+                            if ($range->age_from == null) {
+                                $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->first();
+                                $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                                if ($currentResult->result > $rangeFromTo->range_to) {
+                                    $currentResult["N/H"] = "H";
+                                } elseif ($currentResult->result < $rangeFromTo->from) {
+                                    $currentResult["N/H"] = "L";
+                                } else {
+                                    $currentResult["N/H"] = "N";
+                                }
+                            } else {
+                                $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
+                                $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                                if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                    $currentResult["N/H"] = "H";
+                                } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                    $currentResult["N/H"] = "L";
+                                } else {
+                                    $currentResult["N/H"] = "N";
+                                }
+                            }
+                        } else {
+                            if ($range->age_from == null) {
+                                $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->first();
+                                $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                                if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                    $currentResult["N/H"] = "H";
+                                } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                    $currentResult["N/H"] = "L";
+                                } else {
+                                    $currentResult["N/H"] = "N";
+                                }
+                            } else {
+                                $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
+                                if ($rangeFromTo != null) {
+                                    $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
+                                    if ($currentResult['result'] > $rangeFromTo->range_to) {
+                                        $currentResult["N/H"] = "H";
+                                    } elseif ($currentResult['result'] < $rangeFromTo->from) {
+                                        $currentResult["N/H"] = "L";
+                                    } else {
+                                        $currentResult["N/H"] = "N";
+                                    }
+                                } else {
+                                    $currentResult["N/H"] = "";
+                                }
+                            }
+                        }
+                    } else {
+                        $currentResult["range"] = "";
+                        $currentResult["N/H"] = "";
+                    }
                 }
             } else {
-                $range = $ranges->first();
-
-                if ($range->result_types == "number") {
-                    if ($range->gender == "all") {
-                        if ($range->age_from == null) {
-                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->first();
-                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
-                            if ($currentResult->result > $rangeFromTo->range_to) {
-                                $currentResult["N/H"] = "H";
-                            } elseif ($currentResult->result < $rangeFromTo->from) {
-                                $currentResult["N/H"] = "L";
-                            } else {
-                                $currentResult["N/H"] = "N";
-                            }
-                        } else {
-                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
-                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
-                            if ($currentResult['result'] > $rangeFromTo->range_to) {
-                                $currentResult["N/H"] = "H";
-                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
-                                $currentResult["N/H"] = "L";
-                            } else {
-                                $currentResult["N/H"] = "N";
-                            }
-                        }
-                    } else {
-                        if ($range->age_from == null) {
-                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->first();
-                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
-                            if ($currentResult['result'] > $rangeFromTo->range_to) {
-                                $currentResult["N/H"] = "H";
-                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
-                                $currentResult["N/H"] = "L";
-                            } else {
-                                $currentResult["N/H"] = "N";
-                            }
-                        } else {
-                            $rangeFromTo = $ranges->where("age", $this->currentPatient["duration"])->where("gender", $this->currentPatient["gender"])->where("age_from", "<=", $this->currentPatient["age"])->where("age_to", ">=", $this->currentPatient["age"])->first();
-                            $currentResult["range"] = $rangeFromTo->range_from . " - " . $rangeFromTo->range_to;
-                            if ($currentResult['result'] > $rangeFromTo->range_to) {
-                                $currentResult["N/H"] = "H";
-                            } elseif ($currentResult['result'] < $rangeFromTo->from) {
-                                $currentResult["N/H"] = "L";
-                            } else {
-                                $currentResult["N/H"] = "N";
-                            }
-                        }
-                    }
-                } elseif ($range->result_types == "text" || $range->result_types == "multable_choice") {
-                    $currentResult["range"] = "";
-                    $currentResult["N/H"] = "";
-                }
+                $currentResult["range"] = "";
+                $currentResult["N/H"] = "";
             }
 
         }
@@ -396,6 +483,8 @@ class Patient extends Component
     public function resetData()
     {
         $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'currentPatient');
+        $this->getPatients();
+        $this->resetVisitData();
     }
 
     public function resetAnalysisData()
@@ -410,7 +499,8 @@ class Patient extends Component
 
     public function resetVisitData()
     {
-        $this->reset('visitId', 'currentVisit', 'printVisitAnalyses', 'doctor', 'results', 'visitAnalyses', 'insurance_id', 'visit_date');
+        $this->reset('visitId', 'option','analysesSelectArray','currentVisit', 'printVisitAnalyses', 'doctor', 'results', 'visitAnalyses', 'total_amount', 'insurance_id','amount', 'discount', 'visit_date');
+        $this->resetAnalysisData();
     }
 
     public function render()

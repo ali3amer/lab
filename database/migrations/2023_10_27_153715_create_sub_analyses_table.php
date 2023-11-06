@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('sub_analyses', function (Blueprint $table) {
             $table->id();
             $table->string("subAnalysisName");
+            $table->string("unit")->nullable();
             $table->unsignedBigInteger('analysis_id');
             $table->foreign('analysis_id')->references('id')->on('analyses');
             $table->decimal("price", 10, 2);

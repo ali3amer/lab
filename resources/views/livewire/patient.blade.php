@@ -13,45 +13,62 @@
                 <div dir="rtl"
                      class=" invoice relative print:p-0 print:w-min-full print:m-0 py-8 print:block px-5 print:shadow-none print:border-none  md:px-10 bg-white shadow-md rounded border border-gray-400">
                     <div class="h-80 print:h-full print:block print:w-full overflow-auto">
-                        <div class="header print:block p-5 text-center font-bold border-2 border-solid border-black">
-                            <h5>معمل النخبة</h5>
-                            <h5>للإنتاج الإعلامي خخخ :)</h5>
-                        </div>
-                        <span>
-                            @if(!empty($currentVisit))
-                                تاريخ الزيارة : {{$currentVisit['visit_date']}}
-                            @endif
-                        </span>
-                        <div class="information flex p-2 my-2 border-2 font-bold border-solid border-black">
-                            @if(!empty($currentPatient))
-                                <div class="w-1/4 ">
-                                    الإسم: {{$currentPatient['patientName']}}
-                                </div>
-                                <div class="w-1/4 ">
-                                    العمر: {{$currentPatient['age'] . $durations[$currentPatient['duration']]}}
-                                </div>
-                                <div class="w-1/4 ">
-                                    الهاتف: {{$currentPatient['phone']}}
-                                </div>
-                                <div class="w-1/4 ">
-                                    التأمين: {{$insurance_id == null ? "لايوجد" : \App\Models\Insurance::where("id", $insurance_id)->first()->insuranceName }}
-                                </div>
-                            @endif
-                        </div>
-                        <div class="body" dir="ltr">
-                            @if(!empty($results))
-                                @foreach($results as $key => $printAnalyses)
+                        @if(!empty($results))
+                            @php $count = 0; @endphp
+                            @foreach($results as $key => $printAnalyses)
+                                @foreach($printAnalyses as $index => $analysis)
                                     <div
-                                        class="my-2 p-2 text-center text-white bg-gray-700 font-extrabold">{{$key}}</div>
-
-                                    @foreach($printAnalyses as $index => $analysis)
+                                        class="header  hidden {{ $count == 0 ? "print:block print:break-before-auto" : "" }}  {{ $count >= 10 && count($analysis) > 2 && $index != "URINE GENERAL - Microscopy" ? "print:block print:break-before-page" : '' }} text-center">
+                                        <img src="{{ asset('js/header.jpg') }}" style="width: 100%; height: 150px"
+                                             alt="">
                                         <div
-                                            class="my-2 p-2 text-white bg-gray-700 font-extrabold">{{$index}}</div>
+                                            class="hidden print:block text-right">
+                                            @if(!empty($currentVisit))
+                                                التاريخ : {{$currentVisit['visit_date']}}
+                                            @endif
+                                        </div>
+                                        @if(!empty($currentPatient))
+                                            <div class="flex flex-wrap text-right border-2 border-black">
 
-                                        <table class="table-fixed w-full">
+                                                <div class="w-1/3 px-2">
+                                                    الإسم: {{$currentPatient['patientName']}}
+                                                </div>
+
+                                                <div class="w-2/3 px-2">
+                                                    العمر: {{$currentPatient['age'] . $durations[$currentPatient['duration']]}}
+                                                </div>
+
+                                                <div class="w-1/3 px-2">
+                                                    د/ {{$currentVisit['doctor'] ?? ""}}
+                                                </div>
+
+                                                <div class="w-2/3 px-2">
+                                                    الرقم: {{$currentVisit['id'] ?? ""}}
+                                                </div>
+
+                                                @if($insurance_id != null)
+                                                    <div class="w-1/2 px-2">
+                                                        التأمين: {{ \App\Models\Insurance::where("id", $insurance_id)->first()->insuranceName }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+
+                                    <div class="body " dir="ltr">
+                                        <div
+                                            class=" font-extrabold text-left {{ $index == "URINE GENERAL - Microscopy" ? " bg-white" : "" }}">
+                                            <span
+                                                class="{{ $index == "URINE GENERAL - Microscopy" ? " bg-gray-700 w-25 text-white" : "" }}"> <i
+                                                    class="fa fa-square {{$index == "URINE GENERAL - Microscopy" ? "hidden" : ""}}"></i> {{$index == "URINE GENERAL - Microscopy" ? "Microscopy" : $index}}</span>
+                                        </div>
+
+                                        <table
+                                            class="table-fixed w-full  {{ $index == "URINE GENERAL" ? "" : "border-b-2 border-gray-500" }} ">
                                             <thead class="bg-gray-700 text-white">
-                                            <tr>
-                                                <th class="py-2">Test</th>
+                                            <tr class="{{ $index == "URINE GENERAL - Microscopy" ? "hidden" : "" }}">
+                                                <th class="py-2 text-xs">Test</th>
                                                 <th>Result</th>
                                                 <th>N/H</th>
                                                 <th>Ref. Range</th>
@@ -59,28 +76,23 @@
                                             </thead>
                                             <tbody class="text-center">
                                             @foreach($analysis as $subAnalysis)
-                                                <tr class="border-b-2 border-gray-400">
-                                                    <td class="py-2">{{ $subAnalysis->subAnalysis->subAnalysisName }}</td>
-                                                    <td>{{ $subAnalysis->result . " " . $subAnalysis->result_choice }}</td>
-                                                    <td>{{ $subAnalysis["N/H"] }}</td>
-                                                    <td>
-                                                        @if(is_array($subAnalysis->range))
-                                                            @foreach($subAnalysis->range as $c)
-                                                                {{ $c }} <br>
-                                                            @endforeach
-                                                        @else
-                                                            {{$subAnalysis->range}}
-                                                        @endif
+                                                <tr>
+                                                    <td class="font-extrabold py-1 px-2 text-xs text-left">{{ $subAnalysis->subAnalysis->subAnalysisName }}</td>
+                                                    <td class="text-xs">{{ $subAnalysis->result . " " . $subAnalysis->result_choice }}</td>
+                                                    <td class="font-extrabold text-xs {{ $subAnalysis["N/H"] == "L" || $subAnalysis["N/H"] == "H" ? 'bg-gray-400' : '' }}">{{ $subAnalysis["N/H"] }}</td>
+                                                    <td class="text-xs">
+                                                        {{$subAnalysis->range . " " . $subAnalysis->subAnalysis->unit }}
                                                     </td>
                                                 </tr>
                                             @endforeach
                                             </tbody>
                                         </table>
-                                    @endforeach
-
+                                    </div>
+                                    @php $count += count($analysis) @endphp
                                 @endforeach
-                            @endif
-                        </div>
+
+                            @endforeach
+                        @endif
                     </div>
                     <div class="print:hidden flex items-center justify-start w-full">
                         <button id="print"
@@ -262,7 +274,8 @@
                                             wire:click="edit({{$patient}})">
                                         <i class="fa fa-pen"></i></button>
                                     <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                            wire:click="delete({{$patient->id}})"><i class="fa fa-trash"></i></button>
+                                            wire:click="deletePatientMessage({{$patient->id}})"><i
+                                            class="fa fa-trash"></i></button>
                                     <button class="bg-yellow-400 p-2 rounded text-xs text-white"
                                             wire:click="choosePatient({{$patient}})"><i class="fa fa-eye"></i></button>
                                 </td>
@@ -405,9 +418,9 @@
                                             <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                     wire:click="editVisit({{$visit}})"><i class="fa fa-pen"></i>
                                             </button>
-                                            <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                    wire:click="deleteVisit({{$visit->id}})"><i class="fa fa-trash"></i>
-                                            </button>
+                                            {{--                                            <button class="bg-red-400 p-2 rounded text-xs text-white"--}}
+                                            {{--                                                    wire:click="deleteVisit({{$visit->id}})"><i class="fa fa-trash"></i>--}}
+                                            {{--                                            </button>--}}
                                             <button class="bg-yellow-400 p-2 rounded text-xs text-white"
                                                     wire:click="chooseVisit({{$visit}})"><i class="fa fa-eye"></i>
                                             </button>
@@ -445,6 +458,11 @@
                                                        placeholder="إسم الفحص الفرعي ...">
                                             </td>
                                             <td wire:click="resetAnalysisData()"><i class="fa fa-backward"></i></td>
+                                        </tr>
+                                        <tr class="border-b-2 cursor-pointer"
+                                            wire:click="addAllAnalysis({{$subAnalyses}})">
+                                            <td class="py-2">{{ "all " . $currentAnalysis["analysisName"]}}</td>
+                                            <td class="py-2">{{\App\Models\SubAnalysis::where("analysis_id", $currentAnalysis['id'])->sum("price")}}</td>
                                         </tr>
                                         @foreach($subAnalyses as $analysis)
                                             <tr class="border-b-2 cursor-pointer"
@@ -542,33 +560,41 @@
                                             <td>{{$analysis["subAnalysisName"]}}</td>
                                             <td class="flex">
                                                 @php $result_type = \App\Models\ReferenceRange::where('sub_analysis_id', $analysis['sub_analysis_id'])->first() @endphp
-                                                @if($result_type->result_types == 'number' || $result_type->result_types == 'text')
+                                                @if(isset($result_type->result_types))
+                                                    @if($result_type->result_types == 'number' || $result_type->result_types == 'text')
+                                                        <input autocomplete="off" type="text"
+                                                               wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
+                                                               class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                               placeholder="النتيجه ...">
+                                                    @elseif($result_type->result_types == 'multable_choice')
+                                                        <select
+                                                            wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result_choice"
+                                                            class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                                            id="result">
+                                                            @foreach($result_type->result_multable_choice as $key => $choice)
+                                                                <option value="{{$key}}">{{$choice}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @elseif($result_type->result_types == 'text_and_multable_choice')
+                                                        <input autocomplete="off" type="text"
+                                                               wire:model="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
+                                                               class=" w-1/2 rounded-md text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                               placeholder="النتيجه ...">
+                                                        <select
+                                                            wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result_choice"
+                                                            class="block w-1/2 appearance-none text-center border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                                            id="result">
+
+                                                            @foreach($result_type->result_multable_choice as $key => $choice)
+                                                                <option value="{{$key}}" selected>{{$choice}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    @endif
+                                                @else
                                                     <input autocomplete="off" type="text"
                                                            wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
                                                            class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                                            placeholder="النتيجه ...">
-                                                @elseif($result_type->result_types == 'multable_choice')
-                                                    <select
-                                                        wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result_choice"
-                                                        class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                                        id="result">
-                                                        @foreach($result_type->result_multable_choice as $key => $choice)
-                                                            <option value="{{$key}}">{{$choice}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @elseif($result_type->result_types == 'text_and_multable_choice')
-                                                    <input autocomplete="off" type="text"
-                                                           wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result"
-                                                           class=" w-1/2 rounded-md text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                                           placeholder="النتيجه ...">
-                                                    <select
-                                                        wire:model.live="visitAnalyses.{{$option}}.{{$analysis['id']}}.result_choice"
-                                                        class="block w-1/2 appearance-none text-center border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                                        id="result">
-                                                        @foreach($result_type->result_multable_choice as $key => $choice)
-                                                            <option value="{{$key}}">{{$choice}}</option>
-                                                        @endforeach
-                                                    </select>
                                                 @endif
                                             </td>
                                             <td>{{$analysis['price']}}</td>

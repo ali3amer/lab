@@ -4,6 +4,9 @@
         ['category' , 'الاقسام', 'cubes'],
         ['analysis' , 'التحاليل', 'flask'],
         ['insurance' , 'التأمينات', 'cash-register'],
+        ['employee' , 'الموظفين', 'hospital-user'],
+        ['expense' , 'المصروفات', 'bone'],
+        ['user' , 'المستخدمين', 'user'],
 ];
 @endphp
 
