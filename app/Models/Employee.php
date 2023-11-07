@@ -10,4 +10,7 @@ class Employee extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function expneses() {
+        return $this->hasMany(EmployeeExpense::class);
+    }
 }

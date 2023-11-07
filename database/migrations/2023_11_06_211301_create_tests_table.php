@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string("testName");
             $table->string("shortcut")->nullable();
-            $table->
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->foreign('category_id')->references('id')->on('categories');
+            $table->unsignedBigInteger('test_id')->nullable();
+            $table->foreign('test_id')->references('id')->on('tests');
             $table->timestamps();
         });
     }

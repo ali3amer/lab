@@ -7,6 +7,7 @@
         ['employee' , 'الموظفين', 'hospital-user'],
         ['expense' , 'المصروفات', 'bone'],
         ['user' , 'المستخدمين', 'user'],
+        ['report' , 'التقارير', 'file-lines'],
 ];
 @endphp
 

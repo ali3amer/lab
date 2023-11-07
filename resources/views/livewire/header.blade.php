@@ -1,5 +1,5 @@
 <div class="bg-white shadow py-4 font-extrabold flex text-cyan-800 px-3">
-    <button class="inline-block mx-6" id="sideBarBtn">
+    <button class="inline-block  mx-6" id="sideBarBtn">
         <i class="fa fa-bars"></i>
     </button>
     <span class="mx-6 text-3xl">{{$header}}</span>

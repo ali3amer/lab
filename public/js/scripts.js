@@ -4,6 +4,22 @@ $(document).ready(function () {
         $('.invoice').printThis({
             // importStyle: true,
             importStyle: true,
+
+        });
+    });
+
+    $("#printResult").click(function () {
+        $('.result').printThis({
+            // importStyle: true,
+            importStyle: true,
+
+        });
+    });
+
+    $("#printReport").click(function () {
+        $('.report').printThis({
+            // importStyle: true,
+            importStyle: true,
             header: $('#myHeader'),
             footer: $('#myFooter'),
         });

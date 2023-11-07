@@ -133,7 +133,7 @@ class Patient extends Component
     {
         $this->validate();
         if ($this->id == 0) {
-            \App\Models\Patient::create([
+            $patient = \App\Models\Patient::create([
                 'patientName' => $this->patientName,
                 'gender' => $this->gender,
                 'duration' => $this->duration,
@@ -142,7 +142,7 @@ class Patient extends Component
                 'firstVisitDate' => $this->firstVisitDate,
             ]);
 
-
+            $this->choosePatient($patient->toArray());
             $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
 
         } else {
@@ -156,11 +156,11 @@ class Patient extends Component
             ]);
 
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
+            $this->getPatients();
 
+            $this->resetData();
         }
-        $this->getPatients();
 
-        $this->resetData();
     }
 
 
@@ -223,7 +223,7 @@ class Patient extends Component
     public function saveVisit()
     {
         if ($this->visitId == 0) {
-            \App\Models\Visit::create([
+            $visit = \App\Models\Visit::create([
                 'patient_id' => $this->currentPatient['id'],
                 'insurance_id' => $this->insurance_id,
                 'patientEndurance' => $this->insurance_id != null || $this->insurance_id != "" ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
@@ -231,24 +231,36 @@ class Patient extends Component
                 'visit_date' => $this->visit_date,
                 'user_id' => auth()->id(),
             ]);
+            $this->chooseVisit($visit->toArray());
         } else {
             \App\Models\Visit::where('id', $this->visitId)->update([
                 'insurance_id' => $this->insurance_id,
                 'patientEndurance' => $this->insurance_id != null || $this->insurance_id != "" ? \App\Models\Insurance::where("id", $this->insurances)->first()->patientEndurance : 100,
                 'doctor' => $this->doctor,
+                'total_amount' => $this->total_amount,
                 'visit_date' => $this->visit_date,
                 'user_id' => auth()->id(),
             ]);
+
+            $this->resetVisitData();
+            $this->getVisits($this->currentPatient['id']);
         }
 
-        $this->resetVisitData();
-        $this->getVisits($this->currentPatient['id']);
+        $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
+
 
     }
 
     public function saveVisitAnalyses()
     {
         VisitAnalysis::where("visit_id", $this->currentVisit['id'])->delete();
+        Visit::where("id", $this->currentVisit['id'])->update([
+            'amount' => $this->amount,
+            'discount' => $this->discount,
+            'total_amount' => $this->total_amount,
+            'visit_date' => $this->visit_date,
+        ]);
+        $this->amount = 0;
         foreach ($this->visitAnalyses as $analyses) {
             foreach ($analyses as $analysis) {
                 $range = ReferenceRange::where("sub_analysis_id", $analysis['id'])->first();
@@ -282,6 +294,8 @@ class Patient extends Component
             }
         }
         $this->chooseVisit($this->currentVisit);
+        $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
+
     }
 
     public function editVisit($visit)
@@ -291,9 +305,7 @@ class Patient extends Component
         $this->insurance_id = $visit['insurance_id'];
         $this->visit_date = $visit['visit_date'];
         $this->doctor = $visit['doctor'];
-        $this->discount = floatval($visit['discount']);
-        $this->amount = floatval($visit['amount']);
-        $this->total_amount = floatval($visit['total_amount']);
+        $this->discount = isset($visit['discount']) ? floatval($visit['discount']) : 0;
     }
 
     public function chooseVisit($visit)
@@ -366,12 +378,13 @@ class Patient extends Component
         if (!is_array($analysis)) {
             $analysis = $analysis->subAnalysis->toArray();
         }
-        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']] = $analysis;
-        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]["sub_analysis_id"] = $analysis["id"];
-        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = $result;
-        $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result_choice'] = $result_choice;
-        $this->amount += $analysis["price"];
-        $this->calcDiscount();
+            $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']] = $analysis;
+            $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]["sub_analysis_id"] = $analysis["id"];
+            $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result'] = $result;
+            $this->visitAnalyses[$analysis['analysis_id']][$analysis['id']]['result_choice'] = $result_choice;
+            $this->amount += $analysis["price"];
+            $this->calcDiscount();
+
     }
 
     public function calcDiscount()
@@ -470,12 +483,12 @@ class Patient extends Component
                 $currentResult["range"] = "";
                 $currentResult["N/H"] = "";
             }
-
         }
     }
 
     public function deleteAnalysis($id)
     {
+        $this->amount -= $this->visitAnalyses[$this->option][$id]['price'];
         unset($this->visitAnalyses[$this->option][$id]);
         $this->calcDiscount();
     }

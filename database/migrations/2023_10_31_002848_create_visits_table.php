@@ -20,9 +20,9 @@ return new class extends Migration
             $table->unsignedBigInteger('insurance_id')->nullable();
             $table->foreign('insurance_id')->references('id')->on('insurances');
             $table->string("insuranceNumber")->nullable();
-            $table->decimal("amount", 10, 8)->nullable();
-            $table->decimal("discount", 10, 8)->nullable();
-            $table->decimal("total_amount", 10, 8)->nullable();
+            $table->decimal("amount", 10, 2)->nullable();
+            $table->decimal("discount", 10, 2)->nullable();
+            $table->decimal("total_amount", 10, 2)->nullable();
             $table->string("doctor")->nullable();
             $table->string("comment")->nullable();
             $table->decimal("patientEndurance", 8, 2);
