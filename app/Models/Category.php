@@ -14,4 +14,9 @@ class Category extends Model
     {
         return $this->hasMany(Analysis::class);
     }
+
+    public function tests()
+    {
+        return $this->hasMany(Test::class);
+    }
 }

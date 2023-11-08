@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string("testName");
             $table->string("shortcut")->nullable();
+            $table->decimal("price", 10, 2)->nullable();
+            $table->string("unit")->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
             $table->foreign('category_id')->references('id')->on('categories');
             $table->unsignedBigInteger('test_id')->nullable();

@@ -5,115 +5,115 @@
     <!-- component -->
     <!-- Code block starts -->
 
-    <div class="print:w-full">
-        <div wire:ignore.self
-             class="print:p-0 py-12 bg-gray-700 print:w-min-full print:block print:m-0 print:bg-white opacity-5 hidden transition duration-150 ease-in-out z-10 absolute top-0 right-0 bottom-0 left-0"
-             id="modal">
-            <div role="alert" class="container print:w-min-full print:block print:p-0  print:m-0  mx-auto w-11/12">
-                <div dir="rtl"
-                     class=" invoice relative print:p-0 print:w-min-full print:m-0 py-8 print:block px-5 print:shadow-none print:border-none  md:px-10 bg-white shadow-md rounded border border-gray-400">
-                    <div class="h-80 print:h-full print:block print:w-full overflow-auto">
-                        @if(!empty($results))
-                            @php $count = 0; @endphp
-                            @foreach($results as $key => $printAnalyses)
-                                @foreach($printAnalyses as $index => $analysis)
-                                    <div
-                                        class="header  hidden {{ $count == 0 ? "print:block print:break-before-auto" : "" }}  {{ $count >= 10 && count($analysis) > 2 && $index != "URINE GENERAL - Microscopy" ? "print:block print:break-before-page" : '' }} text-center">
-                                        <img src="{{ asset('js/header.jpg') }}" style="width: 100%; height: 150px"
-                                             alt="">
-                                        <div
-                                            class="hidden print:block text-right">
-                                            @if(!empty($currentVisit))
-                                                التاريخ : {{$currentVisit['visit_date']}}
-                                            @endif
-                                        </div>
-                                        @if(!empty($currentPatient))
-                                            <div class="flex flex-wrap text-right border-2 border-black">
+{{--    <div class="print:w-full">--}}
+{{--        <div wire:ignore.self--}}
+{{--             class="print:p-0 py-12 bg-gray-700 print:w-min-full print:block print:m-0 print:bg-white opacity-5 hidden transition duration-150 ease-in-out z-10 absolute top-0 right-0 bottom-0 left-0"--}}
+{{--             id="modal">--}}
+{{--            <div role="alert" class="container print:w-min-full print:block print:p-0  print:m-0  mx-auto w-11/12">--}}
+{{--                <div dir="rtl"--}}
+{{--                     class=" invoice relative print:p-0 print:w-min-full print:m-0 py-8 print:block px-5 print:shadow-none print:border-none  md:px-10 bg-white shadow-md rounded border border-gray-400">--}}
+{{--                    <div class="h-80 print:h-full print:block print:w-full overflow-auto">--}}
+{{--                        @if(!empty($results))--}}
+{{--                            @php $count = 0; @endphp--}}
+{{--                            @foreach($results as $key => $printAnalyses)--}}
+{{--                                @foreach($printAnalyses as $index => $analysis)--}}
+{{--                                    <div--}}
+{{--                                        class="header  hidden {{ $count == 0 ? "print:block print:break-before-auto" : "" }}  {{ $count >= 10 && count($analysis) > 2 && $index != "URINE GENERAL - Microscopy" ? "print:block print:break-before-page" : '' }} text-center">--}}
+{{--                                        <img src="{{ asset('js/header.jpg') }}" style="width: 100%; height: 150px"--}}
+{{--                                             alt="">--}}
+{{--                                        <div--}}
+{{--                                            class="hidden print:block text-right">--}}
+{{--                                            @if(!empty($currentVisit))--}}
+{{--                                                التاريخ : {{$currentVisit['visit_date']}}--}}
+{{--                                            @endif--}}
+{{--                                        </div>--}}
+{{--                                        @if(!empty($currentPatient))--}}
+{{--                                            <div class="flex flex-wrap text-right border-2 border-black">--}}
 
-                                                <div class="w-1/3 px-2">
-                                                    الإسم: {{$currentPatient['patientName']}}
-                                                </div>
+{{--                                                <div class="w-1/3 px-2">--}}
+{{--                                                    الإسم: {{$currentPatient['patientName']}}--}}
+{{--                                                </div>--}}
 
-                                                <div class="w-2/3 px-2">
-                                                    العمر: {{$currentPatient['age'] . $durations[$currentPatient['duration']]}}
-                                                </div>
+{{--                                                <div class="w-2/3 px-2">--}}
+{{--                                                    العمر: {{$currentPatient['age'] . $durations[$currentPatient['duration']]}}--}}
+{{--                                                </div>--}}
 
-                                                <div class="w-1/3 px-2">
-                                                    د/ {{$currentVisit['doctor'] ?? ""}}
-                                                </div>
+{{--                                                <div class="w-1/3 px-2">--}}
+{{--                                                    د/ {{$currentVisit['doctor'] ?? ""}}--}}
+{{--                                                </div>--}}
 
-                                                <div class="w-2/3 px-2">
-                                                    الرقم: {{$currentVisit['id'] ?? ""}}
-                                                </div>
+{{--                                                <div class="w-2/3 px-2">--}}
+{{--                                                    الرقم: {{$currentVisit['id'] ?? ""}}--}}
+{{--                                                </div>--}}
 
-                                                @if($insurance_id != null)
-                                                    <div class="w-1/2 px-2">
-                                                        التأمين: {{ \App\Models\Insurance::where("id", $insurance_id)->first()->insuranceName }}
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
+{{--                                                @if($insurance_id != null)--}}
+{{--                                                    <div class="w-1/2 px-2">--}}
+{{--                                                        التأمين: {{ \App\Models\Insurance::where("id", $insurance_id)->first()->insuranceName }}--}}
+{{--                                                    </div>--}}
+{{--                                                @endif--}}
+{{--                                            </div>--}}
+{{--                                        @endif--}}
+{{--                                    </div>--}}
 
 
-                                    <div class="body " dir="ltr">
-                                        <div
-                                            class=" font-extrabold text-left {{ $index == "URINE GENERAL - Microscopy" ? " bg-white" : "" }}">
-                                            <span
-                                                class="{{ $index == "URINE GENERAL - Microscopy" ? " bg-gray-700 w-25 text-white" : "" }}"> <i
-                                                    class="fa fa-square {{$index == "URINE GENERAL - Microscopy" ? "hidden" : ""}}"></i> {{$index == "URINE GENERAL - Microscopy" ? "Microscopy" : $index}}</span>
-                                        </div>
+{{--                                    <div class="body " dir="ltr">--}}
+{{--                                        <div--}}
+{{--                                            class=" font-extrabold text-left {{ $index == "URINE GENERAL - Microscopy" ? " bg-white" : "" }}">--}}
+{{--                                            <span--}}
+{{--                                                class="{{ $index == "URINE GENERAL - Microscopy" ? " bg-gray-700 w-25 text-white" : "" }}"> <i--}}
+{{--                                                    class="fa fa-square {{$index == "URINE GENERAL - Microscopy" ? "hidden" : ""}}"></i> {{$index == "URINE GENERAL - Microscopy" ? "Microscopy" : $index}}</span>--}}
+{{--                                        </div>--}}
 
-                                        <table
-                                            class="table-fixed w-full  {{ $index == "URINE GENERAL" ? "" : "border-b-2 border-gray-500" }} ">
-                                            <thead class="bg-gray-700 text-white">
-                                            <tr class="{{ $index == "URINE GENERAL - Microscopy" ? "hidden" : "" }}">
-                                                <th class="py-2 text-xs">Test</th>
-                                                <th>Result</th>
-                                                <th>N/H</th>
-                                                <th>Ref. Range</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody class="text-center">
-                                            @foreach($analysis as $subAnalysis)
-                                                <tr>
-                                                    <td class="font-extrabold py-1 px-2 text-xs text-left">{{ $subAnalysis->subAnalysis->subAnalysisName }}</td>
-                                                    <td class="text-xs">{{ $subAnalysis->result . " " . $subAnalysis->result_choice }}</td>
-                                                    <td class="font-extrabold text-xs {{ $subAnalysis["N/H"] == "L" || $subAnalysis["N/H"] == "H" ? 'bg-gray-400' : '' }}">{{ $subAnalysis["N/H"] }}</td>
-                                                    <td class="text-xs">
-                                                        {{$subAnalysis->range . " " . $subAnalysis->subAnalysis->unit }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    @php $count += count($analysis) @endphp
-                                @endforeach
+{{--                                        <table--}}
+{{--                                            class="table-fixed w-full  {{ $index == "URINE GENERAL" ? "" : "border-b-2 border-gray-500" }} ">--}}
+{{--                                            <thead class="bg-gray-700 text-white">--}}
+{{--                                            <tr class="{{ $index == "URINE GENERAL - Microscopy" ? "hidden" : "" }}">--}}
+{{--                                                <th class="py-2 text-xs">Test</th>--}}
+{{--                                                <th>Result</th>--}}
+{{--                                                <th>N/H</th>--}}
+{{--                                                <th>Ref. Range</th>--}}
+{{--                                            </tr>--}}
+{{--                                            </thead>--}}
+{{--                                            <tbody class="text-center">--}}
+{{--                                            @foreach($analysis as $subAnalysis)--}}
+{{--                                                <tr>--}}
+{{--                                                    <td class="font-extrabold py-1 px-2 text-xs text-left">{{ $subAnalysis->subAnalysis->subAnalysisName }}</td>--}}
+{{--                                                    <td class="text-xs">{{ $subAnalysis->result . " " . $subAnalysis->result_choice }}</td>--}}
+{{--                                                    <td class="font-extrabold text-xs {{ $subAnalysis["N/H"] == "L" || $subAnalysis["N/H"] == "H" ? 'bg-gray-400' : '' }}">{{ $subAnalysis["N/H"] }}</td>--}}
+{{--                                                    <td class="text-xs">--}}
+{{--                                                        {{$subAnalysis->range . " " . $subAnalysis->subAnalysis->unit }}--}}
+{{--                                                    </td>--}}
+{{--                                                </tr>--}}
+{{--                                            @endforeach--}}
+{{--                                            </tbody>--}}
+{{--                                        </table>--}}
+{{--                                    </div>--}}
+{{--                                    @php $count += count($analysis) @endphp--}}
+{{--                                @endforeach--}}
 
-                            @endforeach
-                        @endif
-                    </div>
-                    <div class="print:hidden flex items-center justify-start w-full">
-                        <button id="print"
-                                class="focus:outline-none ml-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm">
-                            طباعه
-                        </button>
-                        <button
-                            class="focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 ml-3 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm"
-                            onclick="modalHandler()">إلغاء
-                        </button>
-                    </div>
-                    <button
-                        class="print:hidden cursor-pointer absolute top-0 right-0 mt-4 mr-5 text-gray-400 hover:text-gray-600 transition duration-150 ease-in-out rounded focus:ring-2 focus:outline-none focus:ring-gray-600"
-                        onclick="modalHandler()" aria-label="close modal" role="button">
-                        <i class="fa fa-x"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+{{--                            @endforeach--}}
+{{--                        @endif--}}
+{{--                    </div>--}}
+{{--                    <div class="print:hidden flex items-center justify-start w-full">--}}
+{{--                        <button id="print"--}}
+{{--                                class="focus:outline-none ml-2 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition duration-150 ease-in-out hover:bg-indigo-600 bg-indigo-700 rounded text-white px-8 py-2 text-sm">--}}
+{{--                            طباعه--}}
+{{--                        </button>--}}
+{{--                        <button--}}
+{{--                            class="focus:outline-none focus:ring-2 focus:ring-offset-2  focus:ring-gray-400 ml-3 bg-gray-100 transition duration-150 text-gray-600 ease-in-out hover:border-gray-400 hover:bg-gray-300 border rounded px-8 py-2 text-sm"--}}
+{{--                            onclick="modalHandler()">إلغاء--}}
+{{--                        </button>--}}
+{{--                    </div>--}}
+{{--                    <button--}}
+{{--                        class="print:hidden cursor-pointer absolute top-0 right-0 mt-4 mr-5 text-gray-400 hover:text-gray-600 transition duration-150 ease-in-out rounded focus:ring-2 focus:outline-none focus:ring-gray-600"--}}
+{{--                        onclick="modalHandler()" aria-label="close modal" role="button">--}}
+{{--                        <i class="fa fa-x"></i>--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--        </div>--}}
 
-    </div>
+{{--    </div>--}}
     <!--
     <div class="w-full flex justify-center py-12" id="button">
         <button
