@@ -13,8 +13,13 @@ class ReferenceRange extends Model
         'result_multable_choice' => 'array',
     ];
 
-    public function subAnalysis()
+    public function test()
     {
-        return $this->belongsTo(SubAnalysis::class);
+        return $this->belongsTo(Test::class);
+    }
+
+    public function choices()
+    {
+        return $this->hasMany(RangeChoice::class);
     }
 }

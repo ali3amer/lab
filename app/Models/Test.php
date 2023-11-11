@@ -25,7 +25,10 @@ class Test extends Model
         return $this->belongsTo(Category::class);
     }
 
-
+    public function ranges()
+    {
+        return $this->hasMany(ReferenceRange::class);
+    }
 
 //    public static function tree($id)
 //    {

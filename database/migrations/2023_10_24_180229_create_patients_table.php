@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('patientName');
             $table->decimal('age', '8', '2');
             $table->enum('gender', ['male', 'female']);
-            $table->enum('duration', ['years', 'months', 'weeks', 'days', 'hours']);
+            $table->enum('duration', ['year', 'month', 'week', 'day', 'hour']);
             $table->integer('phone');
             $table->date('firstVisitDate');
             $table->timestamps();

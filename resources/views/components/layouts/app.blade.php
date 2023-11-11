@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{{asset("fontawesome-free-6.4.2-web\css\all.min.css")}}">
 {{--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">--}}
     @vite('resources/css/app.css')
+    <link rel="stylesheet" href="{{asset("fontawesome-free-6.4.2-web\css\all.min.css")}}">
+
     <title>{{ $title ?? 'Page Title' }}</title>
 </head>
 <body dir="rtl">
@@ -22,53 +24,6 @@
 <script src="{{asset('js/jquery.min.js')}}"></script>
 <script src="{{asset('js/printThis.js')}}"></script>
 <script src="{{asset('js/scripts.js')}}"></script>
-<script>
-    const modal = document.querySelector(".modal");
-    const showModal = document.querySelector(".show-modal");
-    const closeModal = document.querySelector(".close-modal");
-
-    showModal.addEventListener("click", function () {
-        modal.classList.remove("hidden");
-    });
-
-    closeModal.addEventListener("click", function () {
-        modal.classList.add("hidden");
-    });
-</script>
-{{--<script>--}}
-{{--    let modal = document.getElementById("modal");--}}
-
-{{--    function modalHandler(val) {--}}
-{{--        if (val) {--}}
-{{--            fadeIn(modal);--}}
-{{--        } else {--}}
-{{--            fadeOut(modal);--}}
-{{--        }--}}
-{{--    }--}}
-
-{{--    function fadeOut(el) {--}}
-{{--        el.style.opacity = 1;--}}
-{{--        (function fade() {--}}
-{{--            if ((el.style.opacity -= 0.1) < 0) {--}}
-{{--                el.style.display = "none";--}}
-{{--            } else {--}}
-{{--                requestAnimationFrame(fade);--}}
-{{--            }--}}
-{{--        })();--}}
-{{--    }--}}
-
-{{--    function fadeIn(el, display) {--}}
-{{--        el.style.opacity = 0;--}}
-{{--        el.style.display = display || "flex";--}}
-{{--        (function fade() {--}}
-{{--            let val = parseFloat(el.style.opacity);--}}
-{{--            if (!((val += 0.2) > 1)) {--}}
-{{--                el.style.opacity = val;--}}
-{{--                requestAnimationFrame(fade);--}}
-{{--            }--}}
-{{--        })();--}}
-{{--    }--}}
-{{--</script>--}}
 
 @livewireScripts
 <script src="{{asset('js/sweetalert2.js')}}"></script>

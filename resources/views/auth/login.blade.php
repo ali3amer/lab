@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{asset("fontawesome-free-6.4.2-web\css\all.min.css")}}">
+
     @vite('resources/css/app.css')
     <title>{{ $title ?? 'Page Title' }}</title>
 </head>
 <body dir="rtl">
 <div class="w-full h-screen flex">
-    <div class="m-auto w-1/3 border-1 bg-white-700 px-3 py-5 shadow-2xl shadow-gray-500 rounded-2xl text-black border-red-300">
-        <div class="text-center font-extrabold">تسجيل الدخول</div>
+    <div class="m-auto w-1/3 border-1 bg-gradient-to-r from-cyan-600 to-cyan-800 px-3 py-24 shadow-2xl shadow-gray-500 rounded-2xl text-black border-red-300">
+        <div class="text-center text-white mb-5 font-extrabold">تسجيل الدخول</div>
 
         <div class="card-body">
             <form method="POST" action="{{ route('login') }}">
@@ -18,10 +19,10 @@
 
                 <div class="row mb-3">
                     <label for="username"
-                           class="">إسم المستخدم</label>
+                           class="text-white">إسم المستخدم</label>
 
                     <div class="col-md-6">
-                        <input id="username" autocomplete="off" type="text" class="rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        <input id="username" autocomplete="off" type="text" placeholder="إسم المستخدم" class="w-full font-extrabold bg-transparent text-center text-white py-1.5 pr-2 border-b-2 placeholder:text-gray-600 "
                                name="username" value="{{ old('username') }}" required autocomplete="username" autofocus>
 
                         @error('username')
@@ -34,11 +35,11 @@
 
                 <div class="row mb-3">
                     <label for="password"
-                           class="">كلمة المرور</label>
+                           class="text-white">كلمة المرور</label>
 
                     <div class="col-md-6">
-                        <input id="password" autocomplete="off" type="password"
-                               class="rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" name="password"
+                        <input id="password" placeholder="كلمة المرور" autocomplete="off" type="password"
+                               class="w-full font-extrabold text-white bg-transparent text-center  py-1.5 pr-2 border-b-2 border-white placeholder:text-gray-600 sm:text-sm sm:leading-6" name="password"
                                required autocomplete="current-password">
 
                         @error('password')
@@ -51,7 +52,7 @@
 
                 <div class="row mb-0">
                     <div class="col-md-8 offset-md-4">
-                        <button type="submit" class="w-full font-extrabold bg-cyan-700 py-2 rounded-2xl text-white">
+                        <button type="submit" class="w-full font-extrabold bg-transparent border-white border-2 py-2 rounded-2xl text-white">
                             تسجيل الدخول
                         </button>
                     </div>
@@ -61,5 +62,4 @@
     </div>
 </div>
 </body>
->
 </html>
