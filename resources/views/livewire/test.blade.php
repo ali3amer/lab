@@ -43,7 +43,7 @@
         <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
             <form class="w-full" wire:submit="saveTest()">
                 <div class="flex flex-wrap -mx-3">
-                    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                    <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="testName">
                             إسم الفحص
@@ -65,7 +65,7 @@
                     </div>
 
 
-                    <div class="w-full md:w-1/5 px-3">
+                    <div class="w-full md:w-1/6 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for=unit">
                             الوحده
                         </label>
@@ -78,11 +78,18 @@
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="price">
                             السعر
                         </label>
-                        <input autocomplete="off" wire:model="price" @disabled($rangeMode)
+                        <input autocomplete="off" wire:model="price" @disabled($getAll) @disabled($rangeMode)
                         class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="price" type="text" placeholder="السعر">
                     </div>
 
+                    <div class="w-1/12 px-3 flex items-center">
+                        <input checked id="getAll" wire:model="getAll" type="checkbox"
+                               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="getAll"
+                               class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                            إضافة الكل</label>
+                    </div>
 
                     <div class="w-full md:w-1/12 px-2  flex items-center ">
                         @if(!$rangeMode)
@@ -120,6 +127,7 @@
                             <th>الإختصار</th>
                             <th>الوحده</th>
                             <th>السعر</th>
+                            <th>الكل</th>
                             <th class="rounded-l-2xl">التحكم</th>
                         </tr>
                         </thead>
@@ -131,6 +139,7 @@
                                 <td>{{ $test->shortcut }}</td>
                                 <td>{{ $test->unit }}</td>
                                 <td>{{ number_format($test->price, 2) }}</td>
+                                <td>{{ $test->getAll ? "نعم" : "لا" }}</td>
                                 <td>
                                     <button class="py-1 px-2 rounded bg-blue-600 text-white"
                                             wire:click="chooseTest({{$test->id}})"><i class="fa fa-plus"></i></button>
@@ -345,9 +354,9 @@
                                 <span class="text-red-500">@error('choiceName') {{ $message }} @enderror</span>
                             </div>
                             <div class="w-1/4 px-3 flex items-center">
-                                <input checked id="checked-checkbox" wire:model="default" type="checkbox"
+                                <input checked id="default" wire:model="default" type="checkbox"
                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label for="checked-checkbox"
+                                <label for="default"
                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">خيار
                                     إفتراضي</label>
                             </div>

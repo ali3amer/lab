@@ -201,90 +201,274 @@
             </form>
         </div>
 
-        <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+        @if(empty($currentPatient))
+            <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
-            <div class="overflow-auto h-80">
-                <table class="table-fixed relative max-h-96 w-full overflow-auto">
-                    <thead class="bg-cyan-700 text-white sticky top-0 ">
-                    <tr>
-                        <th class="py-2 rounded-r-2xl">#</th>
-                        <th>إسم المريض</th>
-                        <th>النوع</th>
-                        <th>العمر</th>
-                        <th>الفتره</th>
-                        <th>الهاتف</th>
-                        <th class="rounded-l-2xl">التحكم</th>
-                    </tr>
-                    </thead>
-                    <tbody class="text-center">
-                    <tr>
-                        <td class="py-2 rounded-r-2xl">
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <input autocomplete="off" type="text" wire:model.live="searchName"
-                                   wire:keydown="search()"
-                                   class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                   placeholder="إسم المريض">
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <select wire:model.live="searchGender" wire:change="search()"
-                                    class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    id="gender">
-                                <option value="choose">---</option>
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
-                            </select>
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <input autocomplete="off" type="text" wire:model.live="searchAge"
-                                   wire:keydown="search()"
-                                   class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                   placeholder="العمر">
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <select wire:model.live="searchDuration" wire:change="search()"
-                                    class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-1.5 px-4 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    id="gender">
-                                <option value="choose">---</option>
-                                @foreach($durations as $key => $time)
-                                    <option value="{{$key}}">{{$time}}</option>
+                <div class="overflow-auto h-80">
+                    <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                        <thead class="bg-cyan-700 text-white sticky top-0 ">
+                        <tr>
+                            <th class="py-2 rounded-r-2xl">#</th>
+                            <th>إسم المريض</th>
+                            <th>النوع</th>
+                            <th>العمر</th>
+                            <th>الفتره</th>
+                            <th>الهاتف</th>
+                            <th class="rounded-l-2xl">التحكم</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-center">
+                        <tr>
+                            <td class="py-2 rounded-r-2xl">
+                            </td>
+                            <td class="py-2 rounded-r-2xl">
+                                <input autocomplete="off" type="text" wire:model.live="searchName"
+                                       wire:keydown="search()"
+                                       class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                       placeholder="إسم المريض">
+                            </td>
+                            <td class="py-2 rounded-r-2xl">
+                            </td>
+                            <td class="py-2 rounded-r-2xl">
+                            </td>
+                            <td class="py-2 rounded-r-2xl">
+                            </td>
+                            <td class="py-2 rounded-r-2xl">
+                            </td>
+                            <th class="rounded-l-2xl"></th>
+                        </tr>
+
+                        @foreach($patients as $patient)
+                            <tr class="border-b-2">
+                                <td class="py-2">{{$patient->id}}</td>
+                                <td>{{$patient->patientName}}</td>
+                                <td>{{$patient->gender == 'male' ? 'ذكر' : 'أنثى'}}</td>
+                                <td>{{$patient->age}}</td>
+                                <td>{{$durations[$patient->duration]}}</td>
+                                <td>{{$patient->phone}}</td>
+                                <td>
+                                    <button class="bg-cyan-400 p-2 rounded text-xs text-white"
+                                            wire:click="edit({{$patient}})">
+                                        <i class="fa fa-pen"></i></button>
+                                    <button class="bg-red-400 p-2 rounded text-xs text-white"
+                                            wire:click="deletePatientMessage({{$patient->id}})"><i
+                                            class="fa fa-trash"></i></button>
+                                    <button class="bg-yellow-400 p-2 rounded text-xs text-white"
+                                            wire:click="choosePatient({{$patient}})"><i class="fa fa-eye"></i></button>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        @else
+
+            <div
+                class="p-5 text-cyan-800 bg-white font-extrabold max-w-full border-2 border-dashed rounded-2xl my-2 mx-5">
+                <form class="w-full" wire:submit="saveVisit()">
+                    <div class="flex flex-wrap -mx-3">
+                        <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="visitId">
+                                رقم زيارة المريض
+                            </label>
+                            <input autocomplete="off" disabled wire:model="visitId"
+                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                   id="visitId" type="text">
+                            <span class="text-red-500">@error('visitId') {{ $message }} @enderror</span>
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="visit_date">
+                                تاريخ الزيارة
+                            </label>
+                            <input autocomplete="off" required wire:model="visit_date"
+                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                   id="patientName" type="date">
+                            <span class="text-red-500">@error('patientName') {{ $message }} @enderror</span>
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="doctor">
+                                الدكتور
+                            </label>
+                            <input autocomplete="off" wire:model="doctor"
+                                   class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="doctor" type="text" placeholder="الدكتور">
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="gender">
+                                التأمين
+                            </label>
+                            <select wire:model="insurance_id"
+                                    class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                    id="insurance_id">
+                                @foreach($insurances as $insurance)
+                                    <option value="{{$insurance->id}}">{{$insurance->insuranceName}}</option>
                                 @endforeach
                             </select>
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <input autocomplete="off" type="text" wire:model.live="searchPhone"
-                                   wire:keydown="search()"
-                                   class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                   placeholder="الهاتف">
-                        </td>
-                        <th class="rounded-l-2xl"></th>
-                    </tr>
 
-                    @foreach($patients as $patient)
-                        <tr class="border-b-2">
-                            <td class="py-2">{{$patient->id}}</td>
-                            <td>{{$patient->patientName}}</td>
-                            <td>{{$patient->gender == 'male' ? 'ذكر' : 'أنثى'}}</td>
-                            <td>{{$patient->age}}</td>
-                            <td>{{$durations[$patient->duration]}}</td>
-                            <td>{{$patient->phone}}</td>
-                            <td>
-                                <button class="bg-cyan-400 p-2 rounded text-xs text-white"
-                                        wire:click="edit({{$patient}})">
-                                    <i class="fa fa-pen"></i></button>
-                                <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                        wire:click="deletePatientMessage({{$patient->id}})"><i
-                                        class="fa fa-trash"></i></button>
-                                <button class="bg-yellow-400 p-2 rounded text-xs text-white"
-                                        wire:click="choosePatient({{$patient}})"><i class="fa fa-eye"></i></button>
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="amount">
+                                الجمله
+                            </label>
+                            <input autocomplete="off" wire:model="amount"
+                                   class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="amount" type="text" placeholder="الجمله">
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="discount">
+                                التخفيض
+                            </label>
+                            <input autocomplete="off" wire:model="discount"
+                                   class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="discount" type="text" placeholder="التخفيض">
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-3">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="total_amount">
+                                الصافي
+                            </label>
+                            <input autocomplete="off" wire:model="total_amount"
+                                   class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="total_amount" type="text" placeholder="الصافي">
+                        </div>
+
+                        <div class="w-full md:w-1/4 px-2  flex items-end ">
+                            @if(empty($currentVisit))
+                                <button type="submit"
+                                        class=" py-2.5 px-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">
+                                    حفظ
+                                </button>
+                            @else
+                                <button type="button" wire:click="resetVisitData()"
+                                        class=" py-2.5 bg-red-800 hover:bg-red-700 w-full mt-2 rounded text-white"><i
+                                        class="fa fa-close"></i></button>
+
+                            @endif
+                        </div>
+                    </div>
+
+                </form>
             </div>
 
-        </div>
+            @if(empty($currentVisit))
+                <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
+                    <div class="overflow-auto h-80">
+                        <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                            <thead class="bg-cyan-700 text-white sticky top-0 ">
+                            <tr>
+                                <th class="py-2 rounded-r-2xl">#</th>
+                                <th>تاريخ الزيارة</th>
+                                <th>الدكتور</th>
+                                <th>التأمين</th>
+                                <th>نسبة التحمل</th>
+                                <th>المبلغ</th>
+                                <th>التخفيض</th>
+                                <th>الصافي</th>
+                                <th class="rounded-l-2xl">التحكم</th>
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+
+                            @foreach($visits as $visit)
+                                <tr class="border-b-2">
+                                    <td class="py-2">{{$visit->id}}</td>
+                                    <td>{{$visit->visit_date}}</td>
+                                    <td>{{$visit->doctor}}</td>
+                                    <td>{{$visit->insurance_id}}</td>
+                                    <td>  {{$visit->patientEndurance}} %</td>
+                                    <td>{{number_format($visit->amount, 2)}}</td>
+                                    <td>{{number_format($visit->discount, 2)}}</td>
+                                    <td>{{number_format($visit->total_amount, 2)}}</td>
+                                    <td>
+                                        <button class="bg-cyan-400 p-2 rounded text-xs text-white"
+                                                wire:click="editVisit({{$visit}})">
+                                            <i class="fa fa-pen"></i></button>
+                                        <button class="bg-red-400 p-2 rounded text-xs text-white"
+                                                wire:click="deleteVisitMessage({{$visit->id}})"><i
+                                                class="fa fa-trash"></i></button>
+                                        <button class="bg-yellow-400 p-2 rounded text-xs text-white"
+                                                wire:click="chooseVisit({{$visit}})"><i class="fa fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            @else
+                <div class="flex">
+                    <div class="p-5 w-2/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                        @if(empty($currentCategory))
+                            <div class="overflow-auto block max-h-96">
+                                <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                                    <thead class="bg-cyan-700 text-white sticky top-0 ">
+                                    <tr>
+                                        <th class=" rounded-l-2xl rounded-r-2xl py-2">إسم القسم</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+
+                                    @foreach($categories as $category)
+                                        <tr class="border-b-2 cursor-pointer" wire:click="chooseCategory({{$category}})">
+                                            <td class="py-2">{{$category->categoryName}}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class=" py-1 text-cyan-800 bg-gray-300 flex font-extrabold rounded mb-2">
+                                <div wire:click="changeLocation(-1)" class="mr-1 text-black cursor-pointer"><i class="fa fa-home"></i>
+                                </div>
+                                @foreach($currentLocation as $index => $location)
+                                    {{ $loop->first ? "/" : '' }} <div wire:click="changeLocation({{$index}})"
+                                                                       class="mr-1 text-black cursor-pointer">{{ $location }} </div> {{ !$loop->last ? "/" : '' }}
+                                @endforeach
+                            </div>
+                            <div class="overflow-auto block max-h-96">
+                                <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                                    <thead class="bg-cyan-700 text-white sticky top-0 ">
+                                    <tr>
+                                        <th class=" rounded-r-2xl py-2">إسم الفحص</th>
+                                        <th class=" rounded-l-2xl py-2">السعر</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                    @foreach($tests as $test)
+                                        <tr class="border-b-2 cursor-pointer" @if($test->children->count() > 0 && !$test->getAll) wire:click="chooseTest({{$test->id}})" @else wire:click="addTest({{$test}})" @endif >
+                                            <td class="py-2">{{$test->testName}}</td>
+                                            <td class="py-2">{{$test->price}}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                            @foreach($cart as $key => $item)
+                                <button wire:click="deleteFromCart({{$key}})" class="py-1 px-2.5 rounded border-2 border-cyan-600 text-cyan-800">{{$item}}</button>
+                            @endforeach
+                    </div>
+                </div>
+            @endif
+        @endif
     </div>
 </div>

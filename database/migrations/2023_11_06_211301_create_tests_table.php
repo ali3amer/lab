@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('category_id')->references('id')->on('categories');
             $table->unsignedBigInteger('test_id')->nullable();
             $table->foreign('test_id')->references('id')->on('tests');
+            $table->boolean("getAll")->default(false);
             $table->timestamps();
         });
     }

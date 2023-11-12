@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('visits', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('patient_id');
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('patient_id')->references('id')->on('patients');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->unsignedBigInteger('insurance_id')->nullable();
             $table->foreign('insurance_id')->references('id')->on('insurances');
             $table->string("insuranceNumber")->nullable();
@@ -24,8 +24,7 @@ return new class extends Migration
             $table->decimal("discount", 10, 2)->nullable();
             $table->decimal("total_amount", 10, 2)->nullable();
             $table->string("doctor")->nullable();
-            $table->string("comment")->nullable();
-            $table->decimal("patientEndurance", 8, 2);
+            $table->decimal("patientEndurance", 8, 2)->default(100);
             $table->date("visit_date");
             $table->timestamps();
         });

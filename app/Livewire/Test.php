@@ -63,6 +63,7 @@ class Test extends Component
     public $rangeMode = false;
     public $choicesMode = false;
     public bool $default = false;
+    public bool $getAll = false;
     public $category_id = null;
     public $test_id = null;
     public $unit = null;
@@ -150,13 +151,19 @@ class Test extends Component
 
     public function saveTest()
     {
+        if ($this->getAll) {
+            $this->price = null;
+        } else {
+            $this->price = floatval($this->price);
+        }
         if ($this->id == 0) {
             \App\Models\Test::create([
                 "testName" => $this->testName,
                 "shortcut" => $this->shortcut,
                 "category_id" => empty($this->currentTest) ? $this->currentCategory['id'] : null,
                 "test_id" => empty($this->currentTest) ? null : $this->currentTest['id'],
-                "price" => floatval($this->price),
+                "price" => $this->price,
+                "getAll" => $this->getAll,
                 "unit" => $this->unit,
             ]);
 
@@ -166,7 +173,8 @@ class Test extends Component
             \App\Models\Test::where("id", $this->id)->update([
                 "testName" => $this->testName,
                 "shortcut" => $this->shortcut,
-                "price" => floatval($this->price),
+                "price" => $this->price,
+                "getAll" => $this->getAll,
                 "unit" => $this->unit
             ]);
 
@@ -348,7 +356,7 @@ class Test extends Component
 
     public function resetTestData()
     {
-        $this->reset("id", "testName", "shortcut", "price", "unit", "rangeMode", "test_id");
+        $this->reset("id", "testName", "shortcut", "price", "unit", "rangeMode", "test_id", "getAll");
     }
 
     public function resetChoicesData()
