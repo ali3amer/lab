@@ -18,4 +18,9 @@ class Visit extends Model
     {
         return $this->hasMany(VisitAnalysis::class);
     }
+
+    public function visitTests()
+    {
+        return $this->hasMany(VisitTest::class);
+    }
 }

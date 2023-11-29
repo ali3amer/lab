@@ -20,6 +20,12 @@ class ReferenceRange extends Model
 
     public function choices()
     {
-        return $this->hasMany(RangeChoice::class);
+        return $this->hasMany(RangeChoice::class, "range_id");
+    }
+
+    public function tree($id)
+    {
+      $allChoices = RangeChoice::where("test_id", $id)->get();
+      dd($allChoices);
     }
 }

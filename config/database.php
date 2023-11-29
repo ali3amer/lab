@@ -68,6 +68,19 @@ return [
             ]
         ],
 
+        'db2' => [
+            'driver' => 'mysql',
+            'host' => 'localhost',
+            'database' => 'oldlab',
+            'username' => 'root',
+            'password' => '',
+            'charset' => 'utf8',
+            'collation' => 'utf8_general_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

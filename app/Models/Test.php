@@ -17,7 +17,7 @@ class Test extends Model
 
     public function parent()
     {
-        return $this->belongsTo(Test::class);
+        return $this->belongsTo(Test::class, "test_id");
     }
 
     public function category()

@@ -11,6 +11,10 @@ class Category extends Component
     use LivewireAlert;
     public $header = "الاقسام";
     public $id = 0;
+    protected $listeners = [
+        'deleteCategory',
+    ];
+
     #[Rule('required', message: 'أدخل إسم القسم')]
 
     public $categoryName = "";
@@ -43,10 +47,15 @@ class Category extends Component
             \App\Models\Category::create([
                 'categoryName' => $this->categoryName,
             ]);
+            $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
+
         } else {
             \App\Models\Category::where('id', $this->id)->update([
                 'categoryName' => $this->categoryName,
             ]);
+
+            $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
+
         }
 
         $this->getCategories();
@@ -61,9 +70,26 @@ class Category extends Component
         $this->categoryName = $category['categoryName'];
     }
 
-    public function deleteCategory($id)
+    public function deleteMessage($id)
     {
-        \App\Models\Category::where("id", $id)->delete();
+        $this->confirm("  هل توافق على الحذف ؟  ", [
+            'inputAttributes' => ["id" => $id],
+            'toast' => false,
+            'showConfirmButton' => true,
+            'confirmButtonText' => 'موافق',
+            'onConfirmed' => "deleteCategory",
+            'showCancelButton' => true,
+            'cancelButtonText' => 'إلغاء',
+            'confirmButtonColor' => '#dc2626',
+            'cancelButtonColor' => '#4b5563'
+        ]);
+    }
+
+    public function deleteCategory($data)
+    {
+        \App\Models\Category::where("id", $data['inputAttributes']['id'])->delete();
+        $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
+
         $this->getCategories();
         $this->resetCategoryData();
     }

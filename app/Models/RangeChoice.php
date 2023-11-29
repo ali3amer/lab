@@ -12,6 +12,16 @@ class RangeChoice extends Model
 
     public function range()
     {
-        return $this->belongsTo(ReferenceRange::class);
+        return $this->belongsTo(ReferenceRange::class, "range_id");
+    }
+
+    public function choices()
+    {
+        return $this->hasMany(RangeChoice::class, "choice_id");
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(RangeChoice::class, "choice_id");
     }
 }

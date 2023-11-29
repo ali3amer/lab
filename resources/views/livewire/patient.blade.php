@@ -321,7 +321,7 @@
                                    for="amount">
                                 الجمله
                             </label>
-                            <input autocomplete="off" wire:model="amount"
+                            <input autocomplete="off" wire:model.live="amount" disabled
                                    class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                    id="amount" type="text" placeholder="الجمله">
                         </div>
@@ -331,7 +331,7 @@
                                    for="discount">
                                 التخفيض
                             </label>
-                            <input autocomplete="off" wire:model="discount"
+                            <input wire:keydown="calcDiscount()" autocomplete="off" wire:model.live="discount"
                                    class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                    id="discount" type="text" placeholder="التخفيض">
                         </div>
@@ -341,7 +341,7 @@
                                    for="total_amount">
                                 الصافي
                             </label>
-                            <input autocomplete="off" wire:model="total_amount"
+                            <input autocomplete="off" wire:model="total_amount" disabled
                                    class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                    id="total_amount" type="text" placeholder="الصافي">
                         </div>
@@ -451,7 +451,7 @@
                                     </thead>
                                     <tbody class="text-center">
                                     @foreach($tests as $test)
-                                        <tr class="border-b-2 cursor-pointer" @if($test->children->count() > 0 && !$test->getAll) wire:click="chooseTest({{$test->id}})" @else wire:click="addTest({{$test}})" @endif >
+                                        <tr class="border-b-2 cursor-pointer"  wire:click="addTest({{$test}})" >
                                             <td class="py-2">{{$test->testName}}</td>
                                             <td class="py-2">{{$test->price}}</td>
                                         </tr>
@@ -464,7 +464,7 @@
 
                     <div class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
                             @foreach($cart as $key => $item)
-                                <button wire:click="deleteFromCart({{$key}})" class="py-1 px-2.5 rounded border-2 border-cyan-600 text-cyan-800">{{$item}}</button>
+                                <button wire:loading.attr="disabled" wire:click="deleteFromCart({{$key}})" class="py-1 hover:bg-red-500 hover:text-white hover:border-none transition-all px-2.5 rounded border-2 border-cyan-600 text-cyan-800">{{$item}}</button>
                             @endforeach
                     </div>
                 </div>

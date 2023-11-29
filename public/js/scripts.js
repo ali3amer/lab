@@ -16,6 +16,15 @@ $(document).ready(function () {
         });
     });
 
+    function printResult() {
+        $('.invoice').printThis({
+            // importStyle: true,
+            importStyle: true,
+
+        });
+    }
+
+
     $("#printReport").click(function () {
         $('.report').printThis({
             // importStyle: true,

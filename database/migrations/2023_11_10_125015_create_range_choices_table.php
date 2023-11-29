@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string("choiceName");
             $table->boolean("default")->default(false);
             $table->unsignedBigInteger('choice_id')->nullable();
-            $table->foreign('choice_id')->references('id')->on('range_choices');
+            $table->foreign('choice_id')->references('id')->on('range_choices')->onDelete("cascade");
             $table->unsignedBigInteger('range_id')->nullable();
-            $table->foreign('range_id')->references('id')->on('reference_ranges');
+            $table->foreign('range_id')->references('id')->on('reference_ranges')->onDelete("cascade");
             $table->timestamps();
         });
     }

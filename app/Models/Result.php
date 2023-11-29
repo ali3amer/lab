@@ -10,4 +10,15 @@ class Result extends Model
     use HasFactory;
     protected $guarded = [];
 
+    public function test()
+    {
+        return $this->belongsTo(Test::class);
+    }
+
+
+
+    public function visitTest()
+    {
+        return $this->belongsTo(VisitTest::class);
+    }
 }

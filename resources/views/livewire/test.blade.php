@@ -78,7 +78,7 @@
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="price">
                             السعر
                         </label>
-                        <input autocomplete="off" wire:model="price" @disabled($getAll) @disabled($rangeMode)
+                        <input autocomplete="off" wire:model="price"  @disabled($rangeMode)
                         class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="price" type="text" placeholder="السعر">
                     </div>
@@ -361,7 +361,7 @@
                                     إفتراضي</label>
                             </div>
                             <div class="w-1/6 px-3 ">
-                                <button type="button" wire:click="addChoice()"
+                                <button type="button" wire:click="addChoice()" @disabled($result_type == "number")
                                         class=" py-2.5 w-full bg-cyan-800 hover:bg-cyan-700 rounded text-white"><i
                                         class="fa fa-plus"></i></button>
                             </div>
@@ -387,9 +387,15 @@
                                             <td>{{ $option->choiceName }}</td>
                                             <td>{{ $option->default ? "نعم" : "لا" }}</td>
                                             <td>
+
                                                 <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                         wire:click="chooseChoice({{$option}})"><i
                                                         class="fa fa-plus"></i>
+                                                </button>
+
+                                                <button class="bg-blue-400 p-2 rounded text-xs text-white"
+                                                        wire:click="editChoice({{$option}})"><i
+                                                        class="fa fa-pen"></i>
                                                 </button>
 
                                                 <button class="bg-red-400 p-2 rounded text-xs text-white"

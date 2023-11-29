@@ -63,120 +63,122 @@
                 <div class="header hidden print:block">
                     <img src="{{ asset('js/header.jpg') }}" style="width: 100%; height: 150px"
                          alt="">
-                    <span>التاريخ: {{ date("Y-m-d") }}</span>
+                    <span class="mx-5">التاريخ: {{ date("Y-m-d") }}</span>
                     <h3 class="text-center font-extrabold">{{ $reports[$reportType] . ' من تاريخ : ' . $from . ' إلى تاريخ : ' . $to }}</h3>
                 </div>
-                @if($reportType == "generalReport")
-                    <table class="w-full table-fixed text-center">
-                        <thead class="bg-cyan-700 font-extrabold text-white">
-                        <tr>
-                            <th class="py-2 rounded-r-2xl">البيان</th>
-                            <th class="py-2 rounded-l-2xl">المبلغ</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>الإيرادات</td>
-                            <td>{{ $incomes != null ? number_format($incomes->sum("total_amount"), 2) : 0 }}</td>
-                        </tr>
-                        <tr>
-                            <td>المصروفات</td>
-                            <td>{{ $expenses != null ? number_format($expenses->sum("amount"), 2) : 0 }}</td>
-                        </tr>
-                        <tr>
-                            <td>الموظفين</td>
-                            <td>{{ $employees != null ? number_format($employees->sum("amount"), 2) : 0 }}</td>
-                        </tr>
-                        </tbody>
-                        <tfoot class="bg-cyan-700 font-extrabold text-white">
-                        <tr>
-                            <th class="py-2 rounded-r-2xl">الجمله</th>
-                            <th class="py-2 rounded-l-2xl">{{ number_format($generalSum, 2) }}</th>
-                        </tr>
-                        </tfoot>
-                    </table>
-                @elseif($reportType == "incomesReport")
-                    @if(!empty($incomes))
+                <div class="print:mx-5">
+                    @if($reportType == "generalReport")
                         <table class="w-full table-fixed text-center">
                             <thead class="bg-cyan-700 font-extrabold text-white">
                             <tr>
-                                <th class="py-2 rounded-r-2xl">التاريخ</th>
-                                <th class="py-2 ">إسم المريض</th>
-                                <th class="py-2 rounded-l-2xl">المبلغ</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($incomes as $income)
-                                <tr>
-                                    <td class="py-2">{{ $income->visit_date }}</td>
-                                    <td>{{ $income->patient->patientName }}</td>
-                                    <td>{{ number_format($income->amount, 2) }}</td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                            <tfoot class="bg-cyan-700 font-extrabold text-white">
-                            <tr>
-                                <th class="py-2 rounded-r-2xl" colspan="2">الجمله</th>
-                                <th class="py-2 rounded-l-2xl">{{ number_format($incomes->sum("amount"), 2) }}</th>
-                            </tr>
-                            </tfoot>
-                        </table>
-                    @endif
-                @elseif($reportType == "employeesReport")
-                    @if(!empty($employees))
-                        <table class="w-full table-fixed text-center">
-                            <thead class="bg-cyan-700 font-extrabold text-white">
-                            <tr>
-                                <th class="py-2 rounded-r-2xl">التاريخ</th>
-                                <th class="py-2 ">إسم الموظف</th>
-                                <th class="py-2 rounded-l-2xl">المبلغ</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            @foreach($employees as $employee)
-                                <tr>
-                                    <td class="py-2">{{ $employee->payDate }}</td>
-                                    <td>{{ $employee->employee->employeeName }}</td>
-                                    <td>{{ number_format($employee->amount, 2) }}</td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                            <tfoot class="bg-cyan-700 font-extrabold text-white">
-                            <tr>
-                                <th class="py-2 rounded-r-2xl" colspan="2">الجمله</th>
-                                <th class="py-2 rounded-l-2xl">{{ number_format($employees->sum("amount"), 2) }}</th>
-                            </tr>
-                            </tfoot>
-                        </table>
-                    @endif
-                @elseif($reportType == "expensesReport")
-                    @if(!empty($expenses))
-                        <table class="w-full table-fixed text-center">
-                            <thead class="bg-cyan-700 font-extrabold text-white">
-                            <tr>
-                                <th class="py-2 rounded-r-2xl">التاريخ</th>
                                 <th class="py-2 ">البيان</th>
-                                <th class="py-2 rounded-l-2xl">المبلغ</th>
+                                <th class="py-2 ">المبلغ</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @foreach($expenses as $expense)
-                                <tr>
-                                    <td class="py-2">{{ $expense->expenseDate }}</td>
-                                    <td>{{ $expense->description }}</td>
-                                    <td>{{ number_format($expense->amount, 2) }}</td>
-                                </tr>
-                            @endforeach
+                            <tr>
+                                <td>الإيرادات</td>
+                                <td>{{ $incomes != null ? number_format($incomes->sum("total_amount"), 2) : 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>المصروفات</td>
+                                <td>{{ $expenses != null ? number_format($expenses->sum("amount"), 2) : 0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>الموظفين</td>
+                                <td>{{ $employees != null ? number_format($employees->sum("amount"), 2) : 0 }}</td>
+                            </tr>
                             </tbody>
                             <tfoot class="bg-cyan-700 font-extrabold text-white">
                             <tr>
-                                <th class="py-2 rounded-r-2xl" colspan="2">الجمله</th>
-                                <th class="py-2 rounded-l-2xl">{{ number_format($expense->sum("amount"), 2) }}</th>
+                                <th class="py-2 ">الجمله</th>
+                                <th class="py-2 ">{{ number_format($generalSum, 2) }}</th>
                             </tr>
                             </tfoot>
                         </table>
+                    @elseif($reportType == "incomesReport")
+                        @if(!empty($incomes))
+                            <table class="w-full table-fixed text-center">
+                                <thead class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 ">التاريخ</th>
+                                    <th class="py-2 ">إسم المريض</th>
+                                    <th class="py-2 ">المبلغ</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($incomes as $income)
+                                    <tr>
+                                        <td class="py-2">{{ $income->visit_date }}</td>
+                                        <td>{{ $income->patient->patientName }}</td>
+                                        <td>{{ number_format($income->amount, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                                <tfoot class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 " colspan="2">الجمله</th>
+                                    <th class="py-2 ">{{ number_format($incomes->sum("amount"), 2) }}</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        @endif
+                    @elseif($reportType == "employeesReport")
+                        @if(!empty($employees))
+                            <table class="w-full table-fixed text-center">
+                                <thead class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 ">التاريخ</th>
+                                    <th class="py-2 ">إسم الموظف</th>
+                                    <th class="py-2 ">المبلغ</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($employees as $employee)
+                                    <tr>
+                                        <td class="py-2">{{ $employee->payDate }}</td>
+                                        <td>{{ $employee->employee->employeeName }}</td>
+                                        <td>{{ number_format($employee->amount, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                                <tfoot class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 " colspan="2">الجمله</th>
+                                    <th class="py-2 ">{{ number_format($employees->sum("amount"), 2) }}</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        @endif
+                    @elseif($reportType == "expensesReport")
+                        @if(!empty($expenses))
+                            <table class="w-full table-fixed text-center">
+                                <thead class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 ">التاريخ</th>
+                                    <th class="py-2 ">البيان</th>
+                                    <th class="py-2 ">المبلغ</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($expenses as $expense)
+                                    <tr>
+                                        <td class="py-2">{{ $expense->expenseDate }}</td>
+                                        <td>{{ $expense->description }}</td>
+                                        <td>{{ number_format($expense->amount, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                                <tfoot class="bg-cyan-700 font-extrabold text-white">
+                                <tr>
+                                    <th class="py-2 " colspan="2">الجمله</th>
+                                    <th class="py-2 ">{{ number_format($expenses->sum("amount"), 2) }}</th>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        @endif
                     @endif
-                @endif
+                </div>
             </div>
         </div>
     </div>

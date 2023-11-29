@@ -20,6 +20,7 @@ class Test extends Component
     public $range_id = null;
     public $choiceName = null;
     public $choice_id = null;
+    public $choiceId = 0;
     public $choice = "";
     public Collection $choices;
     public $currentChoice = [];
@@ -121,6 +122,7 @@ class Test extends Component
 
     public function changeLocation($index)
     {
+        $this->resetTestData();
 
         if ($index == -1) {
             $this->currentCategory = [];
@@ -151,11 +153,6 @@ class Test extends Component
 
     public function saveTest()
     {
-        if ($this->getAll) {
-            $this->price = null;
-        } else {
-            $this->price = floatval($this->price);
-        }
         if ($this->id == 0) {
             \App\Models\Test::create([
                 "testName" => $this->testName,
@@ -197,11 +194,12 @@ class Test extends Component
         if ($this->rangeMode) {
             $this->getRanges($test['id']);
         }
-        $this->id = $range ? $test['id'] : 0;
+        $this->id = !$range ? $test['id'] : 0;
         $this->testName = $test['testName'];
         $this->shortcut = $test['shortcut'];
         $this->unit = $test['unit'];
         $this->price = $test['price'];
+        $this->getAll = $test['getAll'];
     }
 
     public function deleteTestMassage($id)
@@ -316,15 +314,30 @@ class Test extends Component
 
     public function addChoice()
     {
-        RangeChoice::create([
-            "range_id" => empty($this->currentChoice) ? $this->range_id : null,
-            "choiceName" => $this->choiceName,
-            "default" => $this->default,
-            "choice_id" => !empty($this->currentChoice) ? $this->currentChoice['id'] : null
-        ]);
+        if ($this->choiceId == 0) {
+            RangeChoice::create([
+                "range_id" => empty($this->currentChoice) ? $this->range_id : null,
+                "choiceName" => $this->choiceName,
+                "default" => $this->default,
+                "choice_id" => !empty($this->currentChoice) ? $this->currentChoice['id'] : null
+            ]);
+        } else {
+            RangeChoice::where("id", $this->choiceId)->update([
+                "choiceName" => $this->choiceName,
+                "default" => $this->default,
+            ]);
+        }
         $this->choiceName = "";
+        $this->choiceId = 0;
         $this->default = false;
         $this->getChoices(true);
+    }
+
+    public function editChoice($choice)
+    {
+        $this->choiceId = $choice["id"];
+        $this->choiceName = $choice["choiceName"];
+        $this->default = $choice["default"];
     }
 
     public function deleteChoice($id)
@@ -343,6 +356,7 @@ class Test extends Component
             $this->choices = RangeChoice::where("choice_id", $this->currentChoice['id'])->get();
         }
     }
+
     public function chooseChoice($choice)
     {
         $this->currentChoice = $choice;
@@ -351,12 +365,13 @@ class Test extends Component
 
     public function resetRangeData()
     {
-        $this->reset( "gender", "age", "result_type", "min_age", "max_age", "min_value", "max_value", "refId");
+        $this->reset("gender", "age", "result_type", "min_age", "max_age", "min_value", "max_value", "refId");
     }
 
     public function resetTestData()
     {
         $this->reset("id", "testName", "shortcut", "price", "unit", "rangeMode", "test_id", "getAll");
+        $this->resetChoicesData();
     }
 
     public function resetChoicesData()
@@ -369,7 +384,7 @@ class Test extends Component
             }
             $this->getChoices(true);
         } else {
-            $this->reset( "range_id", "choicesMode", "choiceName");
+            $this->reset("range_id", "choicesMode", "choiceName", "choiceId");
             $this->resetRangeData();
         }
     }

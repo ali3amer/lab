@@ -1,6 +1,6 @@
 <div class="">
     <livewire:header :$header/>
-    
+
     <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl m-5">
         <form class="w-full" wire:submit="saveCategory()">
             <div class="flex flex-wrap -mx-3">
@@ -56,7 +56,7 @@
                                 <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                         wire:click="editCategory({{$category}})"><i class="fa fa-pen"></i></button>
                                 <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                        wire:click="deleteCategory({{$category->id}})"><i class="fa fa-trash"></i>
+                                        wire:click="deleteMessage({{$category->id}})"><i class="fa fa-trash"></i>
                                 </button>
                             </td>
                         </tr>

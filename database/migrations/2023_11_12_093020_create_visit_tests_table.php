@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('visit_test_id')->nullable();
             $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete("cascade");
             $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('tests');
+            $table->foreign('test_id')->references('id')->on('tests')->onDelete("cascade");
             $table->decimal("price", 10, 2)->nullable();
             $table->string("comment")->nullable();
             $table->timestamps();

@@ -1,8 +1,9 @@
 @php
     $links = [
         ['patient' , 'المرضى', 'face-frown'],
+        ['result' , 'النتائج', 'file'],
         ['category' , 'الاقسام', 'cubes'],
-        ['analysis' , 'التحاليل', 'flask'],
+        ['test' , 'التحاليل', 'flask'],
         ['insurance' , 'التأمينات', 'cash-register'],
         ['employee' , 'الموظفين', 'hospital-user'],
         ['expense' , 'المصروفات', 'bone'],
