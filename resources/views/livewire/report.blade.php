@@ -61,8 +61,17 @@
         <div class="overflow-auto h-80">
             <div class="report" dir="rtl">
                 <div class="header hidden print:block">
-                    <img src="{{ asset('js/header.jpg') }}" style="width: 100%; height: 150px"
-                         alt="">
+                    <div class="flex items-center border border-2 rounded-xl px-1 border-cyan-600" style="height: 90px;">
+                        <div class="w-1/5 rounded-xl">
+                            <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
+                        </div>
+                        <div class="w-3/5 items-center text-center">
+                            <h2  class="result-header">معمل النخبة للتحاليل الطبيه</h2>
+                        </div>
+                        <div class="w-1/5 rounded-xl">
+                            <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
+                        </div>
+                    </div>
                     <span class="mx-5">التاريخ: {{ date("Y-m-d") }}</span>
                     <h3 class="text-center font-extrabold">{{ $reports[$reportType] . ' من تاريخ : ' . $from . ' إلى تاريخ : ' . $to }}</h3>
                 </div>

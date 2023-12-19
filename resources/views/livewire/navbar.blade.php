@@ -11,7 +11,46 @@
         ['report' , 'التقارير', 'file-lines'],
 ];
 @endphp
+<style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        padding: 0px;
+    }
 
+    @font-face {
+        font-family: 'arefRuqaa';
+        src: url('fonts/ArefRuqaa/ArefRuqaa-Bold.ttf');
+        font-style: normal;
+        font-weight: 400;
+    }
+
+    @font-face {
+        font-family: 'lateef';
+        src: url('fonts/lateef/Lateef-Bold.ttf');
+        font-style: normal;
+        font-weight: 400;
+    }
+
+    @font-face {
+        font-family: 'marhey';
+        src: url('fonts/marhey/static/Marhey-Bold.ttf');
+        font-style: normal;
+        font-weight: 400;
+    }
+
+    @font-face {
+        font-family: 'messiri';
+        src: url('fonts/messiri/static/ElMessiri-Bold.ttf');
+        font-style: normal;
+        font-weight: 400;
+    }
+
+    .result-header {
+        font-family: 'messiri', sans-serif;
+        font-size: 32px;
+    }
+</style>
 <div id="sideBar" class="w-64 bg-cyan-600 space-y-6 px-2 py-4 absolute inset-y-0 right-0 transform translate-x-full transition duration-200 ease-in-out md:relative md:-translate-x-0">
     <a href="" class="flex  justify-center text-white space-x-5 space-x-reverse ">
         <span class="text-2xl font-extrabold text-white">نظام إدارة المعامل</span>

@@ -1,4 +1,12 @@
 <div>
+    <div wire:loading class="h-screen w-full fixed top-0 right-0 bg-gray-700 opacity-25 z-10 absolute text-center justify-items-center">
+        <div class="flex items-center h-screen">
+            <div class="w-full">
+                <i class="fa-solid fa-circle-notch fa-spin text-red-900 " style="font-size: xxx-large"></i>
+
+            </div>
+        </div>
+    </div>
     <livewire:header :$header/>
     @if(empty($currentVisit))
         <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
@@ -36,53 +44,63 @@
                     class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></button>
             <button id="resetData" wire:click="resetData()"
                     class="py-1.5 px-2.5 bg-red-700 text-white rounded"><i class="fa fa-close"></i></button>
-            <div class="invoice print:block hidden">
+            <div class="invoice hidden print:block">
                 @if(!empty($printResults))
                     <div class="body relative">
                         @php $count = 0; @endphp
-                        @php $limit = 23; @endphp
+                        @php $limit = 30; @endphp
 
                         @foreach($printResults as $key => $items)
 
                             @if($loop->first || $count > $limit || $key == "URINE GENERAL" || $key == "STOOL GENERAL" || $key == "CBC")
-                                <div
-                                        class="header break-before-page  ">
-                                    <img src="{{asset("js/header.jpg")}}" style="width: 100%;height: 120px;">
-                                    <div dir="rtl" class="info mx-5 mt-2 mb-6">
-                                        <span class="my-1"> التاريخ : {{ date("Y/m/d") }} </span>
-                                        <div class="flex flex-wrap">
+                                <div class="header top-0 break-before-page">
+                                    <div dir="rtl" class="info mx-5 mb-1">
+                                        <div class="flex items-center border border-2 rounded-xl px-1 border-cyan-600" style="height: 90px;">
+                                            <div class="w-1/5 rounded-xl">
+                                                <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
+                                            </div>
+                                            <div class="w-3/5 items-center text-center">
+                                                <h2  class="result-header">معمل النخبة للتحاليل الطبيه</h2>
+                                            </div>
+                                            <div class="w-1/5 rounded-xl">
+                                                <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
+                                            </div>
+                                        </div>
+
+                                        <span class="my-1" style="font-family: 'lateef', sans-serif"> التاريخ : {{ date("Y/m/d") }} </span>
+                                        <div class="flex flex-wrap"  style="font-family: 'lateef', sans-serif;">
 
                                             <div class="w-1/2 mt-2">
-                                                <div class="border-2 border-gray-300 ml-2">
+                                                <div class="border-2 border-gray-100 ml-2">
                                                     <div class="flex">
-                                                        <div class="w-1/6 px-2  bg-gray-300">الإسم</div>
+                                                        <div class="w-1/6 px-2 bg-gray-100">الإسم</div>
                                                         <div class="w-5/6 px-3">{{ $currentPatient["patientName"] }}</div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="w-1/2 mt-2">
-                                                <div class="border-2 border-gray-300 ml-2">
+                                                <div class="border-2 border-gray-100 ml-2">
                                                     <div class="flex">
-                                                        <div class="w-1/6 px-2  bg-gray-300">د/</div>
+                                                        <div class="w-1/6 px-2  bg-gray-100">د/</div>
                                                         <div class="w-5/6 px-3">{{ $currentVisit['doctor'] }}</div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="w-1/2 mt-2">
-                                                <div class="border-2 border-gray-300 ml-2">
+                                                <div class="border-2 border-gray-100 ml-2">
                                                     <div class="flex">
-                                                        <div class="w-1/6 px-2  bg-gray-300">العمر</div>
+                                                        <div class="w-1/6 px-2  bg-gray-100">العمر</div>
                                                         <div class="w-5/6 px-3">{{ number_format($currentPatient['age'], 0) }}</div>
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div class="w-1/2 mt-2">
-                                                <div class="border-2 border-gray-300 ml-2">
+                                                <div class="border-2 border-gray-100 ml-2">
                                                     <div class="flex">
-                                                        <div class="w-1/6 px-2  bg-gray-300">التأمين</div>
+                                                        <div class="w-1/6 px-2  bg-gray-100">التأمين</div>
                                                         <div class="w-5/6 px-3"></div>
                                                     </div>
                                                 </div>
@@ -94,15 +112,15 @@
                                 @php $count = 1; @endphp
                             @endif
                             <div class="mx-5">
-                                <h2 class="px-2 bg-gray-300 mb-1">{{ $key }}</h2>
+                                <h2 class="px-2 w-fit underline decoration-double mb-1" style="font-size: 14px">{{ $key }}</h2>
                                 @foreach($items as $index => $item)
                                     @if(count($items) != 1)
-                                        <h1 class="px-2 w-fit border-b-2 bg-gray-400 text-white">{{$index}}</h1>
+                                        <h1 class="px-2 w-fit mb-1" style="font-size: 12px">{{$index}}</h1>
                                     @endif
-                                    <table class="w-full text-center {{ $index != 'MACRO' && $index != 'MICRO' ? 'mb-5' : 'mb-2' }} " style="font-size: small">
+                                    <table class="w-full text-center {{ $index != 'MACRO' && $index != 'MICRO' ? 'mb-1' : 'mb-1' }} " style="font-size: 10px">
                                         <thead>
-                                        <tr class="bg-gray-400 text-white font-extrabold">
-                                            <th class="text-left px-2 w-1/4">Test Name</th>
+                                        <tr class="bg-gray-300 text-white font-extrabold">
+                                            <th class="text-left px-2 w-1/4">Test</th>
                                             <th class="w-1/4">Result</th>
                                             <th class="w-1/4">N/H</th>
                                             <th class="text-right w-1/4">Ref.Range</th>
@@ -113,8 +131,8 @@
                                         @foreach($item as $result)
                                             @php $count++; @endphp
                                             <tr class="border-b border-b-1 border-b-black border-solid">
-                                                <td class="text-left px-2">{{ $result["testName"] }}</td>
-                                                <td dir="ltr">
+                                                <td class="text-left px-2" style="font-weight: bold">{{ $result["testName"] }}</td>
+                                                <td dir="ltr"  style="font-weight: bold; font-size: 10px">
                                                     @if($result["result_type"] == "number" || $result["result_type"] == "text")
                                                         {{ $result["result"] }}
                                                     @else
@@ -128,15 +146,12 @@
                                                         @endif
                                                     @endif
                                                 </td>
-                                                <td class="font-extrabold">
+                                                <td class="font-extrabold" style="font-weight: bold">
                                                     @if($result["result_type"] == "number")
-                                                        @if(floatval($result["result"] >= $result["min_value"] && floatval($result["result"] <= $result["max_value"])))
-                                                            N
-                                                        @elseif ($result["result"] < $result["min_value"])
-                                                            <span class="px-2 bg-gray-300">L</span>
-                                                        @else
-                                                            <span class="px-2 bg-gray-300">H</span>
-
+                                                        @if (floatval($result["result"]) < $result["min_value"])
+                                                            <i class="fa fa-arrow-down"></i>
+                                                        @elseif(floatval($result["result"]) > $result["max_value"])
+                                                            <i class="fa fa-arrow-up"></i>
                                                         @endif
                                                     @endif
                                                 </td>
@@ -258,12 +273,5 @@
         </div>
     @endif
 
-    <style>
-        .footer {
-            position: fixed;
-            bottom: 0;
-            background-color: #f2f2f2;
-            padding: 20px;
-        }
-    </style>
+
 </div>

@@ -22,8 +22,8 @@
                            class="text-white">إسم المستخدم</label>
 
                     <div class="col-md-6">
-                        <input id="username" autocomplete="off" type="text" placeholder="إسم المستخدم" class="w-full font-extrabold bg-transparent text-center text-white py-1.5 pr-2 border-b-2 placeholder:text-gray-600 "
-                               name="username" value="{{ old('username') }}" required autocomplete="username" autofocus>
+                        <input id="username" autocomplete="off" type="text" placeholder="إسم المستخدم" class="w-full font-extrabold outline-0  bg-transparent text-center text-white py-1.5 pr-2 border-b-2 placeholder:text-gray-300 "
+                               name="username" value="{{ old('username') }}" required autocomplete="off" autofocus>
 
                         @error('username')
                         <span class="invalid-feedback" role="alert">
@@ -39,7 +39,7 @@
 
                     <div class="col-md-6">
                         <input id="password" placeholder="كلمة المرور" autocomplete="off" type="password"
-                               class="w-full font-extrabold text-white bg-transparent text-center  py-1.5 pr-2 border-b-2 border-white placeholder:text-gray-600 sm:text-sm sm:leading-6" name="password"
+                               class="w-full font-extrabold text-white bg-transparent text-center  py-1.5 pr-2 border-b-2 border-white outline-0 placeholder:text-gray-300 sm:text-sm sm:leading-6" name="password"
                                required autocomplete="current-password">
 
                         @error('password')

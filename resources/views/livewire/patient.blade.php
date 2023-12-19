@@ -1,5 +1,12 @@
 <div wire:keydown.esc.window="resetData()" class="">
+    <div wire:loading class="h-screen w-full fixed top-0 right-0 bg-gray-700 opacity-25 z-10 absolute text-center justify-items-center">
+        <div class="flex items-center h-screen">
+            <div class="w-full">
+                <i class="fa-solid fa-circle-notch fa-spin text-red-900 " style="font-size: xxx-large"></i>
 
+            </div>
+        </div>
+    </div>
     <livewire:header :$header/>
 
     <!-- component -->

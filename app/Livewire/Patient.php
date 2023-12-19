@@ -207,18 +207,20 @@ class Patient extends Component
             $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
 
         } else {
-            \App\Models\Patient::where('id', $this->id)->update([
-                'patientName' => $this->patientName,
-                'gender' => $this->gender,
-                'duration' => $this->duration,
-                'age' => $this->age,
-                'phone' => $this->phone,
-                'firstVisitDate' => $this->firstVisitDate,
+            \App\Models\Visit::where('id', $this->visitId)->update([
+                'user_id' => auth()->id(),
+                'insurance_id' => $this->insurance_id,
+                'insuranceNumber' => $this->insuranceNumber,
+                'total_amount' => $this->total_amount,
+                'discount' => $this->discount,
+                'doctor' => $this->doctor,
+                'patientEndurance' => $this->insurance_id != null ? $this->insurances->where("id", $this->insurance_id) : 100,
+                'visit_date' => $this->visit_date,
             ]);
 
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
 
-            $this->resetPatientData();
+            $this->resetVisitData();
         }
 
     }
