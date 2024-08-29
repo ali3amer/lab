@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\InsuranceDebt;
+use App\Models\Visit;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
@@ -13,6 +14,8 @@ class Insurance extends Component
     public Collection $insurances;
     public $searchName = "";
     public $id = 0;
+    public $balance = 0;
+    public $riminder = 0;
     public $insuranceName = "";
     public $companyEndurance = "";
     public $patientEndurance = "";
@@ -49,15 +52,15 @@ class Insurance extends Component
         if ($this->id == 0) {
             \App\Models\Insurance::create([
                 'insuranceName' => $this->insuranceName,
-                'companyEndurance' => $this->companyEndurance,
-                'patientEndurance' => $this->patientEndurance,
+                'companyEndurance' => floatval($this->companyEndurance),
+                'patientEndurance' => floatval($this->patientEndurance),
                 'contractDate' => $this->contractDate,
             ]);
         } else {
             \App\Models\Insurance::where('id', $this->id)->update([
                 'insuranceName' => $this->insuranceName,
-                'companyEndurance' => $this->companyEndurance,
-                'patientEndurance' => $this->patientEndurance,
+                'companyEndurance' => floatval($this->companyEndurance),
+                'patientEndurance' => floatval($this->patientEndurance),
                 'contractDate' => $this->contractDate,
             ]);
         }
@@ -122,13 +125,14 @@ class Insurance extends Component
     {
         $this->currentInsurance = $insurance;
         $this->edit($insurance);
+        $this->balance = 0;
         $this->debts = InsuranceDebt::where("insurance_id", $insurance['id'])->get();
     }
 
 
     public function resetData()
     {
-        $this->reset('id', 'insuranceName', 'companyEndurance', 'patientEndurance', 'currentInsurance');
+        $this->reset('id', 'insuranceName', 'companyEndurance', 'patientEndurance', 'currentInsurance', 'contractDate');
     }
 
     public function resetDebtsData()
@@ -138,6 +142,12 @@ class Insurance extends Component
 
     public function render()
     {
+        if ($this->contractDate == "") {
+            $this->contractDate = date("Y-m-d");
+        }
+        if (!empty($this->currentInsurance)) {
+            $this->riminder = $this->balance - $this->amount;
+        }
         return view('livewire.insurance');
     }
 }

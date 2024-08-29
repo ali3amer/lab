@@ -55,7 +55,7 @@
                             @if($loop->first || $count > $limit || $key == "URINE GENERAL" || $key == "STOOL GENERAL" || $key == "CBC")
                                 <div class="header top-0 break-before-page">
                                     <div dir="rtl" class="info mx-5 mb-1">
-                                        <div class="flex items-center border border-2 rounded-xl px-1 border-cyan-600" style="height: 90px;">
+                                        <div class="flex items-center border-2 rounded-xl px-1 border-cyan-600" style="height: 90px;">
                                             <div class="w-1/5 rounded-xl">
                                                 <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
                                             </div>

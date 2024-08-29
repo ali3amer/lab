@@ -63,11 +63,11 @@
                 <table class="table-fixed w-full">
                     <thead class="bg-cyan-700 text-white">
                     <tr>
-                        <th class="py-2 rounded-r-2xl">#</th>
-                        <th>إسم شركة التأمين</th>
+                        <th class="py-2 rounded-r-2xl">إسم شركة التأمين</th>
                         <th>نسبة تحمل الشركه</th>
                         <th>نسبة تحمل المريض</th>
                         <th>تاريخ التعاقد</th>
+                        <th>المطالبه</th>
                         <th class="rounded-l-2xl">التحكم</th>
                     </tr>
                     </thead>
@@ -89,11 +89,11 @@
 
                     @foreach($insurances as $insurance)
                         <tr class="border-b-2">
-                            <td class="py-2">{{$insurance->id}}</td>
                             <td>{{$insurance->insuranceName}}</td>
                             <td>{{$insurance->companyEndurance}}</td>
                             <td>{{$insurance->patientEndurance}}</td>
                             <td>{{$insurance->contractDate}}</td>
+                            <td>{{number_format($insurance->balance, 2)}}</td>
                             <td>
                                 <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                         wire:click="edit({{$insurance}})"><i class="fa fa-pen"></i></button>
@@ -113,7 +113,7 @@
             <form class="w-full" wire:submit="saveDebt()">
                 <div class="flex flex-wrap -mx-3">
 
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-full md:w-1/6 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="amount">
                             المبلغ
@@ -122,7 +122,7 @@
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="amount" type="text" placeholder="المبلغ">
                     </div>
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-full md:w-1/6 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="paid_date">
                             تاريخ الدفع
@@ -142,9 +142,28 @@
                                id="note" type="text" placeholder="ملاحظات">
                     </div>
 
-                    <div class="md:w-1/6 px-2  flex items-center ">
+                    <div class="w-full md:w-1/6 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                               for="note">
+                            الرصيد
+                        </label>
+                        <input disabled autocomplete="off" wire:model="balance"
+                               class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="note" type="text" placeholder="الرصيد">
+                    </div>
+
+                    <div class="w-full md:w-1/6 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                               for="note">
+                            المتبقي
+                        </label>
+                        <input disabled autocomplete="off" wire:model="remainder"
+                               class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="note" type="text" placeholder="المتبقي">
+                    </div>
+                    <div class="md:w-1/12 px-2  flex items-center ">
                         <button type="submit"
-                                class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{$debtId == 0 ? 'حفظ': 'تعديل'}}</button>
+                                class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-3 rounded text-white">{{$debtId == 0 ? 'حفظ': 'تعديل'}}</button>
                     </div>
                 </div>
 

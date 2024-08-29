@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{asset("fontawesome-free-6.4.2-web\css\all.min.css")}}">
 {{--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">--}}
     @vite('resources/js/app.js')
-    <title>{{ $title ?? 'Page Title' }}</title>
+    <title>{{ $title ?? 'نظام إدارة معامل' }}</title>
 </head>
 <body dir="rtl">
 

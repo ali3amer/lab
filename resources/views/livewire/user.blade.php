@@ -94,18 +94,18 @@
 
                 @if(!empty($users))
                     @foreach($users as $user)
-                        <tr class="border-b-2">
-                            <td class="py-2">{{$user->id}}</td>
-                            <td>{{$user->name}}</td>
-                            <td>{{$user->username}}</td>
-                            <td>
-                                <button class="bg-cyan-400 p-2 rounded text-xs text-white"
-                                        wire:click="editUser({{$user}})"><i class="fa fa-pen"></i></button>
-                                <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                        wire:click="deleteUser({{$user->id}})"><i class="fa fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
+                            <tr class="border-b-2">
+                                <td class="py-2">{{$user->id}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$user->username}}</td>
+                                <td>
+                                    <button class="bg-cyan-400 p-2 rounded text-xs text-white"
+                                            wire:click="editUser({{$user}})"><i class="fa fa-pen"></i></button>
+                                    <button @disabled(auth()->user()->id == $user->id) class="bg-red-400 p-2 rounded text-xs text-white"
+                                            wire:click="deleteUser({{$user->id}})"><i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
                     @endforeach
                 @endif
                 </tbody>

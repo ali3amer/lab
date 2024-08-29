@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('visit_tests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('visit_id')->nullable();
-            $table->foreign('visit_id')->references('id')->on('visits')->onDelete("cascade");
+            $table->foreign('visit_id')->references('id')->on('visits')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('visit_test_id')->nullable();
-            $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete("cascade");
+            $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('tests')->onDelete("cascade");
+            $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal("price", 10, 2)->nullable();
             $table->string("comment")->nullable();
             $table->timestamps();

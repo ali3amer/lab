@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('results', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('visit_test_id');
-            $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete("cascade");
+            $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete('cascade')->onUpdate('cascade');
             $table->string("result")->nullable();
             $table->unsignedBigInteger('result_choice')->nullable();
-            $table->foreign('result_choice')->references('id')->on('range_choices')->onDelete("cascade");
+            $table->foreign('result_choice')->references('id')->on('range_choices')->onDelete('cascade')->onUpdate('cascade');
 
             $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('tests')->onDelete("cascade");
+            $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal("price", 10, 2)->nullable();
 
             $table->timestamps();

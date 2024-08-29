@@ -18,9 +18,9 @@ return new class extends Migration
             $table->decimal("price", 10, 2)->nullable();
             $table->string("unit")->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete("cascade");
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('test_id')->nullable();
-            $table->foreign('test_id')->references('id')->on('tests')->onDelete("cascade");
+            $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->boolean("getAll")->default(false);
             $table->timestamps();
         });

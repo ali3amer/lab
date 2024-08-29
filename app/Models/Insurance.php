@@ -14,4 +14,16 @@ class Insurance extends Model
     {
         return $this->hasMany(InsuranceDebt::class);
     }
+
+    public function visits()
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    public function getBalanceAttribute()
+    {
+        return $this->visits->sum(function ($visit) {
+            return $visit->amount * ((100 - $visit->patienEndurance) / 100);
+        });
+    }
 }

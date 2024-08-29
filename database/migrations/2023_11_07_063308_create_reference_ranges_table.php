@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('reference_ranges', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('test_id');
-            $table->foreign('test_id')->references('id')->on('tests')->onDelete("cascade");
+            $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->enum("gender", ['all', 'male', 'female']);
             $table->enum("age", ["all", "year", "month", "day", "hour"]);
             $table->enum("result_type", ["number", "multable_choice", "text_and_multable_choice"]);

@@ -6,7 +6,7 @@
         ['test' , 'التحاليل', 'flask'],
         ['insurance' , 'التأمينات', 'cash-register'],
         ['employee' , 'الموظفين', 'hospital-user'],
-        ['expense' , 'المصروفات', 'bone'],
+        ['expense' , 'المصروفات', 'dollar'],
         ['user' , 'المستخدمين', 'user'],
         ['report' , 'التقارير', 'file-lines'],
 ];

@@ -68,7 +68,7 @@ class Patient extends Component
     {
         $this->categories = \App\Models\Category::all();
         $this->patients = \App\Models\Patient::latest()->get();
-        $this->insurances = \App\Models\Insurance::all();
+        $this->insurances = \App\Models\Insurance::all()->keyBy("id");
         $this->firstVisitDate = date('Y-m-d');
     }
 
@@ -119,7 +119,6 @@ class Patient extends Component
         }
 
     }
-
 
     public function edit($patient)
     {
@@ -199,7 +198,7 @@ class Patient extends Component
                 'total_amount' => $this->total_amount,
                 'discount' => $this->discount,
                 'doctor' => $this->doctor,
-                'patientEndurance' => $this->insurance_id != null ? $this->insurances->where("id", $this->insurance_id) : 100,
+                'patientEndurance' => $this->insurance_id != null ? $this->insurances[$this->insurance_id]["patientEndurance"] : 100,
                 'visit_date' => $this->visit_date,
             ]);
 
@@ -214,7 +213,7 @@ class Patient extends Component
                 'total_amount' => $this->total_amount,
                 'discount' => $this->discount,
                 'doctor' => $this->doctor,
-                'patientEndurance' => $this->insurance_id != null ? $this->insurances->where("id", $this->insurance_id) : 100,
+                'patientEndurance' => $this->insurance_id != null ? $this->insurances[$this->insurance_id]["patientEndurance"] : 100,
                 'visit_date' => $this->visit_date,
             ]);
 
@@ -341,13 +340,6 @@ class Patient extends Component
                 }
                 $this->chooseTest($test->id);
             } else {
-//                $deleted = VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $test->id)->get();
-//                $sum = $deleted->sum("price");
-//                $this->amount -= $sum;
-//
-//                if ($deleted->count() > 0) {
-//                    VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $test->parent->id)->delete();
-//                }
 
                 if ($this->visit_test_id == 0) {
                     VisitTest::where("visit_id", $this->currentVisit["id"])->where("test_id", $test->id)->delete();

@@ -316,6 +316,7 @@
                             <select wire:model="insurance_id"
                                     class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     id="insurance_id">
+                                <option>--------------</option>
                                 @foreach($insurances as $insurance)
                                     <option value="{{$insurance->id}}">{{$insurance->insuranceName}}</option>
                                 @endforeach
@@ -396,11 +397,11 @@
                                     <td class="py-2">{{$visit->id}}</td>
                                     <td>{{$visit->visit_date}}</td>
                                     <td>{{$visit->doctor}}</td>
-                                    <td>{{$visit->insurance_id}}</td>
+                                    <td>{{$visit->insurance_id ? $visit->insurance->insuranceName : ""}}</td>
                                     <td>  {{$visit->patientEndurance}} %</td>
                                     <td>{{number_format($visit->amount, 2)}}</td>
                                     <td>{{number_format($visit->discount, 2)}}</td>
-                                    <td>{{number_format($visit->total_amount, 2)}}</td>
+                                    <td>{{number_format($visit->total_amount * ($visit->patientEndurance / 100), 2)}}</td>
                                     <td>
                                         <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                 wire:click="editVisit({{$visit}})">

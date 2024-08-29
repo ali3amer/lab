@@ -12,11 +12,14 @@ class Report extends Component
     public $header = "التقارير";
     public $from = "";
     public $to = "";
+    public Collection $visits;
     public Collection $incomes;
     public Collection $expenses;
     public Collection $employees;
+    public array $insurances = [];
 
     public $generalSum = 0;
+    public $insurance_id = null;
     public $reportType = null;
     public array $reports = [
         "" => "------------",
@@ -24,7 +27,14 @@ class Report extends Component
         "incomesReport" => "تقرير إيرادات",
         "employeesReport" => "تقرير موظفين",
         "expensesReport" => "تقرير مصروفات",
+        "insuranceReport" => "تقرير تأمين",
     ];
+    public Collection $insurancesResult;
+
+    public function mount()
+    {
+        $this->insurances = \App\Models\Insurance::get()->keyBy("id")->toArray();
+    }
 
     public function getReport()
     {
@@ -36,6 +46,8 @@ class Report extends Component
             $this->employeesReports();
         } elseif ($this->reportType == "expensesReport") {
             $this->expensesReports();
+        } elseif ($this->reportType == "insuranceReport") {
+            $this->insurancesReports();
         }
     }
 
@@ -59,6 +71,11 @@ class Report extends Component
     public function expensesReports()
     {
         $this->expenses = \App\Models\Expense::whereBetween("expenseDate", [$this->from, $this->to])->get();
+    }
+
+    public function insurancesReports()
+    {
+        $this->visits = \App\Models\Visit::where("insurance_id", $this->insurance_id)->whereBetween("visit_date", [$this->from, $this->to])->get();
     }
 
     public function employeesReports()
