@@ -22,11 +22,15 @@ class Category extends Component
     public $searchCategoryShortcut = "";
     public $shortcut = "";
     public Collection $categories;
-    public Collection $analyzies;
+    public $user;
     public array $currentCategory = [];
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
+
         $this->categories = \App\Models\Category::all();
     }
 
@@ -101,6 +105,8 @@ class Category extends Component
 
     public function render()
     {
+        $this->user = auth()->user();
+
         return view('livewire.category');
     }
 }

@@ -11,6 +11,7 @@ class Report extends Component
 {
     public $header = "التقارير";
     public $from = "";
+    public $user;
     public $to = "";
     public Collection $visits;
     public Collection $incomes;
@@ -33,6 +34,9 @@ class Report extends Component
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->insurances = \App\Models\Insurance::get()->keyBy("id")->toArray();
     }
 
@@ -85,6 +89,8 @@ class Report extends Component
 
     public function render()
     {
+        $this->user = auth()->user();
+
         return view('livewire.report');
     }
 }

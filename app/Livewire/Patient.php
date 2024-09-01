@@ -21,6 +21,7 @@ class Patient extends Component
     ];
     public $header = "المرضى";
     public $id = 0;
+    public $user = 0;
     public $visit_test_id = 0;
     public $searchName = "";
     public $searchAge = "";
@@ -36,7 +37,7 @@ class Patient extends Component
     public $age = 0;
     public $phone = 0;
     public Collection $patients;
-    public Collection $insurances;
+    public array $insurances = [];
     public Collection $categories;
     public Collection $tests;
     public array $durations = [
@@ -66,9 +67,12 @@ class Patient extends Component
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->categories = \App\Models\Category::all();
         $this->patients = \App\Models\Patient::latest()->get();
-        $this->insurances = \App\Models\Insurance::all()->keyBy("id");
+        $this->insurances = \App\Models\Insurance::all()->keyBy("id")->toArray();
         $this->firstVisitDate = date('Y-m-d');
     }
 
@@ -162,6 +166,7 @@ class Patient extends Component
     public function chooseCategory($category)
     {
         $this->currentCategory = $category;
+        $this->currentLocation[0] = $this->currentCategory['categoryName'];
         $this->getTests();
     }
 
@@ -226,6 +231,7 @@ class Patient extends Component
 
     public function chooseVisit($visit)
     {
+        $this->changeLocation(-1);
         $this->cart = [];
         $this->currentVisit = $visit;
 
@@ -275,139 +281,135 @@ class Patient extends Component
         $this->getVisits($this->currentPatient['id']);
     }
 
-
-    public function chooseTest($id)
+    public function calcAmount()
     {
-        if ($id == 0) {
-            $this->getTests();
-        } else {
-            $this->currentTest = \App\Models\Test::where("id", $id)->first()->toArray();
-
-            $this->currentLocation[$id] = $this->currentTest['testName'];
-            $this->tests = \App\Models\Test::where("test_id", $this->currentTest['id'])->get();
+        $amount = 0;
+        $visit = Visit::find($this->currentVisit['id']);
+        $visitTests = VisitTest::where("visit_id", $visit->id)->get();
+        $amount += $visitTests->sum("price");
+        foreach ($visitTests as $test) {
+            if ($test->children->count() > 0) {
+                $amount += $test->children->sum("price");
+            }
         }
     }
 
     public function addTest(\App\Models\Test $test)
     {
-        if ($test->getAll) {
-            $testModel = \App\Models\Test::find($test['id']);
-            $this->amount += floatval($testModel->price);
+        $check = VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $test['id'])->first();
 
-            if ($testModel) {
-
-                VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $testModel->id)->delete();
-                $visit_test = VisitTest::create([
-                    "visit_id" => $this->currentVisit['id'],
-                    "test_id" => $testModel->id,
-                    "price" => floatval($testModel->price),
-                ]);
-
-                $search = array_search($testModel['testName'], $this->cart);
-                unset($this->cart[$search]);
-                $this->cart[$testModel['id']] = $testModel['testName'];
-                $this->getChildrenTree($testModel, $visit_test['id']);
+        // إذا كان الفحص موجود مسبقًا ولم يكن لديه أطفال أو نتائج
+        if ($check != null) {
+            if ($check->children->count() == 0 && $check->results->count() == 0) {
+                // تعديل المبلغ والخصم بناءً على الفحص المحذوف
+                $price = floatval($check->price);
+                $visit = Visit::find($this->currentVisit['id']);
+                $visit->amount -= $price;
+                $visit->total_amount -= $price;
+                $visit->save();
+                $this->amount = $visit->amount;
+                $this->total_amount = $visit->total_amount;
+                // حذف الفحص من الزيارة
+                $check->delete();
+                $check = null;
             }
-        } else {
-            if ($test->children->count() > 0) {
-                if ($test->parent) {
-                    VisitTest::where("visit_test_id", $this->visit_test_id)->where("test_id", $test->id)->delete();
+        }
+        if ($check == null) {
+            if ($test->getAll) {
+                $testModel = \App\Models\Test::find($test['id']);
+                $this->amount += floatval($testModel->price);
 
+                if ($testModel) {
+
+                    VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $testModel->id)->delete();
                     $visit_test = VisitTest::create([
-                        "visit_test_id" => $this->visit_test_id,
-                        "test_id" => $test->id,
-                        "price" => floatval($test->price),
+                        "visit_id" => $this->currentVisit['id'],
+                        "test_id" => $testModel->id,
+                        "price" => floatval($testModel->price),
                     ]);
 
-                    $this->visit_test_id = $visit_test->id;
-                    $this->amount += floatval($test->price);
+                    $search = array_search($testModel['testName'], $this->cart);
+                    unset($this->cart[$search]);
+                    $this->cart[$testModel['id']] = $testModel['testName'];
+                    $this->getChildrenTree($testModel, $visit_test['id']);
+                }
+            } else {
+                if ($test->children->count() > 0) {
+                    if ($test->parent) {
+                        VisitTest::where("visit_test_id", $this->visit_test_id)->where("test_id", $test->id)->delete();
 
-                } else {
-                    $check = VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $test->id)->first();
-                    if ($check) {
-                        $this->visit_test_id = $check->id;
-                    } else {
                         $visit_test = VisitTest::create([
-                            "visit_id" => $this->currentVisit['id'],
+                            "visit_test_id" => $this->visit_test_id,
                             "test_id" => $test->id,
                             "price" => floatval($test->price),
                         ]);
+
                         $this->visit_test_id = $visit_test->id;
+                        $this->amount += floatval($test->price);
+
+                    } else {
+                        $check = VisitTest::where("visit_id", $this->currentVisit['id'])->where("test_id", $test->id)->first();
+                        if ($check) {
+                            $this->visit_test_id = $check->id;
+                        } else {
+                            $visit_test = VisitTest::create([
+                                "visit_id" => $this->currentVisit['id'],
+                                "test_id" => $test->id,
+                                "price" => floatval($test->price),
+                            ]);
+                            $this->visit_test_id = $visit_test->id;
+                        }
+
+                        $this->amount += floatval($test->price);
+
                     }
+                    $this->chooseTest($test->id);
+                } else {
+
+                    if ($this->visit_test_id == 0) {
+                        VisitTest::where("visit_id", $this->currentVisit["id"])->where("test_id", $test->id)->delete();
+                        $visit_test = VisitTest::create([
+                            "visit_id" => $this->currentVisit["id"],
+                            "test_id" => $test->id,
+                            "price" => floatval($test->price),
+                        ]);
+                        $result = Result::create([
+                            "visit_test_id" => $visit_test->id,
+                            "test_id" => $test->id,
+                            "price" => floatval($test->price),
+                        ]);
+                    } else {
+                        dd(5);
+
+                        $result = Result::create([
+                            "visit_test_id" => $this->visit_test_id,
+                            "test_id" => $test->id,
+                            "price" => floatval($test->price),
+                        ]);
+
+                    }
+
+
+                    $search = array_search($test['testName'], $this->cart);
+                    unset($this->cart[$search]);
+
+                    $this->cart[$result->id] = $test['testName'];
+
 
                     $this->amount += floatval($test->price);
 
                 }
-                $this->chooseTest($test->id);
-            } else {
-
-                if ($this->visit_test_id == 0) {
-                    VisitTest::where("visit_id", $this->currentVisit["id"])->where("test_id", $test->id)->delete();
-                    $visit_test = VisitTest::create([
-                        "visit_id" => $this->currentVisit["id"],
-                        "test_id" => $test->id,
-                        "price" => floatval($test->price),
-                    ]);
-                    $result = Result::create([
-                        "visit_test_id" => $visit_test->id,
-                        "test_id" => $test->id,
-                        "price" => floatval($test->price),
-                    ]);
-                } else {
-                    $result = Result::create([
-                        "visit_test_id" => $this->visit_test_id,
-                        "test_id" => $test->id,
-                        "price" => floatval($test->price),
-                    ]);
-
-                }
-
-
-                $search = array_search($test['testName'], $this->cart);
-                unset($this->cart[$search]);
-
-                $this->cart[$result->id] = $test['testName'];
-
-
-                $this->amount += floatval($test->price);
-
             }
+            $this->calcDiscount();
+
+            \App\Models\Visit::where("id", $this->currentVisit["id"])->update([
+                "amount" => $this->amount,
+                "discount" => $this->discount,
+                "total_amount" => $this->total_amount
+            ]);
         }
-        $this->calcDiscount();
-
-        \App\Models\Visit::where("id", $this->currentVisit["id"])->update([
-            "amount" => $this->amount,
-            "discount" => $this->discount,
-            "total_amount" => $this->total_amount
-        ]);
-
-    }
-
-    public function changeLocation($index)
-    {
         $this->visit_test_id = 0;
-        if ($index == -1) {
-            $this->currentCategory = [];
-            $this->currentLocation = [];
-            $this->currentTest = [];
-        } else {
-
-            $this->chooseTest($index);
-
-            $newArray = [];
-            foreach ($this->currentLocation as $key => $location) {
-                $newArray[$key] = $location;
-                if ($index == $key) {
-                    break;
-                }
-            }
-
-            $this->currentLocation = $newArray;
-
-        }
-
     }
-
 
     protected function getChildrenTree($test, $id)
     {
@@ -454,8 +456,47 @@ class Patient extends Component
         return [];
     }
 
+    public function chooseTest($id)
+    {
+        if ($id == 0) {
+            $this->getTests();
+        } else {
+            $this->currentTest = \App\Models\Test::where("id", $id)->first()->toArray();
 
-    public function loadDataFromDatabase()
+            $this->currentLocation[$id] = $this->currentTest['testName'];
+            $this->tests = \App\Models\Test::where("test_id", $this->currentTest['id'])->get();
+        }
+    }
+
+    public
+    function changeLocation($index)
+    {
+
+        if ($index == -1) {
+            $this->currentCategory = [];
+            $this->currentLocation = [];
+            $this->currentTest = [];
+        } else {
+
+            $this->chooseTest($index);
+
+            $newArray = [];
+            foreach ($this->currentLocation as $key => $location) {
+                $newArray[$key] = $location;
+                if ($index == $key) {
+                    break;
+                }
+            }
+
+            $this->currentLocation = $newArray;
+
+        }
+
+    }
+
+
+    public
+    function loadDataFromDatabase()
     {
         $visitTests = VisitTest::where('visit_id', $this->currentVisit['id'])->get();
 
@@ -472,7 +513,8 @@ class Patient extends Component
         }
     }
 
-    protected function loadChildrenFromDatabase($visitTest)
+    protected
+    function loadChildrenFromDatabase($visitTest)
     {
         $children = $visitTest->children;
         if ($children->count() > 0) {
@@ -487,7 +529,8 @@ class Patient extends Component
         }
     }
 
-    public function decreseAmount($visitTest)
+    public
+    function decreseAmount($visitTest)
     {
         $amount = 0;
         $children = $visitTest->children;
@@ -502,41 +545,91 @@ class Patient extends Component
         return $amount;
     }
 
-    public function deleteFromCart($id)
+    public
+    function deleteFromCart($id)
     {
+        // البحث عن الاختبار بناءً على test_id والزيارة الحالية
         $visitTest = VisitTest::where("test_id", $id)->where("visit_id", $this->currentVisit['id'])->first();
+
         if ($visitTest) {
+            // تقليل المبلغ بالسعر الخاص بالاختبار الحالي
             $this->amount -= floatval($visitTest->price);
+
+            // إذا كان للاختبار أبناء، نحسب المجموع الخاص بالأبناء ونزيله من المبلغ
             if ($visitTest->children->count() > 0) {
-                $this->amount -= $this->decreseAmount($visitTest);
+                $this->amount -= $this->decreaseAmountForChildren($visitTest);
             } else {
+                // إذا لم يكن له أبناء، نقوم بتقليل المبلغ بناءً على النتائج المرتبطة به
                 $this->amount -= $visitTest->results->sum("price");
             }
+
+            // حذف الاختبار
             $visitTest->delete();
-
         } else {
-            $visitTest = Result::where("id", $id)->first();
-            $this->amount -= floatval($visitTest->price);
+            // إذا كان العنصر هو نتيجة، نبحث عن النتيجة ونقوم بحذفها
+            $result = Result::find($id);
+            if ($result) {
+                $this->amount -= floatval($result->price);
 
-            \App\Models\Visit::where("id", $this->currentVisit["id"])->update([
+                // إذا كانت النتيجة هي الأخيرة المرتبطة بالاختبار، نحذف الاختبار أيضًا
+                if ($result->visitTest->results->where("id", "!=", $id)->count() > 0) {
+                    $result->delete();
+                } else {
+                    $result->visitTest->delete();
+                }
+            }
+        }
+
+        $visit = Visit::find($this->currentVisit["id"]);
+        if ($visit->visitTests->count() > 0) {
+            $visit->update([
                 "amount" => $this->amount,
                 "discount" => $this->discount,
                 "total_amount" => $this->total_amount
             ]);
-            if ($visitTest->visitTest->results->where("id", "!=", $id)->count() > 0) {
-                $visitTest->delete();
-            } else {
-                $this->changeLocation(-1);
-                $visitTest->visitTest->delete();
-            }
+        } else {
+            $visit->update([
+                "amount" => 0,
+                "discount" => 0,
+                "total_amount" => 0
+            ]);
+            $this->total_amount = $visit->total_amount;
+            $this->amount = $visit->amount;
         }
+        // تحديث المبلغ والخصم في جدول الزيارات
 
+
+        // إزالة العنصر من العربة
         unset($this->cart[$id]);
+        $this->changeLocation(-1);
+
+        // إعادة حساب الخصم
         $this->calcDiscount();
     }
 
-    public function render()
+// دالة لحساب مجموع أسعار جميع الأبناء
+    protected
+    function decreaseAmountForChildren($visitTest)
     {
+        $total = 0;
+
+        foreach ($visitTest->children as $child) {
+            $total += floatval($child->price);
+            if ($child->children->count() > 0) {
+                $total += $this->decreaseAmountForChildren($child);
+            } else {
+                $total += $child->results->sum("price");
+            }
+        }
+
+        return $total;
+    }
+
+
+    public
+    function render()
+    {
+        $this->user = auth()->user();
         if ($this->visit_date == "") {
             $this->visit_date = date("Y-m-d");
         }

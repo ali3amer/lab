@@ -80,10 +80,14 @@ class Test extends Component
     public Collection $categories;
     public Collection $tests;
     public Collection $ranges;
+    public $user;
     public $nestedChoices = [];
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->categories = \App\Models\Category::all();
     }
 
@@ -220,6 +224,13 @@ class Test extends Component
     public function deleteTest($data)
     {
         \App\Models\Test::where("id", $data['inputAttributes']['id'])->delete();
+
+        if (empty($this->currentTest)) {
+            $this->getTests();
+        } else {
+            $this->chooseTest($this->currentTest['id']);
+        }
+
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
@@ -391,6 +402,8 @@ class Test extends Component
 
     public function render()
     {
+        $this->user = auth()->user();
+
         return view('livewire.test');
     }
 }

@@ -18,6 +18,7 @@ class Employee extends Component
 
     public $header = 'الموظفين';
     public $id = 0;
+    public $user;
     public $employeeName = "";
     public $amount = 0;
     public $expenseId = 0;
@@ -29,6 +30,9 @@ class Employee extends Component
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->employees = \App\Models\Employee::all();
     }
 
@@ -154,6 +158,10 @@ class Employee extends Component
 
     public function render()
     {
+        if ($this->payDate == "") {
+            $this->payDate = date("Y-m-d");
+        }
+        $this->user = auth()->user();
         return view('livewire.employee');
     }
 }

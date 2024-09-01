@@ -16,6 +16,7 @@ class Expense extends Component
 
     public $header = 'الموظفين';
 
+    public $user;
     public $id = 0;
     public string $description = "";
     public $expenseDate = "";
@@ -24,6 +25,9 @@ class Expense extends Component
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->expenses = \App\Models\Expense::all();
     }
 
@@ -91,6 +95,7 @@ class Expense extends Component
     }
     public function render()
     {
+        $this->user = auth()->user();
         return view('livewire.expense');
     }
 }

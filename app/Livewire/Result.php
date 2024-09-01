@@ -21,6 +21,7 @@ class Result extends Component
     public Collection $visitTests;
     public array $cart = [];
     public $option = "";
+    public $user;
     public array $currentVisit = [];
     public array $currentPatient = [];
     public $patientSearch = "";
@@ -33,6 +34,9 @@ class Result extends Component
 
     public function mount()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
         $this->visits = Visit::latest()->get();
     }
 
@@ -528,6 +532,7 @@ class Result extends Component
     public function render()
     {
 //        $this->collectFromAnotherDatabase();
+        $this->user = auth()->user();
 
         return view('livewire.result');
     }

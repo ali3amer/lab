@@ -23,7 +23,7 @@ class Insurance extends Model
     public function getBalanceAttribute()
     {
         return $this->visits->sum(function ($visit) {
-            return $visit->amount * ((100 - $visit->patienEndurance) / 100);
-        });
+            return $visit->total_amount * ((100 - $visit->patientEndurance) / 100);
+        }) - $this->insuranceDebts->sum("amount");
     }
 }
