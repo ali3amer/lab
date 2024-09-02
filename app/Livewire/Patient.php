@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
+
 
 class Patient extends Component
 {
     use LivewireAlert;
+    use WithPagination;
 
     protected $listeners = [
         'delete',
@@ -36,7 +39,6 @@ class Patient extends Component
     public $insurance_id = null;
     public $age = 0;
     public $phone = 0;
-    public Collection $patients;
     public array $insurances = [];
     public Collection $categories;
     public Collection $tests;
@@ -71,24 +73,13 @@ class Patient extends Component
             redirect("login");
         }
         $this->categories = \App\Models\Category::all();
-        $this->patients = \App\Models\Patient::latest()->get();
         $this->insurances = \App\Models\Insurance::all()->keyBy("id")->toArray();
         $this->firstVisitDate = date('Y-m-d');
-    }
-
-    public function getPatients()
-    {
-        $this->patients = \App\Models\Patient::latest()->get();
     }
 
     public function getVisits($id)
     {
         $this->visits = \App\Models\Visit::where("patient_id", $id)->latest()->get();
-    }
-
-    public function search()
-    {
-        $this->patients = \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->latest()->get();
     }
 
     public function save()
@@ -153,7 +144,6 @@ class Patient extends Component
         \App\Models\Patient::where("id", $data['inputAttributes']['id'])->delete();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
 
-        $this->getPatients();
     }
 
     public function choosePatient($patient)
@@ -188,7 +178,6 @@ class Patient extends Component
     {
         $this->resetVisitData();
         $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'currentPatient');
-        $this->getPatients();
     }
 
     public function saveVisit()
@@ -367,6 +356,7 @@ class Patient extends Component
                 } else {
 
                     if ($this->visit_test_id == 0) {
+
                         VisitTest::where("visit_id", $this->currentVisit["id"])->where("test_id", $test->id)->delete();
                         $visit_test = VisitTest::create([
                             "visit_id" => $this->currentVisit["id"],
@@ -379,7 +369,6 @@ class Patient extends Component
                             "price" => floatval($test->price),
                         ]);
                     } else {
-                        dd(5);
 
                         $result = Result::create([
                             "visit_test_id" => $this->visit_test_id,
@@ -633,6 +622,8 @@ class Patient extends Component
         if ($this->visit_date == "") {
             $this->visit_date = date("Y-m-d");
         }
-        return view('livewire.patient');
+        return view('livewire.patient', [
+            "patients" => \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->latest()->paginate(3)
+        ]);
     }
 }

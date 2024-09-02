@@ -237,7 +237,6 @@
                             </td>
                             <td class="py-2 rounded-r-2xl">
                                 <input autocomplete="off" type="text" wire:model.live="searchName"
-                                       wire:keydown="search()"
                                        class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                        placeholder="إسم المريض">
                             </td>
@@ -282,6 +281,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    {{ $patients->links() }}
                 </div>
 
             </div>
