@@ -7,10 +7,12 @@ use App\Models\ReferenceRange;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
 
 class Test extends Component
 {
     use LivewireAlert;
+    use WithPagination;
 
     protected $listeners = [
         'deleteTest',
@@ -44,6 +46,7 @@ class Test extends Component
 
     public array $types = [
         "number" => "رقمي",
+        "text" => "نص",
         "multable_choice" => "خيارات",
         "text_and_multable_choice" => "نص وخيارات",
     ];
@@ -52,6 +55,7 @@ class Test extends Component
 
     public $min_value = null;
     public $max_value = null;
+    public $text = null;
     public $min_age = null;
     public $max_age = null;
     public array $modals = ["rangeModal" => false];
@@ -247,6 +251,7 @@ class Test extends Component
                 "gender" => $this->gender,
                 "age" => $this->age,
                 "result_type" => $this->result_type,
+                "text" => $this->text,
                 "min_age" => $this->min_age,
                 "max_age" => $this->max_age,
                 "min_value" => $this->min_value,
@@ -279,7 +284,7 @@ class Test extends Component
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
         }
         $this->getRanges($this->test_id);
-        if ($this->result_type == "number") {
+        if ($this->result_type == "number" || $this->result_type == "text") {
             $this->resetRangeData();
         }
     }
@@ -376,7 +381,7 @@ class Test extends Component
 
     public function resetRangeData()
     {
-        $this->reset("gender", "age", "result_type", "min_age", "max_age", "min_value", "max_value", "refId");
+        $this->reset("gender", "age", "result_type", "text", "min_age", "max_age", "min_value", "max_value", "refId");
     }
 
     public function resetTestData()

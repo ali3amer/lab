@@ -2,20 +2,24 @@
 
 namespace App\Livewire;
 
+use App\Models\EmployeeExpense;
 use App\Models\InsuranceDebt;
 use App\Models\Visit;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
+
 class Insurance extends Component
 {
     use LivewireAlert;
+    use WithPagination;
+
     protected $listeners = [
         'deleteInsurance',
         'deleteInsuranceDebt',
     ];
     public $header = "التأمينات";
-    public Collection $insurances;
     public $searchName = "";
     public $id = 0;
     public $balance = 0;
@@ -23,7 +27,6 @@ class Insurance extends Component
     public $insuranceName = "";
     public $companyEndurance = "";
     public $patientEndurance = "";
-    public Collection $debts;
     public $contractDate = "";
     public array $currentInsurance = [];
     public $debtId = 0;
@@ -34,27 +37,16 @@ class Insurance extends Component
 
     public function mount()
     {
-        if(!auth()->check()) {
+        if (!auth()->check()) {
             redirect("login");
         }
 
-        $this->insurances = \App\Models\Insurance::all();
     }
 
-    public function getInsurances()
-    {
-        $this->insurances = \App\Models\Insurance::all();
-    }
 
     public function getInsuranceDebts()
     {
-        $this->debts = \App\Models\InsuranceDebt::where("insurance_id", $this->currentInsurance['id'])->get();
         $this->chooseInsurance($this->currentInsurance);
-    }
-
-    public function search()
-    {
-        $this->insurances = \App\Models\Insurance::where('insuranceName', 'LIKE', '%' . $this->searchName . '%')->get();
     }
 
     public function save()
@@ -78,8 +70,6 @@ class Insurance extends Component
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
 
         }
-
-        $this->getInsurances();
 
         $this->resetData();
     }
@@ -140,11 +130,11 @@ class Insurance extends Component
             'cancelButtonColor' => '#4b5563'
         ]);
     }
+
     public function deleteInsurance($data)
     {
         \App\Models\Insurance::where("id", $data['inputAttributes']['id'])->delete();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
-        $this->getInsurances();
     }
 
     public function deleteDebtMessage($id)
@@ -203,6 +193,14 @@ class Insurance extends Component
         }
         $this->user = auth()->user();
 
-        return view('livewire.insurance');
+        $debts = null;
+        if (!empty($this->currentInsurance) && isset($this->currentInsurance['id'])) {
+            $debts = \App\Models\InsuranceDebt::where("insurance_id", $this->currentInsurance['id'])->paginate(10);
+        }
+
+        return view('livewire.insurance', [
+            "insurances" => \App\Models\Insurance::where('insuranceName', 'LIKE', '%' . $this->searchName . '%')->paginate(10),
+            "debts" => $debts
+        ]);
     }
 }

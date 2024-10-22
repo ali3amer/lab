@@ -623,7 +623,7 @@ class Patient extends Component
             $this->visit_date = date("Y-m-d");
         }
         return view('livewire.patient', [
-            "patients" => \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->latest()->paginate(3)
+            "patients" => \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->latest()->paginate(10)
         ]);
     }
 }

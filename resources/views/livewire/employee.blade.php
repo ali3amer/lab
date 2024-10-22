@@ -41,8 +41,8 @@
             <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
                 <div class="overflow-auto h-80">
-                    <table class="table-fixed w-full">
-                        <thead class="bg-cyan-700 text-white">
+                    <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                        <thead class="bg-cyan-700 text-white sticky top-0">
                         <tr>
                             <th class="py-2 rounded-r-2xl">#</th>
                             <th>إسم الموظف</th>
@@ -78,6 +78,7 @@
                         @endif
                         </tbody>
                     </table>
+                    {{ $employees->links() }}
                 </div>
 
             </div>
@@ -92,9 +93,9 @@
                                    for="description">
                                 إسم الموظف
                             </label>
-                            <input autocomplete="off" disabled required
-                                   wire:model.live="currentEmployee.employeeName"
-                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                            <input autocomplete="off" readonly required
+                                   wire:model.live="currentEmployee.employeeName" wire:click="resetData()"
+                                   class="appearance-none text-center block w-full cursor-pointer text-gray-700 border border-red-400 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                    id="employeeName" type="text" placeholder="إسم الموظف">
                             <span class="text-red-500">@error('employeeName') {{ $message }} @enderror</span>
                         </div>
@@ -168,6 +169,8 @@
                         @endif
                         </tbody>
                     </table>
+                    {{ $expenses->links() }}
+
                 </div>
 
             </div>

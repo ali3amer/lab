@@ -220,7 +220,7 @@
 
                 <div class="overflow-auto h-80">
                     <table class="table-fixed relative max-h-96 w-full overflow-auto">
-                        <thead class="bg-cyan-700 text-white sticky top-0 ">
+                        <thead class="bg-cyan-700 text-white sticky top-0">
                         <tr>
                             <th class="py-2 rounded-r-2xl">#</th>
                             <th>إسم المريض</th>

@@ -25,10 +25,15 @@ class Test extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function ranges()
+    public function ageGenderGroups()
     {
-        return $this->hasMany(ReferenceRange::class);
+        return $this->hasMany(AgeGenderGroup::class);
     }
+
+//    public function ranges()
+//    {
+//        return $this->hasMany(ReferenceRange::class);
+//    }
 
 //    public static function tree($id)
 //    {

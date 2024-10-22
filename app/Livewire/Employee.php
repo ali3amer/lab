@@ -6,10 +6,12 @@ use App\Models\EmployeeExpense;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
 
 class Employee extends Component
 {
     use LivewireAlert;
+    use WithPagination;
 
     protected $listeners = [
         'deleteEmployee',
@@ -25,25 +27,12 @@ class Employee extends Component
     public $payDate = "";
 
     public array $currentEmployee = [];
-    public Collection $employees;
-    public Collection $expenses;
 
     public function mount()
     {
-        if(!auth()->check()) {
+        if (!auth()->check()) {
             redirect("login");
         }
-        $this->employees = \App\Models\Employee::all();
-    }
-
-    public function getEmployees()
-    {
-        $this->employees = \App\Models\Employee::all();
-    }
-
-    public function getExpenses()
-    {
-        $this->expenses = EmployeeExpense::where("employee_id", $this->currentEmployee['id'])->get();
     }
 
     public function save()
@@ -60,7 +49,6 @@ class Employee extends Component
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
         }
 
-        $this->getEmployees();
         $this->resetData();
     }
 
@@ -88,22 +76,22 @@ class Employee extends Component
     public function deleteEmployee($data)
     {
         \App\Models\Employee::where("id", $data['inputAttributes']['id'])->delete();
-        $this->getEmployees();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
-    public function resetData() {
-        $this->reset("id", "employeeName");
+    public function resetData()
+    {
+        $this->reset("id", "employeeName", "currentEmployee");
     }
 
-    public function resetExpenseData() {
-        $this->reset("expenseId", "amount" ,"payDate");
+    public function resetExpenseData()
+    {
+        $this->reset("expenseId", "amount", "payDate");
     }
 
     public function chooseEmployee($employee)
     {
         $this->currentEmployee = $employee;
-        $this->getExpenses();
     }
 
     public function saveEmployeeExpenses()
@@ -125,7 +113,6 @@ class Employee extends Component
             $this->alert('success', 'تم التعديل بنجاح', ['timerProgressBar' => true]);
 
         }
-        $this->getExpenses();
         $this->resetExpenseData();
     }
 
@@ -135,6 +122,7 @@ class Employee extends Component
         $this->payDate = $expense['payDate'];
         $this->amount = $expense['amount'];
     }
+
     public function deleteEmployeeExpenseMessage($id)
     {
         $this->confirm("  هل توافق على الحذف ؟  ", [
@@ -150,9 +138,9 @@ class Employee extends Component
         ]);
     }
 
-    public function deleteEmployeeExpense($data) {
+    public function deleteEmployeeExpense($data)
+    {
         \App\Models\EmployeeExpense::where("id", $data['inputAttributes']['id'])->delete();
-        $this->getExpenses();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
@@ -161,7 +149,20 @@ class Employee extends Component
         if ($this->payDate == "") {
             $this->payDate = date("Y-m-d");
         }
+
         $this->user = auth()->user();
-        return view('livewire.employee');
+
+        $employees = \App\Models\Employee::paginate(10);
+
+        $expenses = null;
+        if (!empty($this->currentEmployee) && isset($this->currentEmployee['id'])) {
+            $expenses = EmployeeExpense::where("employee_id", $this->currentEmployee['id'])->paginate(10);
+        }
+
+        return view('livewire.employee', [
+            "employees" => $employees,
+            "expenses" => $expenses,
+        ]);
     }
+
 }

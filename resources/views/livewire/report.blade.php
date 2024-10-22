@@ -139,7 +139,7 @@
                                         <tr>
                                             <td class="py-2">{{ $income->visit_date }}</td>
                                             <td>{{ $income->patient->patientName }}</td>
-                                            <td>{{ number_format($income->amount, 2) }}</td>
+                                            <td>{{ number_format($income->total_amount, 2) }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>

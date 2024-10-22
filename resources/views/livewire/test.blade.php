@@ -283,6 +283,19 @@
                                            id="min_value" type="text" placeholder="أقل من">
                                     <span class="text-red-500">@error('min_value') {{ $message }} @enderror</span>
                                 </div>
+                            @elseif($result_type == "text")
+                                <div class="w-full px-3 ">
+                                    <label
+                                        class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                        for="text">
+                                        النص
+                                    </label>
+                                    <input autocomplete="off"
+                                           wire:model="text"
+                                           class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                                           id="text" type="text" placeholder="النص">
+                                    <span class="text-red-500">@error('text') {{ $message }} @enderror</span>
+                                </div>
                             @elseif($result_type == "multable_choice" || $result_type == "text_and_multable_choice")
                                 <div class="w-full px-2  flex items-center ">
                                     <button type="submit" @disabled($choicesMode)
@@ -291,11 +304,7 @@
                                 </div>
                             @endif
 
-                            <div class="w-full px-2 ">
-
-                            </div>
-
-                            @if($result_type == "number")
+                            @if($result_type == "number" || $result_type == "text")
                                 <div class="w-full px-2  flex items-center ">
                                     <button type="submit"
                                             class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{ $refId == 0 ? "حفظ" : "تعديل" }}
@@ -338,6 +347,7 @@
                                                 @if($range->result_type == "number")
                                                     {{ $range->min_value . " - " . $range->max_value }}
                                                 @elseif($range->result_type == "text")
+                                                    {{ $range->text }}
                                                 @elseif($range->result_type == "multable_choice" || $range->result_type == "text_and_multable_choice")
                                                     @if(is_array($range->result_multable_choice) || is_object($range->result_multable_choice))
                                                         @foreach($range->result_multable_choice as $ch)

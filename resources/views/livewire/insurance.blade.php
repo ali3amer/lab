@@ -81,12 +81,11 @@
                     <tbody class="text-center">
                     <tr>
                         <td class="py-2 rounded-r-2xl">
-                        </td>
-                        <td class="py-2 rounded-r-2xl">
-                            <input autocomplete="off" type="text" wire:model.live="searchName" wire:keydown="search()"
+                            <input autocomplete="off" type="text" wire:model.live="searchName"
                                    class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                    placeholder="إسم شركة التأمين">
                         </td>
+                        <td class="py-2 rounded-r-2xl"></td>
                         <td class="py-2 rounded-r-2xl">
                         </td>
                         <td class="py-2 rounded-r-2xl">
@@ -121,6 +120,7 @@
                     @endforeach
                     </tbody>
                 </table>
+                {{ $insurances->links() }}
             </div>
         </div>
     @else
@@ -129,7 +129,7 @@
                 <form class="w-full" wire:submit="saveDebt()">
                     <div class="flex flex-wrap -mx-3">
 
-                        <div class="w-full md:w-1/6 px-3">
+                        <div class="w-full md:w-1/4 px-3">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                    for="amount">
                                 المبلغ
@@ -158,7 +158,7 @@
                                    id="note" type="text" placeholder="ملاحظات">
                         </div>
 
-                        <div class="w-full md:w-1/6 px-3">
+                        <div class="w-full md:w-1/4 px-3">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                    for="note">
                                 الرصيد
@@ -168,15 +168,6 @@
                                    id="note" type="text" placeholder="الرصيد">
                         </div>
 
-                        <div class="w-full md:w-1/6 px-3">
-                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                   for="note">
-                                المتبقي
-                            </label>
-                            <input disabled autocomplete="off" wire:model="remainder"
-                                   class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                   id="note" type="text" placeholder="المتبقي">
-                        </div>
                         <div class="md:w-1/12 px-2  flex items-center ">
                             <button type="submit" @disabled(floatval($amount) == 0)
                             class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-3 rounded text-white">{{$debtId == 0 ? 'حفظ': 'تعديل'}}</button>
@@ -224,6 +215,7 @@
                         @endif
                         </tbody>
                     </table>
+                    {{ $debts->links() }}
                 </div>
             </div>
         @endif

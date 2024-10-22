@@ -6,9 +6,13 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
+
 class Category extends Component
 {
     use LivewireAlert;
+    use WithPagination;
+
     public $header = "الاقسام";
     public $id = 0;
     protected $listeners = [
@@ -19,9 +23,7 @@ class Category extends Component
 
     public $categoryName = "";
     public $searchCategoryName = "";
-    public $searchCategoryShortcut = "";
     public $shortcut = "";
-    public Collection $categories;
     public $user;
     public array $currentCategory = [];
 
@@ -30,19 +32,8 @@ class Category extends Component
         if(!auth()->check()) {
             redirect("login");
         }
-
-        $this->categories = \App\Models\Category::all();
     }
 
-    public function getCategories()
-    {
-        $this->categories = \App\Models\Category::all();
-    }
-
-    public function searchCategory()
-    {
-        $this->categories = \App\Models\Category::where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->get();
-    }
 
     public function saveCategory()
     {
@@ -62,7 +53,6 @@ class Category extends Component
 
         }
 
-        $this->getCategories();
 
         $this->resetCategoryData();
     }
@@ -94,7 +84,6 @@ class Category extends Component
         \App\Models\Category::where("id", $data['inputAttributes']['id'])->delete();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
 
-        $this->getCategories();
         $this->resetCategoryData();
     }
 
@@ -107,6 +96,8 @@ class Category extends Component
     {
         $this->user = auth()->user();
 
-        return view('livewire.category');
+        return view('livewire.category', [
+            "categories" => \App\Models\Category::where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->where('categoryName', 'LIKE', '%' . $this->searchCategoryName . '%')->paginate(10)
+        ]);
     }
 }

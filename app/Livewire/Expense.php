@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
 
 class Expense extends Component
 {
@@ -21,19 +22,14 @@ class Expense extends Component
     public string $description = "";
     public $expenseDate = "";
     public $amount = "";
-    public Collection $expenses;
+    use WithPagination;
+
 
     public function mount()
     {
         if(!auth()->check()) {
             redirect("login");
         }
-        $this->expenses = \App\Models\Expense::all();
-    }
-
-    public function getExpenses()
-    {
-        $this->expenses = \App\Models\Expense::all();
     }
 
     public function save()
@@ -56,7 +52,6 @@ class Expense extends Component
 
         }
         $this->resetData();
-        $this->getExpenses();
     }
 
     public function edit($expense)
@@ -85,7 +80,6 @@ class Expense extends Component
     public function deleteExpense($data)
     {
         \App\Models\Expense::where('id', $data['inputAttributes']['id'])->delete();
-        $this->getExpenses();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
@@ -95,7 +89,12 @@ class Expense extends Component
     }
     public function render()
     {
+        if ($this->expenseDate == "") {
+            $this->expenseDate = date("Y-m-d");
+        }
         $this->user = auth()->user();
-        return view('livewire.expense');
+        return view('livewire.expense', [
+            "expenses" => \App\Models\Expense::paginate(10)
+        ]);
     }
 }

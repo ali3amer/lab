@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->enum("gender", ['all', 'male', 'female']);
             $table->enum("age", ["all", "year", "month", "day", "hour"]);
-            $table->enum("result_type", ["number", "multable_choice", "text_and_multable_choice"]);
             $table->integer("min_age")->nullable();
             $table->integer("max_age")->nullable();
+            $table->string("text")->nullable();
             $table->decimal("min_value", 10, 2)->nullable();
             $table->decimal("max_value", 10, 2)->nullable();
             $table->timestamps();

@@ -61,8 +61,8 @@
         <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
             <div class="overflow-auto h-80">
-                <table class="table-fixed w-full">
-                    <thead class="bg-cyan-700 text-white">
+                <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                    <thead class="bg-cyan-700 text-white sticky top-0">
                     <tr>
                         <th class="py-2 rounded-r-2xl">#</th>
                         <th>التاريخ</th>
@@ -97,6 +97,7 @@
                     @endif
                     </tbody>
                 </table>
+                {{ $expenses->links() }}
             </div>
 
         </div>

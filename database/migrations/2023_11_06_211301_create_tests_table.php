@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string("shortcut")->nullable();
             $table->decimal("price", 10, 2)->nullable();
             $table->string("unit")->nullable();
+            $table->enum("result_type", ["number", "text", "multable_choice", "text_and_multable_choice"]);
             $table->unsignedBigInteger('category_id')->nullable();
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('test_id')->nullable();

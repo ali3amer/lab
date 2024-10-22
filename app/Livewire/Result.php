@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\WithPagination;
 
 class Result extends Component
 {
     use LivewireAlert;
+    use WithPagination;
 
     public $header = "النتائج";
-    public Collection $visits;
     public array $results = [];
     public Collection $visitTests;
     public array $cart = [];
@@ -37,12 +38,6 @@ class Result extends Component
         if(!auth()->check()) {
             redirect("login");
         }
-        $this->visits = Visit::latest()->get();
-    }
-
-    public function search()
-    {
-        $this->visits = Visit::join("patients", "patients.id", "=", "visits.patient_id")->where("patients.patientName", "LIKE", "%" . $this->patientSearch . "%")->select("visits.*", "patients.patientName")->latest()->get();
     }
 
     public function changeOption($visit)
@@ -112,7 +107,7 @@ class Result extends Component
     {
         if ($test->test->ranges->count() == 1) {
             $range = $test->test->ranges->first();
-            if ($range->result_type != "number") {
+            if ($range->result_type == "multable_choice") {
                 if ($test->result_choice == null) {
                     $test->choices = $range->choices->keyBy("id")->toArray();
                 } else {
@@ -139,7 +134,7 @@ class Result extends Component
 
             $full = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
 
-            if ($result_type != "number") {
+            if ($result_type == "multable_choice") {
                 if ($full) {
                     if ($test->result_choice == null) {
                         $test->choices = $full->choices->keyBy("id")->toArray();
@@ -534,6 +529,9 @@ class Result extends Component
 //        $this->collectFromAnotherDatabase();
         $this->user = auth()->user();
 
-        return view('livewire.result');
+
+        return view('livewire.result',[
+            "visits" => Visit::join("patients", "patients.id", "=", "visits.patient_id")->where("patients.patientName", "LIKE", "%" . $this->patientSearch . "%")->select("visits.*", "patients.patientName")->latest()->paginate(10)
+        ]);
     }
 }

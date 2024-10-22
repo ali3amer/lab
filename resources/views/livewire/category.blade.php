@@ -46,7 +46,6 @@
                         </td>
                         <td class="py-2 rounded-r-2xl">
                             <input autocomplete="off" type="text" wire:model.live="searchCategoryName"
-                                   wire:keydown="searchCategory()"
                                    class=" rounded-md w-full text-center border-0 py-1.5 pr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                    placeholder="إسم القسم">
                         </td>
@@ -75,6 +74,7 @@
                     @endif
                     </tbody>
                 </table>
+                {{ $categories->links() }}
             </div>
 
         </div>

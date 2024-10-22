@@ -11,7 +11,7 @@
     @if($user->hasPermission("results-create"))
         @if(empty($currentVisit))
             <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                <input type="text" placeholder="بحث ..." wire:model.live="patientSearch" wire:keydown="search()"
+                <input type="text" placeholder="بحث ..." wire:model.live="patientSearch"
                        class="p-2 my-2 border-2 text-center font-extrabold">
                 <div class="overflow-auto block max-h-96">
                     <table class="table-fixed relative max-h-96 w-full overflow-auto">
@@ -32,6 +32,7 @@
                         @endforeach
                         </tbody>
                     </table>
+                    {{ $visits->links() }}
                 </div>
             </div>
         @else
