@@ -2,8 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\AgeGenderGroup;
+use App\Models\ChoiceRange;
+use App\Models\NumericRange;
 use App\Models\RangeChoice;
 use App\Models\ReferenceRange;
+use App\Models\TextRange;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
@@ -89,7 +93,7 @@ class Test extends Component
 
     public function mount()
     {
-        if(!auth()->check()) {
+        if (!auth()->check()) {
             redirect("login");
         }
         $this->categories = \App\Models\Category::all();
@@ -165,6 +169,7 @@ class Test extends Component
             \App\Models\Test::create([
                 "testName" => $this->testName,
                 "shortcut" => $this->shortcut,
+                "result_type" => $this->result_type,
                 "category_id" => empty($this->currentTest) ? $this->currentCategory['id'] : null,
                 "test_id" => empty($this->currentTest) ? null : $this->currentTest['id'],
                 "price" => $this->price,
@@ -177,6 +182,7 @@ class Test extends Component
         } else {
             \App\Models\Test::where("id", $this->id)->update([
                 "testName" => $this->testName,
+                "result_type" => $this->result_type,
                 "shortcut" => $this->shortcut,
                 "price" => $this->price,
                 "getAll" => $this->getAll,
@@ -207,6 +213,7 @@ class Test extends Component
         $this->shortcut = $test['shortcut'];
         $this->unit = $test['unit'];
         $this->price = $test['price'];
+        $this->result_type = $test['result_type'];
         $this->getAll = $test['getAll'];
     }
 
@@ -246,14 +253,37 @@ class Test extends Component
     public function saveRange()
     {
         if ($this->range_id == 0) {
-            $range = ReferenceRange::create([
+            $ageGenderGroup = AgeGenderGroup::create([
                 "test_id" => $this->test_id,
                 "gender" => $this->gender,
                 "age" => $this->age,
-                "result_type" => $this->result_type,
-                "text" => $this->text,
                 "min_age" => $this->min_age,
-                "max_age" => $this->max_age,
+                "max_age" => $this->max_age
+            ]);
+
+            if ($this->result_type == "number") {
+                NumericRange::create([
+                    'age_gender_group' => $ageGenderGroup['id'],
+                    'min_value' => $this->min_value,
+                    'max_value' => $this->max_value,
+                ]);
+            } elseif ($this->result_type == "text") {
+                TextRange::create([
+                    'age_gender_group' => $ageGenderGroup['id'],
+                    'text' => $this->text
+                ]);
+            } elseif ($this->result_type == "multable_choice") {
+                ChoiceRange::create([
+                    'age_gender_group' => $ageGenderGroup['id'],
+                    'choiceName' => $this->choiceName,
+                    'default' => $this->default,
+                    'choice_range_id' => $this->choice_range_id,
+                ]);
+            } elseif ($this->result_type == "text_and_multable_choice") {
+
+            }
+            $range = ReferenceRange::create([
+                "text" => $this->text,
                 "min_value" => $this->min_value,
                 "max_value" => $this->max_value,
             ]);
@@ -270,7 +300,6 @@ class Test extends Component
             ReferenceRange::where("id", $this->range_id)->update([
                 "gender" => $this->gender,
                 "age" => $this->age,
-                "result_type" => $this->result_type,
                 "min_age" => $this->min_age,
                 "max_age" => $this->max_age,
                 "min_value" => $this->min_value,
@@ -386,7 +415,7 @@ class Test extends Component
 
     public function resetTestData()
     {
-        $this->reset("id", "testName", "shortcut", "price", "unit", "rangeMode", "test_id", "getAll");
+        $this->reset("id", "testName", "shortcut", "price", "unit", "rangeMode", "result_type", "test_id", "getAll");
         $this->resetChoicesData();
     }
 

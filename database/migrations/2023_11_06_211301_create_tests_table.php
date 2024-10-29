@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->string("testName");
             $table->string("shortcut")->nullable();
-            $table->decimal("price", 10, 2)->nullable();
+            $table->decimal("price", 10, 2)->default(0);
             $table->string("unit")->nullable();
             $table->enum("result_type", ["number", "text", "multable_choice", "text_and_multable_choice"]);
             $table->unsignedBigInteger('category_id')->nullable();
