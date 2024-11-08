@@ -10,7 +10,7 @@ class ReferenceRange extends Model
     use HasFactory;
     protected $guarded = [];
     protected $casts = [
-        'result_multable_choice' => 'array',
+        'result_multiple_choice' => 'array',
     ];
 
     public function test()

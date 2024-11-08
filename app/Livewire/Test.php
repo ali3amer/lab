@@ -51,8 +51,8 @@ class Test extends Component
     public array $types = [
         "number" => "رقمي",
         "text" => "نص",
-        "multable_choice" => "خيارات",
-        "text_and_multable_choice" => "نص وخيارات",
+        "multiple_choice" => "خيارات",
+        "text_and_multiple_choice" => "نص وخيارات",
     ];
 
     public $result_type = "number";
@@ -123,6 +123,7 @@ class Test extends Component
 
     public function chooseTest($id)
     {
+        $this->resetTestData();
         if ($id == 0) {
             $this->getTests();
         } else {
@@ -172,7 +173,7 @@ class Test extends Component
                 "result_type" => $this->result_type,
                 "category_id" => empty($this->currentTest) ? $this->currentCategory['id'] : null,
                 "test_id" => empty($this->currentTest) ? null : $this->currentTest['id'],
-                "price" => $this->price,
+                "price" => floatval($this->price),
                 "getAll" => $this->getAll,
                 "unit" => $this->unit,
             ]);
@@ -247,7 +248,7 @@ class Test extends Component
 
     public function getRanges($id)
     {
-        $this->ranges = ReferenceRange::where("test_id", $id)->get();
+        $this->ranges = \App\Models\Test::find($id)->ageGenderGroups;
     }
 
     public function saveRange()
@@ -263,7 +264,7 @@ class Test extends Component
 
             if ($this->result_type == "number") {
                 NumericRange::create([
-                    'age_gender_group' => $ageGenderGroup['id'],
+                    'age_gender_group_id' => $ageGenderGroup['id'],
                     'min_value' => $this->min_value,
                     'max_value' => $this->max_value,
                 ]);
@@ -272,25 +273,25 @@ class Test extends Component
                     'age_gender_group' => $ageGenderGroup['id'],
                     'text' => $this->text
                 ]);
-            } elseif ($this->result_type == "multable_choice") {
+            } elseif ($this->result_type == "multiple_choice") {
                 ChoiceRange::create([
                     'age_gender_group' => $ageGenderGroup['id'],
                     'choiceName' => $this->choiceName,
                     'default' => $this->default,
                     'choice_range_id' => $this->choice_range_id,
                 ]);
-            } elseif ($this->result_type == "text_and_multable_choice") {
+            } elseif ($this->result_type == "text_and_multiple_choice") {
 
             }
-            $range = ReferenceRange::create([
-                "text" => $this->text,
-                "min_value" => $this->min_value,
-                "max_value" => $this->max_value,
-            ]);
+//            $range = ReferenceRange::create([
+//                "text" => $this->text,
+//                "min_value" => $this->min_value,
+//                "max_value" => $this->max_value,
+//            ]);
 
-            if ($this->result_type == "multable_choice" || $this->result_type == "text_and_multable_choice") {
+            if ($this->result_type == "multiple_choice" || $this->result_type == "text_and_multiple_choice") {
 
-                $this->range_id = $range->id;
+//                $this->range_id = $range->id;
                 $this->getChoices(true);
             }
 
@@ -306,7 +307,7 @@ class Test extends Component
                 "max_value" => $this->max_value,
             ]);
 
-            if ($this->result_type == "multable_choice" || $this->result_type == "text_and_multable_choice") {
+            if ($this->result_type == "multiple_choice" || $this->result_type == "text_and_multiple_choice") {
                 $this->choicesMode = true;
             }
 
@@ -320,13 +321,17 @@ class Test extends Component
 
     public function editRange($range)
     {
+        dd($range);
+        if ($this->currentTest['result_type'] == "number") {
+
+        }
         $this->currentChoice = [];
         $this->choicesMode = true;
         $this->test_id = $range['test_id'];
         $this->range_id = $range['id'];
         $this->gender = $range['gender'];
         $this->age = $range['age'];
-        $this->result_type = $range['result_type'];
+        $this->result_type = $this->currentTest['result_type'];
         $this->min_age = $range['min_age'];
         $this->max_age = $range['max_age'];
         $this->min_value = $range['min_value'];
@@ -351,8 +356,13 @@ class Test extends Component
 
     public function deleteRange($data)
     {
-        RangeChoice::where("range_id", $data['inputAttributes']['id'])->delete();
-        \App\Models\ReferenceRange::where("id", $data['inputAttributes']['id'])->delete();
+        if ($this->currentTest['result_type'] == "number") {
+            NumericRange::where("id", $data['inputAttributes']['id'])->delete();
+        } elseif ($this->currentTest['result_type'] == "text") {
+            TextRange::where("id", $data['inputAttributes']['id'])->delete();
+        } elseif ($this->currentTest['result_type'] == "multiple_choice") {
+            ChoiceRange::where("id", $data['inputAttributes']['id'])->delete();
+        }
         $this->getRanges($this->test_id);
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }

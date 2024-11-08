@@ -243,17 +243,17 @@
                                    id="range_to" type="text" placeholder="أقل من">
                             <span class="text-red-500">@error('range_to') {{ $message }} @enderror</span>
                         </div>
-                    @elseif($result_types == "multable_choice" || $result_types == "text_and_multable_choice")
+                    @elseif($result_types == "multiple_choice" || $result_types == "text_and_multiple_choice")
                         <div class="w-1/2 px-3 ">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                   for="multable_choice">
+                                   for="multiple_choice">
                                 الخيارات
                             </label>
                             <input autocomplete="off"
                                    wire:model.live="choice" wire:keydown.enter="addChoice()"
                                    class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                    id="text" type="text" placeholder="إضغط Enter">
-                            <span class="text-red-500">@error('multable_choice') {{ $message }} @enderror</span>
+                            <span class="text-red-500">@error('multiple_choice') {{ $message }} @enderror</span>
                         </div>
                     @endif
 
@@ -298,9 +298,9 @@
                                         @if($range->result_types == "number")
                                             {{ $range->range_from . " - " . $range->range_to }}
                                         @elseif($range->result_types == "text")
-                                        @elseif($range->result_types == "multable_choice" || $range->result_types == "text_and_multable_choice")
-                                            @if(is_array($range->result_multable_choice) || is_object($range->result_multable_choice))
-                                                @foreach($range->result_multable_choice as $ch)
+                                        @elseif($range->result_types == "multiple_choice" || $range->result_types == "text_and_multiple_choice")
+                                            @if(is_array($range->result_multiple_choice) || is_object($range->result_multiple_choice))
+                                                @foreach($range->result_multiple_choice as $ch)
                                                     <span>{{$ch . ", "}}</span>
                                                 @endforeach
                                             @endif

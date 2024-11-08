@@ -107,7 +107,7 @@ class Result extends Component
     {
         if ($test->test->ranges->count() == 1) {
             $range = $test->test->ranges->first();
-            if ($range->result_type == "multable_choice") {
+            if ($range->result_type == "multiple_choice") {
                 if ($test->result_choice == null) {
                     $test->choices = $range->choices->keyBy("id")->toArray();
                 } else {
@@ -120,7 +120,7 @@ class Result extends Component
                     }
                 }
 
-                $test->result_type = "multable_choice";
+                $test->result_type = "multiple_choice";
             } else {
                 $test->min_value = $range->min_value;
                 $test->max_value = $range->max_value;
@@ -134,7 +134,7 @@ class Result extends Component
 
             $full = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
 
-            if ($result_type == "multable_choice") {
+            if ($result_type == "multiple_choice") {
                 if ($full) {
                     if ($test->result_choice == null) {
                         $test->choices = $full->choices->keyBy("id")->toArray();
@@ -148,7 +148,7 @@ class Result extends Component
                         }
                     }
 
-                    $test->result_type = "multable_choice";
+                    $test->result_type = "multiple_choice";
 
                 } elseif($ranges->where("gender", "all")->where("age", "all")->first()) {
                     $all = $ranges->where("gender", "all")->where("age", "all")->first();
@@ -163,7 +163,7 @@ class Result extends Component
                             $test->choices = $all->choices->keyBy("id")->toArray();
                         }
                     }
-                    $test->result_type = "multable_choice";
+                    $test->result_type = "multiple_choice";
 
                 } elseif ($ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first()) {
                     $age = $ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
@@ -178,7 +178,7 @@ class Result extends Component
                             $test->choices = $age->choices->keyBy("id")->toArray();
                         }
                     }
-                    $test->result_type = "multable_choice";
+                    $test->result_type = "multiple_choice";
                 } elseif ($ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first()) {
                     $gender = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->first();
                     if ($test->result_choice == null) {
@@ -192,7 +192,7 @@ class Result extends Component
                             $test->choices = $gender->choices->keyBy("id")->toArray();
                         }
                     }
-                    $test->result_type = "multable_choice";
+                    $test->result_type = "multiple_choice";
                 } else {
                     $test->result_type = "text";
                 }
@@ -268,7 +268,7 @@ class Result extends Component
 //                        }
 //                    }
 //
-//                    $test->result_type = "multable_choice";
+//                    $test->result_type = "multiple_choice";
 //                } else {
 //
 //                    if ($range->gender == $this->currentPatient["gender"] && $range->age == $this->currentPatient["duration"] && $range->min_age <= $this->currentPatient["age"] && $range->age >= $this->currentPatient["age"]) {
@@ -313,7 +313,7 @@ class Result extends Component
                     foreach ($testsResult as $test) {
                         $this->getRanges($test);
                         $this->results[$test->id] = $test->toArray();
-                        if ($test->result_type == "multable_choice") {
+                        if ($test->result_type == "multiple_choice") {
                             $this->setResultDefault($test->id);
                         }
 
@@ -329,7 +329,7 @@ class Result extends Component
             foreach ($testsResult as $test) {
                 $this->getRanges($test);
                 $this->results[$test->id] = $test->toArray();
-                if ($test->result_type == "multable_choice") {
+                if ($test->result_type == "multiple_choice") {
                     $this->setResultDefault($test->id);
                 }
 
@@ -436,8 +436,8 @@ class Result extends Component
                             "result_type" => $range->result_types,
                         ]);
 
-                        if ($range->result_types == "multable_choice") {
-                            foreach (json_decode($range->result_multable_choice) as $index => $choice) {
+                        if ($range->result_types == "multiple_choice") {
+                            foreach (json_decode($range->result_multiple_choice) as $index => $choice) {
                                 RangeChoice::create([
                                     "range_id" => $ref->id,
                                     "choiceName" => $choice,
@@ -474,8 +474,8 @@ class Result extends Component
                                 "result_type" => $range->result_types,
                             ]);
 
-                            if ($range->result_types == "multable_choice") {
-                                foreach (json_decode($range->result_multable_choice) as $index => $choice) {
+                            if ($range->result_types == "multiple_choice") {
+                                foreach (json_decode($range->result_multiple_choice) as $index => $choice) {
                                     RangeChoice::create([
                                         "range_id" => $ref->id,
                                         "choiceName" => $choice,

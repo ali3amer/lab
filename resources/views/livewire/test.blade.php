@@ -105,14 +105,14 @@
                                 <option value="">--------------</option>
                                 <option value="number">رقمي</option>
                                 <option value="text">نص</option>
-                                <option value="multable_choice">خيارات</option>
-                                <option value="text_and_multable_choice">نص وخيارات</option>
+                                <option value="multiple_choice">خيارات</option>
+                                <option value="text_and_multiple_choice">نص وخيارات</option>
                             </select>
 
                         </div>
 
                         <div class="w-1/12 px-3 flex items-center">
-                            <input checked id="getAll" wire:model="getAll" type="checkbox"
+                            <input checked id="getAll" wire:model="getAll" @disabled($rangeMode) type="checkbox"
                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                             <label for="getAll"
                                    class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
@@ -299,16 +299,16 @@
                                            id="text" type="text" placeholder="النص">
                                     <span class="text-red-500">@error('text') {{ $message }} @enderror</span>
                                 </div>
-                            @elseif($result_type == "multable_choice" || $result_type == "text_and_multable_choice")
-                                <div class="w-full px-2  flex items-center ">
-                                    <button type="submit" @disabled($choicesMode)
-                                    class=" disabled:bg-cyan-400 disabled:cursor-not-allowed py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{ $range_id == 0 ? "إضافة خيارات" : "تعديل الخيارات" }}
-                                    </button>
-                                </div>
+{{--                            @elseif($result_type == "multiple_choice" || $result_type == "text_and_multiple_choice")--}}
+{{--                                <div class="w-full px-2  flex items-center ">--}}
+{{--                                    <button type="submit" @disabled($choicesMode)--}}
+{{--                                    class=" disabled:bg-cyan-400 disabled:cursor-not-allowed py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{ $range_id == 0 ? "إضافة خيارات" : "تعديل الخيارات" }}--}}
+{{--                                    </button>--}}
+{{--                                </div>--}}
                             @endif
 
                             @if($result_type == "number" || $result_type == "text")
-                                <div class="w-full px-2  flex items-center ">
+                                <div class="w-full px-2 flex items-center">
                                     <button type="submit"
                                             class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{ $refId == 0 ? "حفظ" : "تعديل" }}
                                     </button>
@@ -327,7 +327,6 @@
                                 <thead class="bg-cyan-700 text-white sticky top-0">
                                 <tr>
                                     <th class="py-2 rounded-r-2xl">النوع</th>
-                                    <th>نوع المدى</th>
                                     <th>الفئة العمرية</th>
                                     <th>البيان</th>
                                     <th class="rounded-l-2xl">التحكم</th>
@@ -338,7 +337,6 @@
                                     @foreach($ranges as $range)
                                         <tr class="border-b-2 text-center">
                                             <td class="py-2">{{$genders[$range->gender]}}</td>
-                                            <td class="py-2">{{$types[$range->result_type]}}</td>
                                             <td class="py-2">
                                                 @if($range->min_age == null)
                                                     {{$ages[$range->age]}}
@@ -347,19 +345,27 @@
                                                 @endif
                                             </td>
                                             <td class="py-2">
-                                                @if($range->result_type == "number")
-                                                    {{ $range->min_value . " - " . $range->max_value }}
-                                                @elseif($range->result_type == "text")
+                                                @if($currentTest['result_type'] == "number" && $range->numericRange)
+                                                    {{ $range->numericRange->min_value . " - " . $range->numericRange->max_value }}
+                                                @elseif($currentTest['result_type'] == "text")
                                                     {{ $range->text }}
-                                                @elseif($range->result_type == "multable_choice" || $range->result_type == "text_and_multable_choice")
-                                                    @if(is_array($range->result_multable_choice) || is_object($range->result_multable_choice))
-                                                        @foreach($range->result_multable_choice as $ch)
+                                                @elseif($currentTest['result_type'] == "multiple_choice" || $currentTest['result_type'] == "text_and_multiple_choice")
+                                                    @if(is_array($range->result_multiple_choice) || is_object($range->result_multiple_choice))
+                                                        @foreach($range->result_multiple_choice as $ch)
                                                             <span>{{$ch . ", "}}</span>
                                                         @endforeach
                                                     @endif
                                                 @endif
                                             </td>
                                             <td class="py-2">
+                                                @dd($currentTest['result_type'])
+                                                @if($currentTest['result_type'] == 'multiple_choice')
+                                                    <button class="bg-cyan-400 p-2 rounded text-xs text-white"
+                                                            wire:click="editRange({{$range}})"><i
+                                                            class="fa fa-eye"></i>
+                                                    </button>
+                                                     /
+                                                @endif
                                                 <button class="bg-cyan-400 p-2 rounded text-xs text-white"
                                                         wire:click="editRange({{$range}})"><i
                                                         class="fa fa-pen"></i>
