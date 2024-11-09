@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('choice_ranges', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('age_gender_group_id');
+            $table->unsignedBigInteger('age_gender_group_id')->nullable();
             $table->foreign('age_gender_group_id')->references('id')->on('age_gender_groups')->onDelete('cascade')->onUpdate('cascade');
             $table->string("choiceName");
             $table->boolean("default")->default(false);
