@@ -13,7 +13,7 @@
                            wire:model="text"
                            class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                            id="text" type="text" placeholder="النص">
-                    <span class="text-red-500">@error('النص') {{ $message }} @enderror</span>
+                    <span class="text-red-500">@error('text') {{ $message }} @enderror</span>
                 </div>
 
                 <div class="w-full flex px-3 items-center">

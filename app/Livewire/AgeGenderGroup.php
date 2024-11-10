@@ -78,6 +78,7 @@ class AgeGenderGroup extends Component
 
     public function edit($ageGenderGroup)
     {
+        $this->resetData();
         $this->id = $ageGenderGroup['id'];
         $this->gender = $ageGenderGroup['gender'];
         $this->age = $ageGenderGroup['age'];
@@ -103,6 +104,7 @@ class AgeGenderGroup extends Component
     public function delete($data)
     {
         \App\Models\AgeGenderGroup::where("id", $data['inputAttributes']['id'])->delete();
+        $this->resetData();
 
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }

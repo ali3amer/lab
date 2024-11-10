@@ -3,84 +3,122 @@
 namespace App\Livewire;
 
 use App\Models\RangeChoice;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Rule;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ChoiceRange extends Component
 {
 
-    public function addChoice()
+    use LivewireAlert;
+    use WithPagination;
+
+    protected $listeners = [
+        'delete',
+    ];
+    public $age_gender_group_id;
+    public $choice_range_id = null;
+    public $id = 0;
+    #[Rule('required', message: 'أدخل الخيار')]
+    public $choiceName = "";
+    public $default = false;
+    public array $currentLocation = [];
+    public array $currentChoice = [];
+
+    public function changeLocation($index)
     {
-        if ($this->choiceId == 0) {
-            RangeChoice::create([
-                "range_id" => empty($this->currentChoice) ? $this->range_id : null,
-                "choiceName" => $this->choiceName,
-                "default" => $this->default,
-                "choice_id" => !empty($this->currentChoice) ? $this->currentChoice['id'] : null
-            ]);
+        $this->resetData();
+
+        if ($index == -1) {
+            $this->currentLocation = [];
+            $this->currentChoice = [];
+            $this->choice_range_id = null;
         } else {
-            RangeChoice::where("id", $this->choiceId)->update([
-                "choiceName" => $this->choiceName,
-                "default" => $this->default,
-            ]);
-        }
-        $this->choiceName = "";
-        $this->choiceId = 0;
-        $this->default = false;
-        $this->getChoices(true);
-    }
 
-    public function editChoice($choice)
-    {
-        $this->choiceId = $choice["id"];
-        $this->choiceName = $choice["choiceName"];
-        $this->default = $choice["default"];
-    }
+            $this->chooseRange($index);
 
-    public function deleteChoice($id)
-    {
-        RangeChoice::where("choice_id", $id)->delete();
-        RangeChoice::where("id", $id)->delete();
-        $this->getChoices(true);
-    }
-
-    public function getChoices($mode = false)
-    {
-        $this->choicesMode = $mode;
-        if (empty($this->currentChoice)) {
-            $this->choices = RangeChoice::where("range_id", $this->range_id)->get();
-        } else {
-            $this->choices = RangeChoice::where("choice_id", $this->currentChoice['id'])->get();
-        }
-    }
-
-    public function chooseChoice($choice)
-    {
-        $this->currentChoice = $choice;
-        $this->getChoices(true);
-    }
-
-    public function resetRangeData()
-    {
-        $this->reset("gender", "age", "result_type", "refId");
-    }
-
-    public function resetChoicesData()
-    {
-        if (!empty($this->currentChoice)) {
-            if ($this->currentChoice['choice_id'] != null) {
-                $this->currentChoice = RangeChoice::where("id", $this->currentChoice['choice_id'])->first()->toArray();
-            } else {
-                $this->currentChoice = [];
+            $newArray = [];
+            foreach ($this->currentLocation as $key => $location) {
+                $newArray[$key] = $location;
+                if ($index == $key) {
+                    break;
+                }
             }
-            $this->getChoices(true);
-        } else {
-            $this->reset("range_id", "choicesMode", "choiceName", "choiceId");
-            $this->resetRangeData();
+
+            $this->currentLocation = $newArray;
+
         }
+
+    }
+
+    public function chooseRange($id)
+    {
+            $this->currentChoice = \App\Models\ChoiceRange::where("id", $id)->first()->toArray();
+            $this->choice_range_id = $this->currentChoice['id'];
+            $this->currentLocation[$id] = $this->currentChoice['choiceName'];
+    }
+
+
+
+    public function save()
+    {
+        $this->validate();
+        if ($this->id == 0) {
+            \App\Models\ChoiceRange::create([
+                'age_gender_group_id' => $this->choice_range_id == null ? $this->age_gender_group_id : null,
+                'choice_range_id' => $this->choice_range_id,
+                'choiceName' => $this->choiceName,
+                'default' => $this->default,
+            ]);
+        } else {
+            \App\Models\ChoiceRange::where("id", $this->id)->update([
+                'choiceName' => $this->choiceName,
+                'default' => $this->default,
+            ]);
+        }
+        $this->resetData();
+        $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
+    }
+
+    public function resetData()
+    {
+        $this->reset('choiceName', 'id');
+    }
+
+    public function edit($choiceRange)
+    {
+        $this->resetData();
+        $this->id = $choiceRange['id'];
+        $this->choiceName = $choiceRange['choiceName'];
+    }
+
+    public function deleteMassage($id)
+    {
+        $this->confirm("  هل توافق على الحذف ؟  ", [
+            'inputAttributes' => ["id" => $id],
+            'toast' => false,
+            'showConfirmButton' => true,
+            'confirmButtonText' => 'موافق',
+            'onConfirmed' => "delete",
+            'showCancelButton' => true,
+            'cancelButtonText' => 'إلغاء',
+            'confirmButtonColor' => '#dc2626',
+            'cancelButtonColor' => '#4b5563'
+        ]);
+    }
+
+    public function delete($data)
+    {
+        \App\Models\ChoiceRange::where("id", $data['inputAttributes']['id'])->delete();
+        $this->resetData();
+        $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
     public function render()
     {
-        return view('livewire.choice-range');
+        return view('livewire.choice-range', [
+            'choiceRanges' => $this->choice_range_id == null ? \App\Models\ChoiceRange::where('age_gender_group_id', $this->age_gender_group_id)->get() : \App\Models\ChoiceRange::where('choice_range_id', $this->choice_range_id)->get()
+        ]);
     }
 }

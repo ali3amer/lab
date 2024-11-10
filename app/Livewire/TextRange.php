@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,10 +17,12 @@ class TextRange extends Component
     ];
     public $age_gender_group_id;
     public $id = 0;
+    #[Rule('required', message: 'أدخل نص')]
     public $text = "";
 
     public function save()
     {
+        $this->validate();
         if ($this->id == 0) {
             \App\Models\TextRange::create([
                 'age_gender_group_id' => $this->age_gender_group_id,
@@ -41,6 +44,7 @@ class TextRange extends Component
 
     public function edit($text)
     {
+        $this->resetData();
         $this->id = $text['id'];
         $this->text = $text['text'];
     }
@@ -63,7 +67,7 @@ class TextRange extends Component
     public function delete($data)
     {
         \App\Models\TextRange::where("id", $data['inputAttributes']['id'])->delete();
-
+        $this->resetData();
         $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
