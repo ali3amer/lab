@@ -476,13 +476,13 @@ class Result extends Component
                 'max_age' => $reference_range->max_age,
             ]);
 
-            if ($ageGenderGroup->result_type == "number") {
+            if ($ageGenderGroup->test->result_type == "number") {
                 \App\Models\NumericRange::create([
                     'age_gender_group_id' => $ageGenderGroup->id,
                     'min_value' => $reference_range->min_value,
                     'max_value' => $reference_range->max_value,
                 ]);
-            } elseif ($ageGenderGroup->result_type == "multiple_choice") {
+            } elseif ($ageGenderGroup->test->result_type == "multiple_choice") {
                 $choices = $db2->table('range_choices')->where("range_id", $reference_range->id)->get()->keyBy("id");
 
                 foreach ($choices as $choice) {
@@ -616,7 +616,7 @@ class Result extends Component
     public function addChoices($choice)
     {
         $db2 = \DB::connection('db2');
-        $newChoices = $db2->table('range_choices')->where("choice_id", $choice['id'])->get()->keyBy("id");
+        $newChoices = $db2->table('range_choices')->where("choice_id", $choice->id)->get()->keyBy("id");
         if ($newChoices->count() > 0) {
             foreach ($newChoices as $ch) {
                 \App\Models\ChoiceRange::create([

@@ -22,7 +22,7 @@ class ChoiceRange extends Component
     public $id = 0;
     #[Rule('required', message: 'أدخل الخيار')]
     public $choiceName = "";
-    public $default = false;
+    public bool $default = false;
     public array $currentLocation = [];
     public array $currentChoice = [];
 
@@ -54,11 +54,10 @@ class ChoiceRange extends Component
 
     public function chooseRange($id)
     {
-            $this->currentChoice = \App\Models\ChoiceRange::where("id", $id)->first()->toArray();
-            $this->choice_range_id = $this->currentChoice['id'];
-            $this->currentLocation[$id] = $this->currentChoice['choiceName'];
+        $this->currentChoice = \App\Models\ChoiceRange::where("id", $id)->first()->toArray();
+        $this->choice_range_id = $this->currentChoice['id'];
+        $this->currentLocation[$id] = $this->currentChoice['choiceName'];
     }
-
 
 
     public function save()
@@ -83,13 +82,13 @@ class ChoiceRange extends Component
 
     public function resetData()
     {
-        $this->reset('choiceName', 'id');
+        $this->reset('choiceName', 'id', 'default');
     }
 
     public function edit($choiceRange)
     {
-        $this->resetData();
         $this->id = $choiceRange['id'];
+        $this->default = $choiceRange['default'];
         $this->choiceName = $choiceRange['choiceName'];
     }
 
