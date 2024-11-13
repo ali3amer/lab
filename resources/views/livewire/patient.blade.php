@@ -15,7 +15,7 @@
         @if($user->hasPermission("patients-create") || $user->hasPermission("patients-update"))
             <div
                 class="p-5 text-cyan-800 bg-white font-extrabold max-w-full border-2 border-dashed rounded-2xl my-2 mx-5">
-                <form class="w-full" wire:submit="save()">
+                <form id="patient" class="w-full" wire:submit="save()">
                     <div class="flex flex-wrap -mx-3">
                         <div class="w-full md:w-1/4 px-3 mb-6 md:mb-0">
                             <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -23,7 +23,7 @@
                                 إسم المريض
                             </label>
                             <input autocomplete="off" required
-                                   @disabled(!empty($currentPatient)) wire:model="patientName"
+                                   @disabled($visitMode) wire:model="patientName"
                                    class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                                    id="patientName" type="text" placeholder="إسم المريض">
                             <span class="text-red-500">@error('patientName') {{ $message }} @enderror</span>
@@ -35,7 +35,7 @@
                                 النوع
                             </label>
                             <select wire:model="gender"
-                                    @disabled(!empty($currentPatient)) class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                    @disabled($visitMode) class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     id="gender">
                                 <option value="male">ذكر</option>
                                 <option value="female">أنثى</option>
@@ -48,7 +48,7 @@
                                 العمر
                             </label>
                             <input autocomplete="off" wire:model="age"
-                                   @disabled(!empty($currentPatient)) class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   @disabled($visitMode) class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                    id="age" type="text" placeholder="العمر">
                         </div>
 
@@ -58,7 +58,7 @@
                                 الفتره
                             </label>
                             <select wire:model="duration"
-                                    @disabled(!empty($currentPatient)) class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                    @disabled($visitMode) class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     id="gender">
                                 @foreach($durations as $key => $time)
                                     <option value="{{$key}}">{{$time}}</option>
@@ -73,12 +73,12 @@
                                 الهاتف
                             </label>
                             <input autocomplete="off" wire:model="phone"
-                                   @disabled(!empty($currentPatient)) class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   @disabled($visitMode) class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                    id="phone" type="text" placeholder="الهاتف">
                         </div>
 
                         <div class="w-full md:w-1/12 px-2  flex items-center ">
-                            @if(empty($currentPatient))
+                            @if(!$visitMode)
                                 <button type="submit"
                                         class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{$id == 0 ? 'حفظ': 'تعديل'}}</button>
                             @else
@@ -93,7 +93,7 @@
                 </form>
             </div>
         @endif
-        @if(empty($currentPatient) && $user->hasPermission("patients-read"))
+        @if(!$visitMode && $user->hasPermission("patients-read"))
             <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
                 <div class="overflow-auto h-80">
@@ -145,7 +145,7 @@
                                     @endif
                                     @if($user->hasPermission("patients-delete"))
                                         <button class="bg-red-400 p-2 rounded text-xs text-white"
-                                                wire:click="deletePatientMessage({{$patient->id}})"><i
+                                                wire:click="deleteMessage({{$patient->id}})"><i
                                                 class="fa fa-trash"></i></button>
                                     @endif
                                     @if($user->hasPermission("visits-read"))

@@ -23,8 +23,9 @@ class Patient extends Component
         'deleteVisit',
     ];
     public $header = "المرضى";
+    public bool $visitMode = false;
     public $id = 0;
-    public $user = 0;
+    public $user;
     public $searchName = "";
 
     #[Rule('required', message: 'أدخل إسم المريض')]
@@ -42,6 +43,7 @@ class Patient extends Component
     ];
     public array $currentPatient = [];
     public $patient_id = null;
+    public $firstVisitDate = "";
 
 
     public function mount()
@@ -51,10 +53,6 @@ class Patient extends Component
         }
     }
 
-    public function getVisits($id)
-    {
-        $this->visits = \App\Models\Visit::where("patient_id", $id)->latest()->get();
-    }
 
     public function save()
     {
@@ -98,7 +96,7 @@ class Patient extends Component
         $this->phone = $patient['phone'];
     }
 
-    public function deletePatientMessage($id)
+    public function deleteMessage($id)
     {
         $this->confirm("  هل توافق على الحذف ؟  ", [
             'inputAttributes' => ["id" => $id],
@@ -122,21 +120,25 @@ class Patient extends Component
 
     public function choosePatient($patient)
     {
-        $this->currentPatient = $patient;
+        $this->visitMode = true;
         $this->edit($patient);
-        $this->patient_id = $this->currentPatient['id'];
-        $this->visits = Visit::where("patient_id", $this->currentPatient['id'])->get();
+        $this->patient_id = $patient['id'];
     }
 
     public function resetPatientData()
     {
-        $this->resetVisitData();
-        $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'currentPatient');
+        $this->reset('id', 'patientName', 'gender', 'age', 'phone', 'visitMode', 'currentPatient');
     }
 
 
     public function render()
     {
+        if(!auth()->check()) {
+            redirect("login");
+        }
+        if ($this->firstVisitDate == "") {
+            $this->firstVisitDate = date("Y-m-d");
+        }
         $this->user = auth()->user();
         return view('livewire.patient', [
             "patients" => \App\Models\Patient::where('patientName', 'LIKE', '%' . $this->searchName . '%')->latest()->paginate(10)

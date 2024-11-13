@@ -29,4 +29,41 @@ class Visit extends Model
     {
         return $this->hasMany(VisitTest::class);
     }
+
+    protected function calcAmount()
+    {
+        return $this->visitTests()
+            ->with('children.children', 'results')
+            ->get()
+            ->sum(function($visitTest) {
+                return $this->calculateRecursiveAmount($visitTest);
+            });
+    }
+
+// دالة تكرارية لجمع السعر من الأبناء المتداخلين
+    protected function calculateRecursiveAmount($visitTest)
+    {
+        // نبدأ بجمع السعر الحالي
+        $total = $visitTest->price;
+
+        // التحقق من وجود أبناء من نفس النوع ونضيف أسعارهم
+        if ($visitTest->children) {
+            foreach ($visitTest->children as $child) {
+                $total += $this->calculateRecursiveAmount($child); // استدعاء تكراري للأبناء
+            }
+        }
+
+        // إضافة الأسعار من Result إذا لم يكن هناك أبناء من نفس النوع
+        if ($visitTest->results && !$visitTest->children->isNotEmpty()) {
+            $total += $visitTest->results->sum('price');
+        }
+
+        return $total;
+    }
+
+    public function getAmountAttribute()
+    {
+        return $this->calcAmount() - $this->discount;
+    }
+
 }
