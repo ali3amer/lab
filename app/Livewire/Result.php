@@ -105,8 +105,9 @@ class Result extends Component
 
     public function getRanges($test)
     {
-        if ($test->test->ranges->count() == 1) {
-            $range = $test->test->ranges->first();
+        if ($test->test->AgeGenderGroups->count() == 1) {
+            $range = $test->test->AgeGenderGroups->first();
+            $result_type = $test->test->result_type;
             if ($range->result_type == "multiple_choice") {
                 if ($test->result_choice == null) {
                     $test->choices = $range->choices->keyBy("id")->toArray();
@@ -126,11 +127,11 @@ class Result extends Component
                 $test->max_value = $range->max_value;
                 $test->result_type = "number";
             }
-        } elseif ($test->test->ranges->count() > 1) {
+        } elseif ($test->test->AgeGenderGroups->count() > 1) {
 
-            $ranges = $test->test->ranges;
+            $ranges = $test->test->AgeGenderGroups;
 
-            $result_type = $test->test->ranges->first()->result_type;
+            $result_type = $test->test->result_type;
 
             $full = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
 
@@ -637,7 +638,7 @@ class Result extends Component
 
     public function render()
     {
-        $this->collectFromAnotherDatabase();
+//        $this->collectFromAnotherDatabase();
         $this->user = auth()->user();
 
 
