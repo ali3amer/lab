@@ -25,9 +25,9 @@ class Visit extends Model
         return $this->hasMany(VisitAnalysis::class);
     }
 
-    public function visitTests()
+    public function results()
     {
-        return $this->hasMany(VisitTest::class);
+        return $this->hasMany(Result::class);
     }
 
     protected function calcAmount()
@@ -61,9 +61,10 @@ class Visit extends Model
         return $total;
     }
 
-    public function getAmountAttribute()
-    {
-        return $this->calcAmount() - $this->discount;
-    }
+
+//    public function getAmountAttribute()
+//    {
+//        return $this->calcAmount() - $this->discount;
+//    }
 
 }

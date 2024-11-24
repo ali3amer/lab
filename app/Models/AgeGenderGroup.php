@@ -15,17 +15,17 @@ class AgeGenderGroup extends Model
         return $this->belongsTo(Test::class);
     }
 
-    public function choiceRange()
+    public function choiceRanges()
     {
         return $this->hasMany(ChoiceRange::class);
     }
 
-    public function textRange()
+    public function textRanges()
     {
         return $this->hasOne(TextRange::class);
     }
 
-    public function numericRange()
+    public function numericRanges()
     {
         return $this->hasOne(NumericRange::class);
     }

@@ -37,6 +37,7 @@
                 </div>
             </div>
         @else
+
             <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
                 <input type="text" wire:model.live="currentPatient.patientName" disabled
@@ -287,6 +288,29 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div class="flex">
+                <div
+                    class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                    <div class="overflow-auto block max-h-96">
+                        <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                            <thead class="bg-cyan-700 text-white sticky top-0 ">
+                            <tr>
+                                <th class=" rounded-r-2xl rounded-l-2xl py-2">إسم الفحص</th>
+                            </tr>
+                            </thead>
+                            <tbody class="text-center">
+                            <tr class="border-b-2 cursor-pointer">
+                            @foreach($visitTests as $visitTest)
+                                <tr class="cursor-pointer" wire:click="chooseTest({{$visitTest}})">
+                                    <td>{{ $visitTest->test->testName }}</td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         @endif
     @endif
