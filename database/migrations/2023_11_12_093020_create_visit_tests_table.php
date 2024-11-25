@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('test_id');
             $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal("price", 10, 2)->nullable();
-            $table->string("comment")->nullable();
+            $table->text("comment")->nullable();
             $table->timestamps();
         });
     }

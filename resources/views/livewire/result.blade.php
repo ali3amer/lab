@@ -1,6 +1,6 @@
 <div>
     <div wire:loading
-         class="h-screen w-full fixed top-0 right-0 bg-gray-700 opacity-25 z-10 absolute text-center justify-items-center">
+         class="h-full w-full fixed top-0 right-0 bg-gray-700 opacity-25 z-10 absolute text-center justify-items-center">
         <div class="flex items-center h-screen">
             <div class="w-full">
                 <i class="fa-solid fa-circle-notch fa-spin text-red-900 " style="font-size: xxx-large"></i>
@@ -194,123 +194,59 @@
             </div>
 
             <div class="flex">
-                <div
-                    class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                    <div class="overflow-auto block max-h-96">
-                        <table class="table-fixed relative max-h-96 w-full overflow-auto">
-                            <thead class="bg-cyan-700 text-white sticky top-0 ">
-                            <tr>
-                                <th class=" rounded-r-2xl rounded-l-2xl py-2">إسم الفحص</th>
-                            </tr>
-                            </thead>
-                            <tbody class="text-center">
-                            <tr class="border-b-2 cursor-pointer">
-                            @foreach($visitTests as $visitTest)
-                                <tr class="cursor-pointer" wire:click="changeOption({{$visitTest->test}})">
-                                    <td>{{ $visitTest->test->testName }}</td>
+                <div class="w-1/3">
+                    <div
+                        class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                        <div class="overflow-auto block max-h-96">
+                            <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                                <thead class="bg-cyan-700 text-white sticky top-0 ">
+                                <tr>
+                                    <th class=" rounded-r-2xl rounded-l-2xl py-2">إسم الفحص</th>
                                 </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="w-2/3">
-                    <div class=" flex flex-wrap">
-                        @if($option != "")
-                            @foreach($cart as $cartIndex => $items)
-                                @foreach($items as $key => $item)
-                                    <div
-                                        class="p-5 {{ $option != $cartIndex ? 'hidden' : '' }} w-full text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                                        <h1>{{$item}}</h1>
-                                        <div class="overflow-auto block max-h-96">
-                                            <table class="table-fixed relative max-h-96 w-full overflow-auto">
-                                                <thead class="bg-cyan-700 text-white sticky top-0 ">
-                                                <tr>
-                                                    <th class=" rounded-r-2xl py-2">إسم الفحص</th>
-                                                    <th class=" rounded-l-2xl py-2">النتيجه</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody class="text-center">
-                                                <tr class="border-b-2 cursor-pointer">
-                                                @foreach($results as $index => $result)
-                                                    @if($result['visit_test_id'] == $key)
-                                                        <tr>
-                                                            <td>{{ $result['testName'] }}</td>
-                                                            <td>
-                                                                @if($result["test"]["result_type"] == "number" || $result["test"]["result_type"] == "text")
-                                                                    <input autocomplete="off"
-                                                                           wire:model="results.{{$index}}.result"
-                                                                           class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                                                           id="result" type="text"
-                                                                           placeholder="النتيجة">
-                                                                @else
-                                                                    <div class="flex">
-                                                                        <div class="w-1/2">
-                                                                            <div
-                                                                                wire:click="getParentChoice({{$index}})">
-                                                                                @if (!empty($nestedChoices[$index]))
-                                                                                    @foreach ($nestedChoices[$index] as $choice)
-                                                                                        {{ $choice . " " }}
-                                                                                    @endforeach
-                                                                                @endif
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                        <div class="w-1/2">
-                                                                            <select
-                                                                                wire:change="chooseChoice({{$index}})"
-                                                                                wire:model="results.{{ $index }}.result_choice"
-                                                                                class="block appearance-none text-center w-full border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                                                                id="result_choice">
-                                                                                @foreach ($result["choices"] as $choice)
-                                                                                    <option
-                                                                                        @selected($choice["default"])
-                                                                                        value="{{$choice["id"]}}">{{$choice["choiceName"]}}</option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endif
-                                                @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                </thead>
+                                <tbody class="text-center">
+                                <tr class="border-b-2 cursor-pointer">
+                                @foreach($results as $result)
+                                    <tr class="cursor-pointer" wire:click="changeOption({{$result['id']}})">
+                                        <td>{{ $result['name'] }}</td>
+                                    </tr>
                                 @endforeach
-                            @endforeach
-                        @endif
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-            </div>
-
-            <div class="flex">
-                <div
-                    class="p-5 w-1/3 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                    <div class="overflow-auto block max-h-96">
-                        <table class="table-fixed relative max-h-96 w-full overflow-auto">
-                            <thead class="bg-cyan-700 text-white sticky top-0 ">
-                            <tr>
-                                <th class=" rounded-r-2xl rounded-l-2xl py-2">إسم الفحص</th>
-                            </tr>
-                            </thead>
-                            <tbody class="text-center">
-                            <tr class="border-b-2 cursor-pointer">
-                            @foreach($visitTests as $visitTest)
-                                <tr class="cursor-pointer" wire:click="chooseTest({{$visitTest}})">
-                                    <td>{{ $visitTest->test->testName }}</td>
-                                </tr>
-                            @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="w-2/3 flex-wrap">
+                    @if(!empty($options))
+                        @foreach($options['children'] as $option)
+                            <div
+                                class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                                <h3>{{$option['name']}}</h3>
+                                <div class="overflow-auto block max-h-96">
+                                    <table class="table-fixed relative max-h-96 w-full overflow-auto">
+                                        <thead class="bg-cyan-700 text-white sticky top-0 ">
+                                        <tr>
+                                            <th class="rounded-r-2xl py-2">إسم الفحص</th>
+                                            <th class=" rounded-l-2xl py-2">النتجه</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="text-center">
+                                        <tr class="border-b-2 cursor-pointer">
+                                        @foreach($option['children'] as $test)
+                                            <tr class="cursor-pointer">
+                                                <td>{{ $test['name'] }}</td>
+                                                <td></td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
+
             </div>
         @endif
     @endif

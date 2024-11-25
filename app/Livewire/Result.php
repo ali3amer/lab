@@ -19,10 +19,10 @@ class Result extends Component
 
     public $header = "النتائج";
     public Collection $visitTests;
-    public  $results;
+    public $results;
     public array $cart = [];
     public array $parents = [];
-    public $option = "";
+    public array $options = [];
     public $user;
     public array $currentVisit = [];
     public array $currentPatient = [];
@@ -41,42 +41,22 @@ class Result extends Component
         }
     }
 
-    public function chooseTest(VisitTest $visitTest)
+    public function changeOption($id)
     {
-        dd($visitTest);
+        $this->options = $this->results[$id];
     }
 
-    public function changeOption($visit)
+    public function getResults(Visit $visit)
     {
-        $this->option = "";
-        $this->option = $visit["testName"];
-    }
-
-    public function getParentHierarchyNested(\App\Models\Test $test)
-    {
-        $hierarchy = [$test->testName => []]; // ابدأ بالفحص الحالي كأصغر مستوى
-
-        // تصعيد التسلسل الهرمي للأب المباشر
-        while ($test->parent) {
-            $test = $test->parent; // الانتقال إلى الأب
-            $hierarchy = [$test->testName => $hierarchy]; // إنشاء المستوى الجديد
-        }
-
-        return $hierarchy;
-    }
-
-
-    public function chooseVisit(Visit $visit)
-    {
-        $this->currentPatient = $visit->patient->toArray();
-        $this->currentVisit = $visit->toArray();
-        $this->results = $visit->results
+        $this->results = $visit->results;
+        $this->getRanges();
+        return $visit->results
             ->groupBy(function ($result) {
                 return $result->test->test_id ?? $result->test->id;
             })
             ->map(function ($group, $key) {
                 $test = \App\Models\Test::find($key);
-                $data = [
+                return [
                     'id' => $test->id,
                     'name' => $test->testName,
                     'children' => $group->map(function ($result) {
@@ -87,7 +67,6 @@ class Result extends Component
                         ];
                     })->toArray(),
                 ];
-                return $data;
             })
             ->groupBy(function ($item) {
                 $test = \App\Models\Test::find($item['id']);
@@ -96,17 +75,30 @@ class Result extends Component
                 }
                 return $test->id;
             })
-            ->map(function ($group, $key) {
+            ->mapWithKeys(function ($group, $key) {
                 $test = \App\Models\Test::find($key);
                 return [
-                    'id' => $test->id,
-                    'name' => $test->testName,
-                    'children' => $group->values()->toArray(),
+                    $test->id => [
+                        'id' => $test->id,
+                        'name' => $test->testName,
+                        'children' => collect($group)
+                            ->mapWithKeys(function ($item) {
+                                return [$item['id'] => $item];
+                            })
+                            ->toArray(),
+                    ],
                 ];
             })
-            ->values()
             ->toArray();
+    }
 
+    public function chooseVisit(Visit $visit)
+    {
+        $this->currentPatient = $visit->patient->toArray();
+        $this->currentVisit = $visit->toArray();
+        $this->results = $this->getResults($visit);
+        dd($this->results);
+//        $this->getRanges();
     }
 
     public function setResultDefault($index)
@@ -137,133 +129,149 @@ class Result extends Component
 
     }
 
-    public function getRanges($test)
+    public function getRanges()
     {
-        if ($test->test->AgeGenderGroups->count() == 1) {
-            $range = $test->test->AgeGenderGroups->first();
-            $result_type = $test->test->result_type;
-            if ($result_type == "multiple_choice") {
-                if ($test->result_choice == null) {
-                    $test->choices = $range->choiceRanges->keyBy("id")->toArray();
-                } else {
-                    $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
-                    if ($choice->parent) {
-                        $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
-                        $this->getTreeChoice($choice, $test->id);
-                    } else {
-                        $test->choices = $range->choiceRanges->keyBy("id")->toArray();
-                    }
-                }
+        foreach ($this->results as $result) {
+            $test = $result->test;
+            $ageGenderGroups = $test->ageGenderGroups;
+            $result_type = $test->result_type;
+            if ($ageGenderGroups) {
+                if (count($ageGenderGroups) == 1) {
+                    $ageGenderGroup = $ageGenderGroups->first();
+                    dd($ageGenderGroups);
+                } elseif (count($ageGenderGroups) > 1) {
 
-                $test->result_type = "multiple_choice";
-            } else {
-                $test->min_value = $range->min_value;
-                $test->max_value = $range->max_value;
-                $test->result_type = "number";
+                } else {
+
+                }
             }
-        } elseif ($test->test->AgeGenderGroups->count() > 1) {
 
-            $ranges = $test->test->AgeGenderGroups;
-
-            $result_type = $test->test->result_type;
-
-            $full = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
-
-            if ($result_type == "multiple_choice") {
-                if ($full) {
-                    if ($test->result_choice == null) {
-                        $test->choices = $full->choiceRanges->keyBy("id")->toArray();
-                    } else {
-                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
-                        if ($choice->parent) {
-                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
-                            $this->getTreeChoice($choice, $test->id);
-                        } else {
-                            $test->choices = $full->choiceRanges->keyBy("id")->toArray();
-                        }
-                    }
-
-                    $test->result_type = "multiple_choice";
-
-                } elseif ($ranges->where("gender", "all")->where("age", "all")->first()) {
-                    $all = $ranges->where("gender", "all")->where("age", "all")->first();
-                    if ($test->result_choice == null) {
-                        $test->choices = $all->choiceRanges->keyBy("id")->toArray();
-                    } else {
-                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
-                        if ($choice->parent) {
-                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
-                            $this->getTreeChoice($choice, $test->id);
-                        } else {
-                            $test->choices = $all->choiceRanges->keyBy("id")->toArray();
-                        }
-                    }
-                    $test->result_type = "multiple_choice";
-
-                } elseif ($ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first()) {
-                    $age = $ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
-                    if ($test->result_choice == null) {
-                        $test->choices = $age->choiceRanges->keyBy("id")->toArray();
-                    } else {
-                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
-                        if ($choice->parent) {
-                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
-                            $this->getTreeChoice($choice, $test->id);
-                        } else {
-                            $test->choices = $age->choiceRanges->keyBy("id")->toArray();
-                        }
-                    }
-                    $test->result_type = "multiple_choice";
-                } elseif ($ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first()) {
-                    $gender = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->first();
-                    if ($test->result_choice == null) {
-                        $test->choices = $gender->choiceRanges->keyBy("id")->toArray();
-                    } else {
-                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
-                        if ($choice->parent) {
-                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
-                            $this->getTreeChoice($choice, $test->id);
-                        } else {
-                            $test->choices = $gender->choiceRanges->keyBy("id")->toArray();
-                        }
-                    }
-                    $test->result_type = "multiple_choice";
-                } else {
-                    $test->result_type = "text";
-                }
-            } else {
-                if ($full) {
-                    $test->min_value = $full->min_value;
-                    $test->max_value = $full->max_value;
-                    $test->result_type = "number";
-
-                } elseif ($ranges->where("gender", "all")->where("age", "all")->first()) {
-                    $all = $ranges->where("gender", "all")->where("age", "all")->first();
-                    $test->min_value = $all->min_value;
-                    $test->max_value = $all->max_value;
-                    $test->result_type = "number";
-
-                } elseif ($ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first()) {
-                    $gender = $ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first();
-                    $test->min_value = $gender->min_value;
-                    $test->max_value = $gender->max_value;
-                    $test->result_type = "number";
-
-                } elseif ($ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first()) {
-                    $age = $ranges->where("gender", "all")->where("age", $this->currentPatient["duration"])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
-                    $test->min_value = $age->min_value;
-                    $test->max_value = $age->max_value;
-                    $test->result_type = "number";
-
-                } else {
-                    $test->result_type = "text";
-                }
-
-            }
-        } else {
-            $test->result_type = "text";
         }
 
+        //        if ($test->test->AgeGenderGroups->count() == 1) {
+//            $range = $test->test->AgeGenderGroups->first();
+//            $result_type = $test->test->result_type;
+//            if ($result_type == "multiple_choice") {
+//                if ($test->result_choice == null) {
+//                    $test->choices = $range->choiceRanges->keyBy("id")->toArray();
+//                } else {
+//                    $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
+//                    if ($choice->parent) {
+//                        $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
+//                        $this->getTreeChoice($choice, $test->id);
+//                    } else {
+//                        $test->choices = $range->choiceRanges->keyBy("id")->toArray();
+//                    }
+//                }
+//
+//                $test->result_type = "multiple_choice";
+//            } else {
+//                $test->min_value = $range->min_value;
+//                $test->max_value = $range->max_value;
+//                $test->result_type = "number";
+//            }
+//        } elseif ($test->test->AgeGenderGroups->count() > 1) {
+//
+//            $ranges = $test->test->AgeGenderGroups;
+//
+//            $result_type = $test->test->result_type;
+//
+//            $full = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
+//
+//            if ($result_type == "multiple_choice") {
+//                if ($full) {
+//                    if ($test->result_choice == null) {
+//                        $test->choices = $full->choiceRanges->keyBy("id")->toArray();
+//                    } else {
+//                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
+//                        if ($choice->parent) {
+//                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
+//                            $this->getTreeChoice($choice, $test->id);
+//                        } else {
+//                            $test->choices = $full->choiceRanges->keyBy("id")->toArray();
+//                        }
+//                    }
+//
+//                    $test->result_type = "multiple_choice";
+//
+//                } elseif ($ranges->where("gender", "all")->where("age", "all")->first()) {
+//                    $all = $ranges->where("gender", "all")->where("age", "all")->first();
+//                    if ($test->result_choice == null) {
+//                        $test->choices = $all->choiceRanges->keyBy("id")->toArray();
+//                    } else {
+//                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
+//                        if ($choice->parent) {
+//                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
+//                            $this->getTreeChoice($choice, $test->id);
+//                        } else {
+//                            $test->choices = $all->choiceRanges->keyBy("id")->toArray();
+//                        }
+//                    }
+//                    $test->result_type = "multiple_choice";
+//
+//                } elseif ($ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first()) {
+//                    $age = $ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
+//                    if ($test->result_choice == null) {
+//                        $test->choices = $age->choiceRanges->keyBy("id")->toArray();
+//                    } else {
+//                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
+//                        if ($choice->parent) {
+//                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
+//                            $this->getTreeChoice($choice, $test->id);
+//                        } else {
+//                            $test->choices = $age->choiceRanges->keyBy("id")->toArray();
+//                        }
+//                    }
+//                    $test->result_type = "multiple_choice";
+//                } elseif ($ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first()) {
+//                    $gender = $ranges->where("gender", $this->currentPatient['gender'])->where("age", $this->currentPatient['duration'])->first();
+//                    if ($test->result_choice == null) {
+//                        $test->choices = $gender->choiceRanges->keyBy("id")->toArray();
+//                    } else {
+//                        $choice = \App\Models\ChoiceRange::where("id", $test->result_choice)->first();
+//                        if ($choice->parent) {
+//                            $test->choices = $choice->parent->choiceRanges->keyBy("id")->toArray();
+//                            $this->getTreeChoice($choice, $test->id);
+//                        } else {
+//                            $test->choices = $gender->choiceRanges->keyBy("id")->toArray();
+//                        }
+//                    }
+//                    $test->result_type = "multiple_choice";
+//                } else {
+//                    $test->result_type = "text";
+//                }
+//            } else {
+//                if ($full) {
+//                    $test->min_value = $full->min_value;
+//                    $test->max_value = $full->max_value;
+//                    $test->result_type = "number";
+//
+//                } elseif ($ranges->where("gender", "all")->where("age", "all")->first()) {
+//                    $all = $ranges->where("gender", "all")->where("age", "all")->first();
+//                    $test->min_value = $all->min_value;
+//                    $test->max_value = $all->max_value;
+//                    $test->result_type = "number";
+//
+//                } elseif ($ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first()) {
+//                    $gender = $ranges->where("gender", $this->currentPatient['gender'])->where("age", "all")->first();
+//                    $test->min_value = $gender->min_value;
+//                    $test->max_value = $gender->max_value;
+//                    $test->result_type = "number";
+//
+//                } elseif ($ranges->where("gender", "all")->where("age", $this->currentPatient['duration'])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first()) {
+//                    $age = $ranges->where("gender", "all")->where("age", $this->currentPatient["duration"])->where("min_age", "<=", $this->currentPatient['age'])->where("max_age", ">=", $this->currentPatient['age'])->first();
+//                    $test->min_value = $age->min_value;
+//                    $test->max_value = $age->max_value;
+//                    $test->result_type = "number";
+//
+//                } else {
+//                    $test->result_type = "text";
+//                }
+//
+//            }
+//        } else {
+//            $test->result_type = "text";
+//        }
     }
 
     public function getVisitTestChildren(VisitTest $visitTest)
@@ -601,7 +609,7 @@ class Result extends Component
 
     public function resetData()
     {
-        $this->reset("results", "cart", "option", "currentVisit", "currentPatient", "patientSearch");
+        $this->reset("results", "cart", "options", "currentVisit", "currentPatient", "patientSearch");
     }
 
     public function render()

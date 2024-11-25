@@ -30,6 +30,11 @@ class Test extends Model
         return $this->hasMany(AgeGenderGroup::class);
     }
 
+    public function results()
+    {
+        return $this->hasMany(Result::class);
+    }
+
 //    public function ranges()
 //    {
 //        return $this->hasMany(ReferenceRange::class);

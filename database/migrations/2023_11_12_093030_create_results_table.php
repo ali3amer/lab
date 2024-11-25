@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('visit_id');
-            $table->foreign('visit_id')->references('id')->on('visits')->onDelete('cascade')->onUpdate('cascade');
+            $table->unsignedBigInteger('visit_test_id');
+            $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete('cascade')->onUpdate('cascade');
             $table->string("result")->nullable();
             $table->unsignedBigInteger('result_choice')->nullable();
             $table->foreign('result_choice')->references('id')->on('range_choices')->onDelete('cascade')->onUpdate('cascade');
