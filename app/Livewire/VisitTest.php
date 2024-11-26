@@ -21,7 +21,6 @@ class VisitTest extends Component
     public Collection $categories;
     public Collection $tests;
     public array $currentLocation = [];
-    public array $cart = [];
     public $visit_test_id = 0;
     public $amount = 0;
     public $total_amount = 0;
@@ -34,8 +33,6 @@ class VisitTest extends Component
     {
         $this->categories = \App\Models\Category::all();
         $this->changeLocation(-1);
-        $this->cart = [];
-        $this->loadDataFromDatabase();
     }
 
     public function chooseCategory($category)
@@ -57,77 +54,52 @@ class VisitTest extends Component
     public function addTest(\App\Models\Test $test)
     {
         if ($test->getAll) {
-            $testModel = \App\Models\Test::find($test['id']);
-            if ($testModel) {
-                foreach ($this->cart as $key => $item) {
-                    if ($item['testName'] === $test['testName']) {
-                        unset($this->cart[$key]);
-                        $this->cart = array_values($this->cart); // إعادة ترتيب المفاتيح بعد الحذف
-                        break;
-                    }
-                }
-                $this->cart[$testModel['id']]['testName'] = $testModel['testName'];
-                $this->cart[$testModel['id']]['price'] = $testModel['price'];
-                $this->getChildrenTree($testModel);
+            \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->delete();
+            $visit_test = \App\Models\VisitTest::create([
+                'visit_id' => $this->visit_id,
+                'test_id' => $test->id,
+                'price' => $test->price,
+            ]);
+
+            $this->visit_test_id = $visit_test->id;
+
+            if ($test->children->isNotEmpty()) {
+                $this->addChildrenTests($test);
             }
         } else {
-            if ($test->children->count() > 0) {
+            if ($test->children->isNotEmpty()) {
                 $this->chooseTest($test->id);
             } else {
-                $result = Result::create([
-                    "visit_id" => $this->visit_id,
-                    "test_id" => $test->id,
-                    "price" => floatval($test->price),
+                $visit_test = \App\Models\VisitTest::create([
+                    'visit_id' => $this->visit_id,
+                    'test_id' => $test->id,
+                    'price' => $test->price,
                 ]);
 
-                foreach ($this->cart as $key => $item) {
-                    if ($item['testName'] === $test['testName']) {
-                        unset($this->cart[$key]);
-                        $this->cart = array_values($this->cart); // إعادة ترتيب المفاتيح بعد الحذف
-                        break;
-                    }
-                }
-
-                $this->cart[$result->id]['testName'] = $test['testName'];
-                $this->cart[$result->id]['price'] = $test['price'];
-
-
+                Result::create([
+                    'visit_test_id' => $visit_test->id,
+                    'test_id' => $test->id,
+                    'price' => $test->id
+                ]);
             }
         }
     }
 
-    protected function getChildrenTree($test)
+
+    public function addChildrenTests(\App\Models\Test $test)
     {
-        $children = $test->children;
-
-        if ($children->count() > 0) {
-            $tree = [];
-
-            foreach ($children as $child) {
-                if ($child->children->count() > 0) {
-                    $this->amount += floatval($child->price);
-
-                    $this->getChildrenTree($child);
-                    $tree[$child->id] = $child->toArray();
-                } else {
-                    Result::create([
-                        "visit_id" => $this->visit_id,
-                        "test_id" => $child->id,
-                        "price" => floatval($child->price),
-                    ]);
-
-                }
+        if ($test->children->isNotEmpty()) {
+            foreach ($test->children as $childTest) {
+                $this->addChildrenTests($childTest); // استدعاء الدالة لكل طفل
             }
-
-            return $tree;
         } else {
+            // إذا لم يكن هناك أطفال، قم بإنشاء النتيجة
             Result::create([
-                "visit_id" => $this->visit_id,
-                "test_id" => $test->id,
-                "price" => floatval($test->price),
+                'visit_test_id' => $this->visit_test_id,
+                'test_id' => $test->id,
+                'price' => $test->price,
             ]);
         }
-        return [];
     }
 
     public function chooseTest($id)
@@ -167,92 +139,25 @@ class VisitTest extends Component
 
     }
 
-
-    public function loadDataFromDatabase()
+    public function deleteMessage($id)
     {
-        $visitTests = \App\Models\VisitTest::where('visit_id', $this->visit_id)->get();
-
-        foreach ($visitTests as $visitTest) {
-            $test = $visitTest->test;
-
-            if ($test->getAll) {
-                foreach ($this->cart as $key => $item) {
-                    if ($item['testName'] === $test['testName']) {
-                        unset($this->cart[$key]);
-                        $this->cart = array_values($this->cart); // إعادة ترتيب المفاتيح بعد الحذف
-                        break;
-                    }
-                }
-                $this->cart[$test['id']]['testName'] = $test['testName'];
-                $this->cart[$test['id']]['price'] = $test['price'];
-            } else {
-                $this->loadChildrenFromDatabase($visitTest);
-            }
-        }
+        $this->confirm("  هل توافق على الحذف ؟  ", [
+            'inputAttributes' => ["id" => $id],
+            'toast' => false,
+            'showConfirmButton' => true,
+            'confirmButtonText' => 'موافق',
+            'onConfirmed' => "delete",
+            'showCancelButton' => true,
+            'cancelButtonText' => 'إلغاء',
+            'confirmButtonColor' => '#dc2626',
+            'cancelButtonColor' => '#4b5563'
+        ]);
     }
 
-    protected function loadChildrenFromDatabase($visitTest)
+    public function delete($data)
     {
-        $children = $visitTest->children;
-        if ($children->count() > 0) {
-            foreach ($children as $child) {
-                $this->loadChildrenFromDatabase($child);
-            }
-        } else {
-            foreach ($visitTest->results as $result) {
-                $this->cart[$result->id]['testName'] = $result->test->testName;
-                $this->cart[$result->id]['price'] = $result->test->price;
-            }
-
-        }
-    }
-
-    public function deleteFromCart($id)
-    {
-        // البحث عن الاختبار بناءً على test_id والزيارة الحالية
-        $visitTest = \App\Models\VisitTest::where("test_id", $id)->where("visit_id", $this->visit_id)->first();
-
-        if ($visitTest) {
-            // تقليل المبلغ بالسعر الخاص بالاختبار الحالي
-
-            // إذا كان للاختبار أبناء، نحسب المجموع الخاص بالأبناء ونزيله من المبلغ
-            if ($visitTest->children->count() > 0) {
-                $this->amount -= $this->decreaseAmountForChildren($visitTest);
-            } else {
-                // إذا لم يكن له أبناء، نقوم بتقليل المبلغ بناءً على النتائج المرتبطة به
-                $this->amount -= $visitTest->results->sum("price");
-            }
-
-            // حذف الاختبار
-            $visitTest->delete();
-        } else {
-            // إذا كان العنصر هو نتيجة، نبحث عن النتيجة ونقوم بحذفها
-            $result = Result::find($id);
-            if ($result) {
-                $result->delete();
-            }
-        }
-
-        unset($this->cart[$id]);
-        $this->changeLocation(-1);
-
-    }
-
-// دالة لحساب مجموع أسعار جميع الأبناء
-    protected function decreaseAmountForChildren($visitTest)
-    {
-        $total = 0;
-
-        foreach ($visitTest->children as $child) {
-            $total += floatval($child->price);
-            if ($child->children->count() > 0) {
-                $total += $this->decreaseAmountForChildren($child);
-            } else {
-                $total += $child->results->sum("price");
-            }
-        }
-
-        return $total;
+        \App\Models\VisitTest::where('id', $data['inputAttributes']['id'])->delete();
+        $this->alert('success', 'تم الحذف بنجاح', ['timerProgressBar' => true]);
     }
 
     public function render()

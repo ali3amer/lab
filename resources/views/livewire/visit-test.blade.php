@@ -66,13 +66,11 @@
                     </thead>
                     <tbody class="text-center">
                     @php $total = 0 @endphp
-                    @foreach($cart as $key => $item)
-                        @if(isset($item['price']))
-                            @php $total += floatval($item['price']) @endphp
-                        @endif
-                        <tr class="border-b-2 cursor-pointer" wire:click="deleteFromCart({{$key}})">
-                            <td class="py-2">{{$item['testName']}}</td>
-                            <td class="py-2">{{number_format($item['price'], 2)}}</td>
+                    @foreach($visitTests as  $visitTest)
+                        @php $total += floatval($visitTest->price) @endphp
+                        <tr class="border-b-2 cursor-pointer" wire:click="deleteMessage({{$visitTest->id}})">
+                            <td class="py-2">{{$visitTest->test->testName}}</td>
+                            <td class="py-2">{{number_format($visitTest->price, 2)}}</td>
                         </tr>
                     @endforeach
                     </tbody>
