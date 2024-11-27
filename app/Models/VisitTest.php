@@ -18,7 +18,7 @@ class VisitTest extends Model
 
     public function visit()
     {
-        return $this->belongsTo(VisitTest::class);
+        return $this->belongsTo(Visit::class);
     }
 
     public function test()

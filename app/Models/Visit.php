@@ -15,6 +15,11 @@ class Visit extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function visitTests()
+    {
+        return $this->hasMany(VisitTest::class);
+    }
+
     public function insurance()
     {
         return $this->belongsTo(Insurance::class);

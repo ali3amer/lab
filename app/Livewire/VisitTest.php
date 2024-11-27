@@ -55,14 +55,7 @@ class VisitTest extends Component
     {
         if ($test->getAll) {
             \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->delete();
-            $visit_test = \App\Models\VisitTest::create([
-                'visit_id' => $this->visit_id,
-                'test_id' => $test->id,
-                'price' => $test->price,
-            ]);
-
-            $this->visit_test_id = $visit_test->id;
-
+            $this->visitTest($test);
             if ($test->children->isNotEmpty()) {
                 $this->addChildrenTests($test);
             }
@@ -70,36 +63,44 @@ class VisitTest extends Component
             if ($test->children->isNotEmpty()) {
                 $this->chooseTest($test->id);
             } else {
-                $visit_test = \App\Models\VisitTest::create([
-                    'visit_id' => $this->visit_id,
-                    'test_id' => $test->id,
-                    'price' => $test->price,
-                ]);
+                $this->visitTest($test);
+                $this->result($test);
 
-                Result::create([
-                    'visit_test_id' => $visit_test->id,
-                    'test_id' => $test->id,
-                    'price' => $test->id
-                ]);
+
             }
         }
     }
-
 
     public function addChildrenTests(\App\Models\Test $test)
     {
         if ($test->children->isNotEmpty()) {
             foreach ($test->children as $childTest) {
-                $this->addChildrenTests($childTest); // استدعاء الدالة لكل طفل
+                $this->visitTest($childTest);
+                $this->addChildrenTests($childTest);
             }
         } else {
-            // إذا لم يكن هناك أطفال، قم بإنشاء النتيجة
-            Result::create([
-                'visit_test_id' => $this->visit_test_id,
-                'test_id' => $test->id,
-                'price' => $test->price,
-            ]);
+            $this->result($test);
         }
+    }
+
+    public function visitTest($test, $visit_test_id = null)
+    {
+        $visit_test = \App\Models\VisitTest::create([
+            'visit_id' => $visit_test_id == null ? $this->visit_id : null,
+            'visit_test_id' => $visit_test_id,
+            'test_id' => $test->test_id != null ? $test->test_id : $test->id,
+            'price' => $test->price,
+        ]);
+        $this->visit_test_id = $visit_test->id;
+    }
+
+    public function result($test)
+    {
+        Result::create([
+            'visit_test_id' => $this->visit_test_id,
+            'test_id' => $test['id'],
+            'price' => $test['price']
+        ]);
     }
 
     public function chooseTest($id)
