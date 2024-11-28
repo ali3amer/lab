@@ -206,9 +206,9 @@
                                 </thead>
                                 <tbody class="text-center">
                                 <tr class="border-b-2 cursor-pointer">
-                                @foreach($results as $result)
-                                    <tr class="cursor-pointer" wire:click="changeOption({{$result['id']}})">
-                                        <td>{{ $result['name'] }}</td>
+                                @foreach($visitTests as $visitTest)
+                                    <tr class="cursor-pointer" wire:click="changeOption({{$visitTest}})">
+                                        <td>{{ $visitTest->test->testName }}</td>
                                     </tr>
                                 @endforeach
                                 </tbody>
@@ -218,11 +218,11 @@
                 </div>
 
                 <div class="w-2/3 flex-wrap">
-                    @if(!empty($options))
-                        @foreach($options['children'] as $option)
+                        @if(!empty($results))
+                        @foreach($results as $result)
                             <div
                                 class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                                <h3>{{$option['name']}}</h3>
+                                <h3>{{$result->test->testName}}</h3>
                                 <div class="overflow-auto block max-h-96">
                                     <table class="table-fixed relative max-h-96 w-full overflow-auto">
                                         <thead class="bg-cyan-700 text-white sticky top-0 ">
@@ -233,9 +233,9 @@
                                         </thead>
                                         <tbody class="text-center">
                                         <tr class="border-b-2 cursor-pointer">
-                                        @foreach($option['children'] as $test)
+                                        @foreach($result->results as $test)
                                             <tr class="cursor-pointer">
-                                                <td>{{ $test['name'] }}</td>
+                                                <td>{{ $test->test->testName }}</td>
                                                 <td></td>
                                             </tr>
                                         @endforeach
@@ -244,7 +244,7 @@
                                 </div>
                             </div>
                         @endforeach
-                    @endif
+                        @endif
                 </div>
 
             </div>

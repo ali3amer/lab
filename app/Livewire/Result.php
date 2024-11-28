@@ -41,9 +41,13 @@ class Result extends Component
         }
     }
 
-    public function changeOption($id)
+    public function changeOption(VisitTest $visitTest)
     {
-        $this->options = $this->results[$id];
+        if ($visitTest->children->isNotEmpty()) {
+            $this->results = \App\Models\VisitTest::where("visit_test_id", $visitTest['id'])->get();
+        } else {
+            $this->results = VisitTest::where("id", $visitTest['id'])->get();
+        }
     }
 
     public function getResults(Visit $visit)
@@ -96,8 +100,9 @@ class Result extends Component
     {
         $this->currentPatient = $visit->patient->toArray();
         $this->currentVisit = $visit->toArray();
-        $this->results = $this->getResults($visit);
-        dd($this->results);
+        $this->visitTests = VisitTest::where('visit_id', $visit->id)->get();
+//        $this->results = $this->getResults($visit);
+//        dd($this->results);
 //        $this->getRanges();
     }
 

@@ -56,27 +56,27 @@ class VisitTest extends Component
         if ($test->getAll) {
             \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->delete();
             $this->visitTest($test);
-            if ($test->children->isNotEmpty()) {
-                $this->addChildrenTests($test);
-            }
+            $this->addChildrenTests($test, $this->visit_test_id);
         } else {
             if ($test->children->isNotEmpty()) {
                 $this->chooseTest($test->id);
             } else {
-                $this->visitTest($test);
+                $this->visitTest($test, $this->visit_test_id);
                 $this->result($test);
-
-
             }
         }
     }
 
-    public function addChildrenTests(\App\Models\Test $test)
+    public function addChildrenTests(\App\Models\Test $test, $visit_test_id)
     {
         if ($test->children->isNotEmpty()) {
             foreach ($test->children as $childTest) {
-                $this->visitTest($childTest);
-                $this->addChildrenTests($childTest);
+                if ($childTest->children->isNotEmpty()) {
+                    $this->visitTest($childTest, $visit_test_id);
+                    $this->addChildrenTests($childTest, $visit_test_id);
+                } else {
+                    $this->result($childTest);
+                }
             }
         } else {
             $this->result($test);
@@ -88,7 +88,7 @@ class VisitTest extends Component
         $visit_test = \App\Models\VisitTest::create([
             'visit_id' => $visit_test_id == null ? $this->visit_id : null,
             'visit_test_id' => $visit_test_id,
-            'test_id' => $test->test_id != null ? $test->test_id : $test->id,
+            'test_id' => $test->id,
             'price' => $test->price,
         ]);
         $this->visit_test_id = $visit_test->id;
