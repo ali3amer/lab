@@ -43,7 +43,7 @@
                 <input type="text" wire:model.live="currentPatient.patientName" disabled
                        class="p-2 my-2 border-2 text-center font-extrabold">
 
-                <button wire:click="save(true)" class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i
+                <button wire:click="save()" class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i
                         class="fa fa-save"></i></button>
                 <button id="printInvoiceResult" @click="$('.invoice').printThis()"
                         class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></button>
@@ -218,11 +218,11 @@
                 </div>
 
                 <div class="w-2/3 flex-wrap">
-                        @if(!empty($results))
-                        @foreach($results as $result)
+                    @if(!empty($results))
+                        @foreach($options as $option)
                             <div
                                 class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                                <h3>{{$result->test->testName}}</h3>
+                                <h3>{{$option->test->testName}}</h3>
                                 <div class="overflow-auto block max-h-96">
                                     <table class="table-fixed relative max-h-96 w-full overflow-auto">
                                         <thead class="bg-cyan-700 text-white sticky top-0 ">
@@ -233,18 +233,50 @@
                                         </thead>
                                         <tbody class="text-center">
                                         <tr class="border-b-2 cursor-pointer">
-                                        @foreach($result->results as $test)
-                                            <tr class="cursor-pointer">
-                                                <td>{{ $test->test->testName }}</td>
-                                                <td></td>
-                                            </tr>
+                                        @foreach($results as $index => $test)
+                                            @if($test['visit_test_id'] == $option->id)
+                                                <tr class="cursor-pointer">
+                                                    <td>{{$test['test']['testName']}}</td>
+                                                    <td>
+                                                        @if($test['test']['result_type'] == "multiple_choice")
+                                                            <div class="flex items-center">
+                                                                <div class="w-1/2">
+                                                                    <div wire:click="getParentChoice({{$index}})">
+                                                                        @if (!empty($nestedChoices[$index]))
+                                                                            @foreach ($nestedChoices[$index] as $choice)
+                                                                                {{ $choice . " " }}
+                                                                            @endforeach
+                                                                        @endif
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <select wire:change="chooseChoice({{$index}})"
+                                                                        wire:model="results.{{ $index }}.result_choice"
+                                                                        class="w-1/2 block appearance-none text-center border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                                                        id="{{$index}}">
+                                                                    @foreach($test['choices'] as $key => $choice)
+                                                                        <option
+                                                                            @selected($test['result_choice'] == $key) value="{{$key}}">{{$choice}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        @else
+                                                            <input autocomplete="off" required
+                                                                   wire:model="results.{{ $index }}.result"
+                                                                   class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
+                                                                   id="{{$index}}" type="text" placeholder="النتيجه">
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         @endforeach
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         @endforeach
-                        @endif
+                    @endif
                 </div>
 
             </div>

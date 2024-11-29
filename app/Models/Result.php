@@ -17,8 +17,8 @@ class Result extends Model
 
 
 
-    public function visit()
+    public function visitTest()
     {
-        return $this->belongsTo(Visit::class);
+        return $this->belongsTo(VisitTest::class);
     }
 }
