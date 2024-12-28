@@ -21,4 +21,9 @@ class Result extends Model
     {
         return $this->belongsTo(VisitTest::class);
     }
+
+    public function choiceRange()
+    {
+        return $this->belongsTo(ChoiceRange::class, 'result_choice');
+    }
 }

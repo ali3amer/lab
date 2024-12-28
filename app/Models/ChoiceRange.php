@@ -24,4 +24,9 @@ class ChoiceRange extends Model
     {
         return $this->belongsTo(AgeGenderGroup::class);
     }
+
+    public function result()
+    {
+        return $this->belongsTo(Result::class, "result_choice");
+    }
 }

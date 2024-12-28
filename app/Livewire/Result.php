@@ -22,7 +22,8 @@ class Result extends Component
     public $results;
     public array $cart = [];
     public array $parents = [];
-    public Collection $options;
+    public $options;
+    public $currentOption = null;
     public $user;
     public array $currentVisit = [];
     public array $currentPatient = [];
@@ -41,18 +42,30 @@ class Result extends Component
         }
     }
 
-    public function changeOption(VisitTest $visitTest)
+    public function changeOption($id)
     {
-        $this->options = VisitTest::where("visit_test_id", $visitTest['id'])->get();
+        $this->currentOption = $id;
+    }
+
+    public function fillOptions(VisitTest $visitTest)
+    {
         if ($visitTest->children->isNotEmpty()) {
             $keys = \App\Models\VisitTest::where("visit_test_id", $visitTest['id'])->pluck("id");
-            $this->results = \App\Models\Result::whereIn("visit_test_id", $keys)->with("test")->get()->keyBy("id")->toArray();
-            $this->options = \App\Models\VisitTest::where("visit_test_id", $visitTest['id'])->get();
+            $results = \App\Models\Result::whereIn("visit_test_id", $keys)->with("test")->get()->keyBy("id")->toArray();
+            $tests = \App\Models\VisitTest::where("visit_test_id", $visitTest['id'])->get();
         } else {
-            $this->results = \App\Models\Result::where("visit_test_id", $visitTest['id'])->with("test")->get()->keyBy("id")->toArray();
-            $this->options = \App\Models\VisitTest::where("id", $visitTest['id'])->get();
+            $results = \App\Models\Result::where("visit_test_id", $visitTest['id'])->with("test")->get()->keyBy("id")->toArray();
+            $tests = \App\Models\VisitTest::where("id", $visitTest['id'])->get();
         }
 
+        foreach ($results as $result) {
+            $this->results[$result['id']] = $result;
+        }
+
+        foreach ($tests as $test) {
+            $this->options[$test->parent->id][$test->id] = $test->test->testName;
+            $this->getVisitTestChildren($test);
+        }
         $this->getRanges();
     }
 
@@ -61,9 +74,11 @@ class Result extends Component
         $this->currentPatient = $visit->patient->toArray();
         $this->currentVisit = $visit->toArray();
         $this->visitTests = VisitTest::where('visit_id', $visit->id)->get();
-//        $this->results = $this->getResults($visit);
-//        dd($this->results);
-//        $this->getRanges();
+        $this->results = [];
+        $this->options = [];
+        foreach ($this->visitTests as $visitTest) {
+            $this->fillOptions($visitTest);
+        }
     }
 
     public function setResultDefault($index)
@@ -91,7 +106,6 @@ class Result extends Component
             $this->nestedChoices[$index][$parent->id] = $parent->choiceName;
             $this->getTreeChoice($parent, $index);
         }
-
     }
 
     public function getRanges()
@@ -108,17 +122,29 @@ class Result extends Component
                 }
 
                 if ($ageGenderGroup) {
+                    $this->results[$key]['age_gender_group'] = $ageGenderGroup->id;
+                    $this->results[$key]['testName'] = \App\Models\Test::find($result['test_id'])->testName;
                     if ($result_type == "multiple_choice") {
-                        $this->results[$key]['choices'] = $ageGenderGroup->choiceRanges->pluck("choiceName", "id")->toArray();
+                        $choices = $ageGenderGroup->choiceRanges;
+                        $this->results[$key]['result_choice'] = $ageGenderGroup->choiceRanges->where("default", true)->first()->id ?? $ageGenderGroup->choiceRanges->first()->id;
+                        $this->results[$key]['choices'] = $choices->pluck("choiceName", "id")->toArray();
                     } elseif ($result_type == "number") {
-                        $this->results[$key]['numeric_ranges'] = $ageGenderGroup->numericRanges->toArray();
+
+                        $this->results[$key]['numeric_ranges'] = $ageGenderGroup->numericRanges->first()->toArray();
                     } elseif ($result_type == "text") {
                         $this->results[$key]['text_ranges'] = $ageGenderGroup->textRanges->toArray();
                     }
+                    $this->results[$key]['result_type'] = $result_type;
                 }
 
             }
         }
+    }
+
+
+    public function getPrintResults()
+    {
+        return $this->printResults;
     }
 
     public function getVisitTestChildren(VisitTest $visitTest)
@@ -135,7 +161,6 @@ class Result extends Component
 
                     foreach ($testsResult as $test) {
                         $this->getRanges($test);
-                        $this->results[$test->id] = $test->toArray();
                         if ($test->result_type == "multiple_choice") {
                             $this->setResultDefault($test->id);
                         }
@@ -151,7 +176,6 @@ class Result extends Component
 
             foreach ($testsResult as $test) {
                 $this->getRanges($test);
-                $this->results[$test->id] = $test->toArray();
                 if ($test->result_type == "multiple_choice") {
                     $this->setResultDefault($test->id);
                 }
@@ -160,8 +184,7 @@ class Result extends Component
         }
     }
 
-    public
-    function chooseChoice($index)
+    public function chooseChoice($index)
     {
         $choice = \App\Models\ChoiceRange::where("id", $this->results[$index]['result_choice'])->first();
         $choices = $choice->children->pluck("choiceName", "id")->toArray();
@@ -172,30 +195,26 @@ class Result extends Component
         }
     }
 
-    public
-    function getParentChoice($index)
+    public function getParentChoice($index)
     {
         $parent = \App\Models\ChoiceRange::where("id", $this->results[$index]["result_choice"])->first();
-        dd($parent);
         if ($parent->choice_range_id != null) {
             unset($this->nestedChoices[$index][$parent->id]);
             $this->results[$index]["result_choice"] = $parent->id;
             $this->results[$index]["choices"] = $parent->parent->choiceRanges->keyBy("id")->toArray();
         } else {
             $this->nestedChoices = [];
-            $choices = \App\Models\ChoiceRange::where("id", $this->results[$index]["result_choice"])->first()->parent->range->choiceRanges->keyBy("id")->toArray();
+            $choices = \App\Models\ChoiceRange::where("id", $this->results[$index]["result_choice"])->first()->ageGenderGroup->choiceRanges->keyBy("id");
             $this->results[$index]["result_choice"] = $choices->first()->id;
-            $this->results[$index]["choices"] = $choices->pulck("choiceName", "id")->toArray();
+            $this->results[$index]["choices"] = $choices->pluck("choiceName", "id")->toArray();
         }
     }
 
-    public
-    function save()
+    public function save()
     {
         foreach ($this->results as $result) {
             \App\Models\Result::where("id", $result["id"])->update([
-                "result" => $result["result"],
-                "result_choice" => $result["result_choice"],
+                "result_choice" => $result["result_choice"] ?? null,
             ]);
         }
 
@@ -213,14 +232,12 @@ class Result extends Component
 
     }
 
-    public
-    function printResult()
+    public function printResult()
     {
 
     }
 
-    public
-    function collectFromAnotherDatabase()
+    public function collectFromAnotherDatabase()
     {
 //        $choices = RangeChoice::where("choiceName", "LIKE", "%+%")->get()->toArray();
 //        $c = [];
@@ -440,8 +457,7 @@ class Result extends Component
 //        ]);
     }
 
-    public
-    function addChoices($choice)
+    public function addChoices($choice)
     {
         $db2 = \DB::connection('db2');
         $newChoices = $db2->table('range_choices')->where("choice_id", $choice->id)->get()->keyBy("id");
@@ -452,24 +468,20 @@ class Result extends Component
                     'choiceName' => $ch->choiceName,
                     'default' => $ch->default,
                 ]);
-                dd($ch);
                 $this->addChoices($ch);
             }
         }
     }
 
-    public
-    function resetData()
+    public function resetData()
     {
         $this->reset("results", "cart", "currentVisit", "currentPatient", "patientSearch");
     }
 
-    public
-    function render()
+    public function render()
     {
 //        $this->collectFromAnotherDatabase();
         $this->user = auth()->user();
-
 
         return view('livewire.result', [
             "visits" => Visit::join("patients", "patients.id", "=", "visits.patient_id")->where("patients.patientName", "LIKE", "%" . $this->patientSearch . "%")->select("visits.*", "patients.patientName")->latest()->paginate(10)

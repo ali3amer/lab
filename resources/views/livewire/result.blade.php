@@ -74,7 +74,7 @@
                                             </div>
 
                                             <span class="my-1"
-                                                  style="font-family: 'lateef', sans-serif"> التاريخ : {{ date("Y/m/d") }} </span>
+                                                  style="font-family: 'lateef', sans-serif"> التاريخ : {{ $currentVisit['visit_date'] }} </span>
                                             <div class="flex flex-wrap" style="font-family: 'lateef', sans-serif;">
 
                                                 <div class="w-1/2 mt-2">
@@ -150,7 +150,7 @@
                                                             {{ $result["result"] }}
                                                         @else
                                                             @if(isset($result["choices"][$result["result_choice"]]))
-                                                                {{ $result["choices"][$result["result_choice"]]["choiceName"] . " " }}
+                                                                {{ $result["choices"][$result["result_choice"]] . " " }}
                                                             @endif
                                                             @if(isset($nestedChoices[$result["id"]]))
                                                                 @foreach ($nestedChoices[$result["id"]] as $choice)
@@ -161,16 +161,16 @@
                                                     </td>
                                                     <td class="font-extrabold" style="font-weight: bold">
                                                         @if($result["result_type"] == "number")
-                                                            @if (floatval($result["result"]) < $result["min_value"])
+                                                            @if (floatval($result["result"]) < floatval($result['numeric_ranges']["min_value"]))
                                                                 <i class="fa fa-arrow-down"></i>
-                                                            @elseif(floatval($result["result"]) > $result["max_value"])
+                                                            @elseif(floatval($result["result"]) > floatval($result['numeric_ranges']["max_value"]))
                                                                 <i class="fa fa-arrow-up"></i>
                                                             @endif
                                                         @endif
                                                     </td>
                                                     <td class="font-thin text-right" style="font-size: x-small">
                                                         @if($result["result_type"] == "number")
-                                                            {{ $result["min_value"] . " - " . $result["max_value"] . " " . $result["test"]["unit"] }}
+                                                            {{ $result['numeric_ranges']["min_value"] . " - " . $result['numeric_ranges']["max_value"] . " " . $result["test"]["unit"] }}
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -207,7 +207,7 @@
                                 <tbody class="text-center">
                                 <tr class="border-b-2 cursor-pointer">
                                 @foreach($visitTests as $visitTest)
-                                    <tr class="cursor-pointer" wire:click="changeOption({{$visitTest}})">
+                                    <tr class="cursor-pointer" wire:click="changeOption({{$visitTest->id}})">
                                         <td>{{ $visitTest->test->testName }}</td>
                                     </tr>
                                 @endforeach
@@ -218,11 +218,11 @@
                 </div>
 
                 <div class="w-2/3 flex-wrap">
-                    @if(!empty($results))
-                        @foreach($options as $option)
+                    @if(!empty($results) && $currentOption != null)
+                        @foreach($options[$currentOption] as $optionKey => $option)
                             <div
                                 class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
-                                <h3>{{$option->test->testName}}</h3>
+                                <h3>{{$option}}</h3>
                                 <div class="overflow-auto block max-h-96">
                                     <table class="table-fixed relative max-h-96 w-full overflow-auto">
                                         <thead class="bg-cyan-700 text-white sticky top-0 ">
@@ -234,7 +234,7 @@
                                         <tbody class="text-center">
                                         <tr class="border-b-2 cursor-pointer">
                                         @foreach($results as $index => $test)
-                                            @if($test['visit_test_id'] == $option->id)
+                                            @if($test['visit_test_id'] == $optionKey)
                                                 <tr class="cursor-pointer">
                                                     <td>{{$test['test']['testName']}}</td>
                                                     <td>

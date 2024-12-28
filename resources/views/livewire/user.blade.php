@@ -47,30 +47,32 @@
                                     class=" py-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">{{$id == 0 ? 'حفظ': 'تعديل'}}</button>
                         </div>
 
-                        <table class="table-fixed w-full text-center">
-                            <thead>
-                            <tr>
-                                <th>الصلاحية</th>
-                                <th>عرض</th>
-                                <th>إنشاء</th>
-                                <th>تعديل</th>
-                                <th>حذف</th>
-                            </tr>
-                            </thead>
-                            @foreach($permissionsList as $permission)
-                                <tr class="border-2 border-b-gray-500">
-                                    <td>{{$permission[1]}}</td>
-                                    <td><input class="form-check-input" type="checkbox" wire:model="permissions"
-                                               value="{{$permission[0] . '-read'}}" value="" aria-label="..."></td>
-                                    <td><input class="form-check-input" type="checkbox" wire:model="permissions"
-                                               value="{{$permission[0] . '-create'}}" value="" aria-label="..."></td>
-                                    <td><input class="form-check-input" type="checkbox" wire:model="permissions"
-                                               value="{{$permission[0] . '-update'}}" value="" aria-label="..."></td>
-                                    <td><input class="form-check-input" type="checkbox" wire:model="permissions"
-                                               value="{{$permission[0] . '-delete'}}" value="" aria-label="..."></td>
+                        <div class="px-2 mt-5">
+                            <table class="table-fixed w-full  text-center">
+                                <thead>
+                                <tr class="bg-cyan-700 text-white">
+                                    <th class="rounded-r-2xl py-1">الصلاحية</th>
+                                    <th>عرض</th>
+                                    <th>إنشاء</th>
+                                    <th>تعديل</th>
+                                    <th class="rounded-l-2xl">حذف</th>
                                 </tr>
-                            @endforeach
-                        </table>
+                                </thead>
+                                @foreach($permissionsList as $permission)
+                                    <tr class="border-b-2">
+                                        <td>{{$permission[1]}}</td>
+                                        <td><input class="form-check-input" type="checkbox" wire:model="permissions"
+                                                   value="{{$permission[0] . '-read'}}" value="" aria-label="..."></td>
+                                        <td><input class="form-check-input" type="checkbox" wire:model="permissions"
+                                                   value="{{$permission[0] . '-create'}}" value="" aria-label="..."></td>
+                                        <td><input class="form-check-input" type="checkbox" wire:model="permissions"
+                                                   value="{{$permission[0] . '-update'}}" value="" aria-label="..."></td>
+                                        <td><input class="form-check-input" type="checkbox" wire:model="permissions"
+                                                   value="{{$permission[0] . '-delete'}}" value="" aria-label="..."></td>
+                                    </tr>
+                                @endforeach
+                            </table>
+                        </div>
                     </div>
                 </form>
             </div>

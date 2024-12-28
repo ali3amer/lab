@@ -27,6 +27,6 @@ class AgeGenderGroup extends Model
 
     public function numericRanges()
     {
-        return $this->hasOne(NumericRange::class);
+        return $this->hasMany(NumericRange::class);
     }
 }

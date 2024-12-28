@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreign('visit_test_id')->references('id')->on('visit_tests')->onDelete('cascade')->onUpdate('cascade');
             $table->string("result")->nullable();
             $table->unsignedBigInteger('result_choice')->nullable();
-            $table->foreign('result_choice')->references('id')->on('range_choices')->onDelete('cascade')->onUpdate('cascade');
-
+            $table->foreign('result_choice')->references('id')->on('choice_ranges')->onDelete('cascade')->onUpdate('cascade');
             $table->unsignedBigInteger('test_id');
             $table->foreign('test_id')->references('id')->on('tests')->onDelete('cascade')->onUpdate('cascade');
             $table->decimal("price", 10, 2)->nullable();
