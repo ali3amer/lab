@@ -56,7 +56,6 @@
                             @php $limit = 30; @endphp
 
                             @foreach($printResults as $key => $items)
-
                                 @if($loop->first || $count > $limit || $key == "URINE GENERAL" || $key == "STOOL GENERAL" || $key == "CBC")
                                     <div class="header top-0 break-before-page">
                                         <div dir="rtl" class="info mx-5 mb-1">
@@ -150,7 +149,7 @@
                                                             {{ $result["result"] }}
                                                         @else
                                                             @if(isset($result["choices"][$result["result_choice"]]))
-                                                                {{ $result["choices"][$result["result_choice"]] . " " }}
+                                                                {{ $result["choices"][$result["result_choice"]]['choiceName'] . " " }}
                                                             @endif
                                                             @if(isset($nestedChoices[$result["id"]]))
                                                                 @foreach ($nestedChoices[$result["id"]] as $choice)
@@ -207,7 +206,7 @@
                                 <tbody class="text-center">
                                 <tr class="border-b-2 cursor-pointer">
                                 @foreach($visitTests as $visitTest)
-                                    <tr class="cursor-pointer" wire:click="changeOption({{$visitTest->id}})">
+                                    <tr class="cursor-pointer" id="{{$visitTest->id}}" wire:click="changeOption({{$visitTest->id}})">
                                         <td>{{ $visitTest->test->testName }}</td>
                                     </tr>
                                 @endforeach
@@ -218,9 +217,9 @@
                 </div>
 
                 <div class="w-2/3 flex-wrap">
-                    @if(!empty($results) && $currentOption != null)
-                        @foreach($options[$currentOption] as $optionKey => $option)
-                            <div
+                    @if(!empty($results))
+                        @foreach($currentOptions as $optionKey => $option)
+                            <div id="{{$optionKey}}"
                                 class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
                                 <h3>{{$option}}</h3>
                                 <div class="overflow-auto block max-h-96">
@@ -257,7 +256,7 @@
                                                                         id="{{$index}}">
                                                                     @foreach($test['choices'] as $key => $choice)
                                                                         <option
-                                                                            @selected($test['result_choice'] == $key) value="{{$key}}">{{$choice}}</option>
+                                                                            @selected($test['result_choice'] == $choice['id']) value="{{$choice['id']}}">{{$choice['choiceName']}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>

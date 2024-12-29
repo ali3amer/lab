@@ -22,8 +22,9 @@ class Result extends Component
     public $results;
     public array $cart = [];
     public array $parents = [];
-    public $options;
+    public array $options = [];
     public $currentOption = null;
+    public array $currentOptions = [];
     public $user;
     public array $currentVisit = [];
     public array $currentPatient = [];
@@ -44,7 +45,7 @@ class Result extends Component
 
     public function changeOption($id)
     {
-        $this->currentOption = $id;
+        $this->currentOptions = $this->options[$id];
     }
 
     public function fillOptions(VisitTest $visitTest)
@@ -57,16 +58,33 @@ class Result extends Component
             $results = \App\Models\Result::where("visit_test_id", $visitTest['id'])->with("test")->get()->keyBy("id")->toArray();
             $tests = \App\Models\VisitTest::where("id", $visitTest['id'])->get();
         }
-
         foreach ($results as $result) {
             $this->results[$result['id']] = $result;
         }
+
+        $this->getRanges();
 
         foreach ($tests as $test) {
             $this->options[$test->parent->id][$test->id] = $test->test->testName;
             $this->getVisitTestChildren($test);
         }
-        $this->getRanges();
+
+        $this->fillResult();
+
+    }
+
+    public function fillResult()
+    {
+        foreach ($this->cart as $index => $items) {
+            $testName = \App\Models\Test::find($index)->parent->testName ?? \App\Models\Test::find($index)->testName;
+            foreach ($items as $key => $item) {
+                foreach ($this->results as $result) {
+                    if ($result["visit_test_id"] == $key) {
+                        $this->printResults[$testName][$item][$result["id"]] = $result;
+                    }
+                }
+            }
+        }
     }
 
     public function chooseVisit(Visit $visit)
@@ -84,7 +102,6 @@ class Result extends Component
     public function setResultDefault($index)
     {
         foreach ($this->results[$index]["choices"] as $choice) {
-
             if ($choice["default"] && $this->results[$index]["result_choice"] == null) {
                 $this->results[$index]["result_choice"] = $choice['id'];
             } elseif ($this->results[$index]["result_choice"] != null && $this->results[$index]["result_choice"] == $choice['id']) {
@@ -126,8 +143,8 @@ class Result extends Component
                     $this->results[$key]['testName'] = \App\Models\Test::find($result['test_id'])->testName;
                     if ($result_type == "multiple_choice") {
                         $choices = $ageGenderGroup->choiceRanges;
-                        $this->results[$key]['result_choice'] = $ageGenderGroup->choiceRanges->where("default", true)->first()->id ?? $ageGenderGroup->choiceRanges->first()->id;
-                        $this->results[$key]['choices'] = $choices->pluck("choiceName", "id")->toArray();
+//                        $this->results[$key]['result_choice'] = $ageGenderGroup->choiceRanges->where("default", true)->first()->id ?? $ageGenderGroup->choiceRanges->first()->id;
+                        $this->results[$key]['choices'] = $choices->keyBy("id")->toArray();
                     } elseif ($result_type == "number") {
 
                         $this->results[$key]['numeric_ranges'] = $ageGenderGroup->numericRanges->first()->toArray();
@@ -155,12 +172,11 @@ class Result extends Component
                 if ($child->children->count() > 0) {
                     $this->getVisitTestChildren($child);
                 } else {
-                    $this->cart[$child->parent->test->testName][$child->id] = $child->test->testName;
+                    $this->cart[$child->parent->test->id][$child->id] = $child->test->testName;
 
                     $testsResult = \App\Models\Result::where("visit_test_id", $child->id)->join("tests", "results.test_id", "=", "tests.id")->select("results.*", "tests.testName")->get()->keyBy("id");
 
                     foreach ($testsResult as $test) {
-                        $this->getRanges($test);
                         if ($test->result_type == "multiple_choice") {
                             $this->setResultDefault($test->id);
                         }
@@ -170,13 +186,11 @@ class Result extends Component
                 }
             }
         } else {
-            $testsResult = \App\Models\Result::where("visit_test_id", $visitTest->id)->join("tests", "results.test_id", "=", "tests.id")->select("results.*", "tests.testName")->get()->keyBy("id");
+            $testsResult = \App\Models\Result::where("visit_test_id", $visitTest->id)->get()->keyBy("id");
 
-            $this->cart[$visitTest->test->testName][$visitTest->id] = $visitTest->test->testName;
-
+            $this->cart[$visitTest->test->id][$visitTest->id] = $visitTest->test->testName;
             foreach ($testsResult as $test) {
-                $this->getRanges($test);
-                if ($test->result_type == "multiple_choice") {
+                if ($test->test->result_type == "multiple_choice") {
                     $this->setResultDefault($test->id);
                 }
 
@@ -187,7 +201,7 @@ class Result extends Component
     public function chooseChoice($index)
     {
         $choice = \App\Models\ChoiceRange::where("id", $this->results[$index]['result_choice'])->first();
-        $choices = $choice->children->pluck("choiceName", "id")->toArray();
+        $choices = $choice->children->keyBy("id")->toArray();
 
         if (!empty($choices)) {
             $this->results[$index]["choices"] = $choices;
@@ -206,7 +220,7 @@ class Result extends Component
             $this->nestedChoices = [];
             $choices = \App\Models\ChoiceRange::where("id", $this->results[$index]["result_choice"])->first()->ageGenderGroup->choiceRanges->keyBy("id");
             $this->results[$index]["result_choice"] = $choices->first()->id;
-            $this->results[$index]["choices"] = $choices->pluck("choiceName", "id")->toArray();
+            $this->results[$index]["choices"] = $choices->keyBy("id")->toArray();
         }
     }
 
@@ -218,15 +232,7 @@ class Result extends Component
             ]);
         }
 
-        foreach ($this->cart as $index => $items) {
-            foreach ($items as $key => $item) {
-                foreach ($this->results as $result) {
-                    if ($result["visit_test_id"] == $key) {
-                        $this->printResults[$index][$item][$result["id"]] = $result;
-                    }
-                }
-            }
-        }
+        $this->fillResult();
 
         $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
 

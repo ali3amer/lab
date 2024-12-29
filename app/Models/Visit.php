@@ -67,9 +67,9 @@ class Visit extends Model
     }
 
 
-//    public function getAmountAttribute()
-//    {
-//        return $this->calcAmount() - $this->discount;
-//    }
+    public function getAmountAttribute()
+    {
+        return $this->calcAmount() - $this->discount;
+    }
 
 }
