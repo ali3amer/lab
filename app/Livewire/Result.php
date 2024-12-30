@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\RangeChoice;
 use App\Models\ReferenceRange;
 use App\Models\Visit;
 use App\Models\VisitTest;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Component;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
@@ -85,6 +87,26 @@ class Result extends Component
                 }
             }
         }
+
+
+        $this->downloadPdf();
+    }
+
+    public function downloadPdf()
+    {
+        $data = [
+            'name' => "علي",
+            'email' => 'ritik@test.com',
+            'phone' => '1234567890'
+        ];
+
+
+        $pdf = Pdf::loadView('pdf', $data)->output();
+
+        return response()->stream(
+            fn() => print($pdf),
+        );
+//        return $pdf->download('pdf.pdf');
     }
 
     public function chooseVisit(Visit $visit)
