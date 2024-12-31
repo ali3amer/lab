@@ -26,9 +26,9 @@ Route::get('expense', \App\Livewire\Expense::class);
 Route::get('employee', \App\Livewire\Employee::class);
 Route::get('test', \App\Livewire\Test::class);
 Route::get('report', \App\Livewire\Report::class);
-Route::get('/pdf', function () {
-    return view('pdf');
-});
+
+
+Route::get('/pdf', [\App\Livewire\Result::class, 'downloadPdf'])->name('pdf');
 
 Auth::routes();
 

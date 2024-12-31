@@ -1,10 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>pdf</title>
+    @vite('resources/js/app.js')
+
+    <style>
+        body {
+            font-family: DejaVu Sans, serif;
+            direction: rtl;
+        }
+    </style>
+
+
+
 </head>
 <body>
 <table class="w-full">
@@ -12,7 +23,7 @@
         <td class="w-half">
             <img src="{{ asset('myimage.png') }}" alt="image" width="200" />
         </td>
-        <td class="w-half">
+        <td class="w-half bg-red-500">
             <h2>pdf ID: test523</h2>
         </td>
     </tr>
@@ -28,7 +39,7 @@
         <tr>
             <td class="w-half">
                 <div><h4>To:</h4></div>
-                <div>ali</div>
+                <div style="background-color: green">علي</div>
             </td>
         </tr>
     </table>

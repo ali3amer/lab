@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use Barryvdh\DomPDF\Facade\Pdf;
+use PDF;
 use App\Models\RangeChoice;
 use App\Models\ReferenceRange;
 use App\Models\Visit;
@@ -88,25 +88,29 @@ class Result extends Component
             }
         }
 
-
-        $this->downloadPdf();
     }
 
     public function downloadPdf()
     {
-        $data = [
-            'name' => "علي",
-            'email' => 'ritik@test.com',
-            'phone' => '1234567890'
-        ];
-
-
-        $pdf = Pdf::loadView('pdf', $data)->output();
-
-        return response()->stream(
-            fn() => print($pdf),
-        );
+//        $data = [
+//            'name' => "علي",
+//            'email' => 'ritik@test.com',
+//            'phone' => '1234567890'
+//        ];
+//
+//
+//        $pdf = PDF::loadView('pdf');
+//        return $pdf->stream('document.pdf');
 //        return $pdf->download('pdf.pdf');
+
+        $data = [
+            'foo' => 'bar'
+        ];
+        $pdf = PDF::loadView('pdf');
+        $pdf->autoScriptToLang = true;
+        $pdf->autoArabic = true;
+        $pdf->autoLangToFont = true;
+        return $pdf->stream('pdf.pdf');
     }
 
     public function chooseVisit(Visit $visit)
@@ -183,7 +187,10 @@ class Result extends Component
 
     public function getPrintResults()
     {
-        return $this->printResults;
+//        return $this->printResults;
+        $this->fillResult();
+        return $this->redirect('pdf');
+
     }
 
     public function getVisitTestChildren(VisitTest $visitTest)
