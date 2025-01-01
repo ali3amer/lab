@@ -87,7 +87,11 @@ class Result extends Component
                 }
             }
         }
-
+        session([
+            'printResults' => $this->printResults,
+            'currentVisit' => $this->currentVisit,
+            'currentPatient' => $this->currentPatient,
+        ]);
     }
 
     public function downloadPdf()
@@ -103,14 +107,16 @@ class Result extends Component
 //        return $pdf->stream('document.pdf');
 //        return $pdf->download('pdf.pdf');
 
-        $data = [
-            'foo' => 'bar'
-        ];
-        $pdf = PDF::loadView('pdf');
+
+        $pdf = PDF::loadView('pdf', ['currentVisit' => session('currentVisit'), 'currentPatient' => session('currentPatient'), 'printResults' => session('printResults')]);
         $pdf->autoScriptToLang = true;
         $pdf->autoArabic = true;
         $pdf->autoLangToFont = true;
-        return $pdf->stream('pdf.pdf');
+//        return $pdf->stream('pdf.pdf');
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="pdf.pdf"',
+        ]);
     }
 
     public function chooseVisit(Visit $visit)
