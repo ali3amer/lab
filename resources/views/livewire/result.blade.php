@@ -170,6 +170,10 @@
                                                     <td class="font-thin text-right" style="font-size: x-small">
                                                         @if($result["result_type"] == "number")
                                                             {{ $result['numeric_ranges']["min_value"] . " - " . $result['numeric_ranges']["max_value"] . " " . $result["test"]["unit"] }}
+                                                        @elseif($result["result_type"] == "text")
+                                                            @foreach($result['text_ranges'] as $text)
+                                                                {{ $text['text']  }} @if(!$loop->last) <br/> @endif
+                                                            @endforeach
                                                         @endif
                                                     </td>
                                                 </tr>

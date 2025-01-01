@@ -67,7 +67,7 @@ class Result extends Component
         $this->getRanges();
 
         foreach ($tests as $test) {
-            $this->options[$test->parent->id][$test->id] = $test->test->testName;
+            $this->options[$test->parent->id ?? $test->id][$test->id] = $test->test->testName;
             $this->getVisitTestChildren($test);
         }
 

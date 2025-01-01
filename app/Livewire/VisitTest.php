@@ -21,7 +21,7 @@ class VisitTest extends Component
     public Collection $categories;
     public Collection $tests;
     public array $currentLocation = [];
-    public $visit_test_id = 0;
+    public $visit_test_id = null;
     public $amount = 0;
     public $total_amount = 0;
     public $discount = 0;

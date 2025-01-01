@@ -22,7 +22,7 @@ class AgeGenderGroup extends Model
 
     public function textRanges()
     {
-        return $this->hasOne(TextRange::class);
+        return $this->hasMany(TextRange::class);
     }
 
     public function numericRanges()
