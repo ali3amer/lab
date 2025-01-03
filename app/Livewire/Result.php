@@ -62,6 +62,9 @@ class Result extends Component
         }
         foreach ($results as $result) {
             $this->results[$result['id']] = $result;
+            $test = \App\Models\Test::find($result['test_id']);
+            $this->results[$result['id']]['testName'] = $test['testName'];
+            $this->results[$result['id']]['result_type'] = $test['result_type'];
         }
 
         $this->getRanges();
@@ -87,6 +90,7 @@ class Result extends Component
                 }
             }
         }
+
         session([
             'printResults' => $this->printResults,
             'currentVisit' => $this->currentVisit,
@@ -106,17 +110,18 @@ class Result extends Component
 //        $pdf = PDF::loadView('pdf');
 //        return $pdf->stream('document.pdf');
 //        return $pdf->download('pdf.pdf');
-
+        ini_set('max_execution_time', '300');
+        ini_set("pcre.backtrack_limit", "5000000");
 
         $pdf = PDF::loadView('pdf', ['currentVisit' => session('currentVisit'), 'currentPatient' => session('currentPatient'), 'printResults' => session('printResults')]);
         $pdf->autoScriptToLang = true;
         $pdf->autoArabic = true;
         $pdf->autoLangToFont = true;
-//        return $pdf->stream('pdf.pdf');
-        return response($pdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="pdf.pdf"',
-        ]);
+        return $pdf->stream('pdf.pdf');
+//        return response($pdf->output(), 200, [
+//            'Content-Type' => 'application/pdf',
+//            'Content-Disposition' => 'attachment; filename="pdf.pdf"',
+//        ]);
     }
 
     public function chooseVisit(Visit $visit)
@@ -162,6 +167,7 @@ class Result extends Component
         foreach ($this->results as $key => $result) {
             $test = \App\Models\Test::find($result['test_id']);
             $ageGenderGroups = $test->ageGenderGroups;
+
             $result_type = $test->result_type;
             if ($ageGenderGroups) {
                 if (count($ageGenderGroups) == 1) {
@@ -171,6 +177,7 @@ class Result extends Component
                 }
 
                 if ($ageGenderGroup) {
+
                     $this->results[$key]['age_gender_group'] = $ageGenderGroup->id;
                     $this->results[$key]['testName'] = \App\Models\Test::find($result['test_id'])->testName;
                     if ($result_type == "multiple_choice") {
@@ -178,12 +185,15 @@ class Result extends Component
 //                        $this->results[$key]['result_choice'] = $ageGenderGroup->choiceRanges->where("default", true)->first()->id ?? $ageGenderGroup->choiceRanges->first()->id;
                         $this->results[$key]['choices'] = $choices->keyBy("id")->toArray();
                     } elseif ($result_type == "number") {
-
                         $this->results[$key]['numeric_ranges'] = $ageGenderGroup->numericRanges->first()->toArray();
                     } elseif ($result_type == "text") {
                         $this->results[$key]['text_ranges'] = $ageGenderGroup->textRanges->toArray();
                     }
                     $this->results[$key]['result_type'] = $result_type;
+                } else {
+                    $this->results[$key]['choices'] = [];
+                    $this->results[$key]['numeric_ranges'] = ['min_value' => 0, 'max_value' => 0];
+                    $this->results[$key]['text_ranges'] = [];
                 }
 
             }

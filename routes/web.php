@@ -29,6 +29,11 @@ Route::get('report', \App\Livewire\Report::class);
 
 
 Route::get('/pdf', [\App\Livewire\Result::class, 'downloadPdf'])->name('pdf');
+//Route::get('/pdf', function () {
+//    return view('pdf', ['currentVisit' => session('currentVisit'), 'currentPatient' => session('currentPatient'), 'printResults' => session('printResults')]);
+//})->name('pdf');
+
+
 
 Auth::routes();
 

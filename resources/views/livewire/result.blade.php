@@ -45,8 +45,10 @@
 
                 <button wire:click="save()" class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i
                         class="fa fa-save"></i></button>
-                <a id="printInvoiceResult" href="pdf" type="button" target="_blank"
-                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></a>
+{{--                <a id="printInvoiceResult" href="pdf" type="button" target="_blank"--}}
+{{--                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></a>--}}
+                <button id="printInvoiceResult" @click="$('.invoice').printThis()"
+                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></button>
                 <button id="resetData" wire:click="resetData()"
                         class="py-1.5 px-2.5 bg-red-700 text-white rounded"><i class="fa fa-close"></i></button>
                 <div class="invoice hidden print:block">
