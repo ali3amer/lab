@@ -20,9 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('insurance_id')->nullable();
             $table->foreign('insurance_id')->references('id')->on('insurances')->onDelete('cascade')->onUpdate('cascade');
             $table->string("insuranceNumber")->nullable();
-            $table->decimal("amount", 10, 2)->nullable();
-            $table->decimal("discount", 10, 2)->nullable();
-            $table->decimal("total_amount", 10, 2)->nullable();
+            $table->decimal("discount", 10, 2)->default(0);
             $table->string("doctor")->nullable();
             $table->decimal("patientEndurance", 8, 2)->default(100);
             $table->date("visit_date");

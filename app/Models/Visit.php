@@ -59,9 +59,9 @@ class Visit extends Model
         }
 
         // إضافة الأسعار من Result إذا لم يكن هناك أبناء من نفس النوع
-        if ($visitTest->results && !$visitTest->children->isNotEmpty()) {
-            $total += $visitTest->results->sum('price');
-        }
+//        if ($visitTest->results && !$visitTest->children->isNotEmpty()) {
+//            $total += $visitTest->results->sum('price');
+//        }
 
         return $total;
     }

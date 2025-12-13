@@ -37,12 +37,15 @@ class Result extends Component
     ];
     public array $nestedChoices = [];
     public array $printResults = [];
+    public $setting;
 
     public function mount()
     {
         if (!auth()->check()) {
             redirect("login");
         }
+
+        $this->setting = \App\Models\Setting::first();
     }
 
     public function changeOption($id)
@@ -124,10 +127,13 @@ class Result extends Component
 //        ]);
     }
 
-    public function chooseVisit(Visit $visit)
+    public function chooseVisit($id)
     {
+        $visit = Visit::find($id);
         $this->currentPatient = $visit->patient->toArray();
         $this->currentVisit = $visit->toArray();
+        $this->currentVisit['insuranceName'] = $visit->insurance->insuranceName ?? null;
+        $this->currentVisit['amount'] = $visit->amount * ($visit->patientEndurance / 100);
         $this->visitTests = VisitTest::where('visit_id', $visit->id)->get();
         $this->results = [];
         $this->options = [];
@@ -271,13 +277,22 @@ class Result extends Component
 
     public function save()
     {
+        Visit::where('id', $this->currentVisit['id'])->update([
+            'discount' => floatval($this->currentVisit['discount']),
+        ]);
+
+
         foreach ($this->results as $result) {
             \App\Models\Result::where("id", $result["id"])->update([
                 "result_choice" => $result["result_choice"] ?? null,
+                "result" => $result["result"] ?? null,
             ]);
         }
 
         $this->fillResult();
+
+        $this->chooseVisit($this->currentVisit['id']);
+
 
         $this->alert('success', 'تم الحفظ بنجاح', ['timerProgressBar' => true]);
 
@@ -288,242 +303,6 @@ class Result extends Component
 
     }
 
-    public function collectFromAnotherDatabase()
-    {
-//        $choices = RangeChoice::where("choiceName", "LIKE", "%+%")->get()->toArray();
-//        $c = [];
-//        foreach ($choices as $choice) {
-//            $c[$choice["id"]] = $choice["choiceName"];
-//        }
-//        dd($c);
-
-        Artisan::call("migrate:fresh --seed");
-        $this->alert('success', 'تم اعداد قاعدة البيانات بنجاح', ['timerProgressBar' => true]);
-
-//        \App\Models\Category::where("id", ">", 0)->delete();
-        $db2 = \DB::connection('db2');
-        $categories = $db2->table('categories')->get()->keyBy("id");
-        foreach ($categories as $category) {
-            \App\Models\Category::create([
-                'id' => $category->id,
-                'categoryName' => $category->categoryName,
-                'created_at' => $category->created_at,
-                'updated_at' => $category->updated_at,
-            ]);
-        }
-
-        $tests = $db2->table('tests')->whereNotNull("category_id")->get()->keyBy("id");
-
-        foreach ($tests as $test) {
-            $range = $db2->table('reference_ranges')->where("test_id", $test->id)->first();
-            if ($range) {
-                $result_type = $range->result_type == "multable_choice" ? "multiple_choice" : "number";
-            } else {
-                $result_type = "number";
-            }
-            \App\Models\Test::create([
-                'id' => $test->id,
-                'testName' => $test->testName,
-                'result_type' => $result_type,
-                'shortcut' => $test->shortcut,
-                'price' => floatval($test->price),
-                'unit' => $test->unit,
-                'category_id' => $test->category_id,
-                'test_id' => $test->test_id,
-                'getAll' => $test->getAll,
-                'created_at' => $test->created_at,
-                'updated_at' => $test->updated_at,
-            ]);
-        }
-
-        $tests = $db2->table('tests')->whereNull("category_id")->get()->keyBy("id");
-
-        foreach ($tests as $test) {
-            $range = $db2->table('reference_ranges')->where("test_id", $test->id)->first();
-            if ($range) {
-                $result_type = $range->result_type == "multable_choice" ? "multiple_choice" : "number";
-            } else {
-                $result_type = "number";
-            }
-            \App\Models\Test::create([
-                'id' => $test->id,
-                'testName' => $test->testName,
-                'result_type' => $result_type,
-                'shortcut' => $test->shortcut,
-                'price' => floatval($test->price),
-                'unit' => $test->unit,
-                'category_id' => $test->category_id,
-                'test_id' => $test->test_id,
-                'getAll' => $test->getAll,
-                'created_at' => $test->created_at,
-                'updated_at' => $test->updated_at,
-            ]);
-        }
-
-        $reference_ranges = $db2->table('reference_ranges')->get()->keyBy("id");
-
-        foreach ($reference_ranges as $reference_range) {
-            $ageGenderGroup = \App\Models\AgeGenderGroup::create([
-                'test_id' => $reference_range->test_id,
-                'gender' => $reference_range->gender,
-                'age' => $reference_range->age,
-                'min_age' => $reference_range->min_age,
-                'max_age' => $reference_range->max_age,
-            ]);
-
-            if ($ageGenderGroup->test->result_type == "number") {
-                \App\Models\NumericRange::create([
-                    'age_gender_group_id' => $ageGenderGroup->id,
-                    'min_value' => $reference_range->min_value,
-                    'max_value' => $reference_range->max_value,
-                ]);
-            } elseif ($ageGenderGroup->test->result_type == "multiple_choice") {
-                $choices = $db2->table('range_choices')->where("range_id", $reference_range->id)->get()->keyBy("id");
-
-                foreach ($choices as $choice) {
-                    \App\Models\ChoiceRange::create([
-                        'age_gender_group_id' => $ageGenderGroup->id,
-                        'choiceName' => $choice->choiceName,
-                        'default' => $choice->default,
-                    ]);
-
-                    $this->addChoices($choice);
-                }
-            }
-
-        }
-        $this->alert('success', 'تم بحمد الله', ['timerProgressBar' => true]);
-
-
-//        foreach ($categories as $category) {
-//            $cat = \App\Models\Category::create([
-//                "categoryName" => $category->categoryName
-//            ]);
-//            $analyses = $db2->table('analyses')->where("category_id", $category->id)->get()->keyBy("id");
-//            foreach ($analyses as $analysis) {
-//                $sub_analyses = $db2->table('sub_analyses')->where("analysis_id", $analysis->id)->get()->keyBy("id");
-//                $count = $sub_analyses->count();
-//                if ($count == 1) {
-//                    $test = \App\Models\Test::create([
-//                        "testName" => $sub_analyses->first()->subAnalysisName,
-//                        "unit" => $sub_analyses->first()->unit,
-//                        "price" => $sub_analyses->first()->price,
-//                        "category_id" => $cat->id
-//                    ]);
-//
-//                    $ranges = $db2->table('reference_ranges')->where("sub_analysis_id", $sub_analyses->first()->id)->get();
-//
-//                    foreach ($ranges as $range) {
-//                        $ref = ReferenceRange::create([
-//                            "test_id" => $test->id,
-//                            "age" => $range->age == "years" ? "year" : $range->age,
-//                            "gender" => $range->gender,
-//                            "min_value" => $range->range_from,
-//                            "max_value" => $range->range_to,
-//                            "min_age" => $range->age_from,
-//                            "max_age" => $range->age_to,
-//                            "result_type" => $range->result_types,
-//                        ]);
-//
-//                        if ($range->result_types == "multiple_choice") {
-//                            foreach (json_decode($range->result_multiple_choice) as $index => $choice) {
-//                                RangeChoice::create([
-//                                    "range_id" => $ref->id,
-//                                    "choiceName" => $choice,
-//                                    "default" => in_array($choice, ["nil", "yellow", "negative", "clear", "Brown", "Normal"])
-//                                ]);
-//                            }
-//                        }
-//                    }
-//
-//                } else {
-//                    $parentTest = \App\Models\Test::create([
-//                        "testName" => $analysis->analysisName,
-//                        "category_id" => $cat->id
-//                    ]);
-//                    foreach ($sub_analyses as $sub) {
-//                        $test = \App\Models\Test::create([
-//                            "testName" => $sub->subAnalysisName,
-//                            "unit" => $sub->unit,
-//                            "price" => $sub->price,
-//                            "test_id" => $parentTest->id
-//                        ]);
-//
-//                        $ranges = $db2->table('reference_ranges')->where("sub_analysis_id", $sub->id)->get();
-//
-//                        foreach ($ranges as $range) {
-//                            $ref = ReferenceRange::create([
-//                                "test_id" => $test->id,
-//                                "age" => $range->age == "years" ? "year" : $range->age,
-//                                "gender" => $range->gender,
-//                                "min_value" => $range->range_from,
-//                                "max_value" => $range->range_to,
-//                                "min_age" => $range->age_from,
-//                                "max_age" => $range->age_to,
-//                                "result_type" => $range->result_types,
-//                            ]);
-//
-//                            if ($range->result_types == "multiple_choice") {
-//                                foreach (json_decode($range->result_multiple_choice) as $index => $choice) {
-//                                    RangeChoice::create([
-//                                        "range_id" => $ref->id,
-//                                        "choiceName" => $choice,
-//                                        "default" => in_array($choice, ["nil", "yellow", "negative", "clear"])
-//                                    ]);
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//        }
-//
-//        $urin = \App\Models\Test::create(["testName" => "URINE GENERAL", "category_id" => 3, "getAll" => true]);
-//        $stool = \App\Models\Test::create(["testName" => "STOOL GENERAL", "category_id" => 3, "getAll" => true]);
-//
-//        \App\Models\Test::where("testName", "URINE GENERAL - Microscopy")->update([
-//            "testName" => "Microscopy",
-//            "category_id" => null,
-//            "test_id" => $urin->id
-//        ]);
-//        \App\Models\Test::where("testName", "URINE GENERAL - MACRO")->update([
-//            "testName" => "MACRO",
-//            "category_id" => null,
-//            "test_id" => $urin->id
-//        ]);
-//        \App\Models\Test::where("testName", "Stool Genral -MACRO")->update([
-//            "testName" => "MACRO",
-//            "category_id" => null,
-//            "test_id" => $stool->id
-//        ]);
-//        \App\Models\Test::where("testName", "Stool Genral -MICRO")->update([
-//            "testName" => "MICRO",
-//            "category_id" => null,
-//            "test_id" => $stool->id
-//        ]);
-//
-//        \App\Models\Test::where("testName", "CBC")->update([
-//            "getAll" => true
-//        ]);
-    }
-
-    public function addChoices($choice)
-    {
-        $db2 = \DB::connection('db2');
-        $newChoices = $db2->table('range_choices')->where("choice_id", $choice->id)->get()->keyBy("id");
-        if ($newChoices->count() > 0) {
-            foreach ($newChoices as $ch) {
-                \App\Models\ChoiceRange::create([
-                    'choice_range_id' => $choice['id'],
-                    'choiceName' => $ch->choiceName,
-                    'default' => $ch->default,
-                ]);
-                $this->addChoices($ch);
-            }
-        }
-    }
-
     public function resetData()
     {
         $this->reset("results", "cart", "currentVisit", "currentPatient", "patientSearch");
@@ -531,7 +310,6 @@ class Result extends Component
 
     public function render()
     {
-//        $this->collectFromAnotherDatabase();
         $this->user = auth()->user();
 
         return view('livewire.result', [

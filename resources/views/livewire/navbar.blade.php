@@ -9,6 +9,7 @@
         ['expense' , 'المصروفات', 'dollar'],
         ['user' , 'المستخدمين', 'user'],
         ['report' , 'التقارير', 'file-lines'],
+        ['setting' , 'الإعدادات', 'cogs'],
 ];
 @endphp
 <style>

@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patients', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('patientName');
-            $table->decimal('age', '8', '2');
-            $table->enum('gender', ['male', 'female']);
-            $table->enum('duration', ['year', 'month', 'week', 'day', 'hour']);
-            $table->integer('phone')->nullable();
-            $table->date('firstVisitDate');
+            $table->string("name");
+            $table->string("first_name");
+            $table->string("second_name");
+            $table->string("logo")->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('patients');
+        Schema::dropIfExists('settings');
     }
 };

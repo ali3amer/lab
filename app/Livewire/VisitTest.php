@@ -28,10 +28,15 @@ class VisitTest extends Component
 
     public array $currentCategory = [];
     public array $currentTest = [];
+    public $visit;
+    public $setting;
 
     public function mount()
     {
         $this->categories = \App\Models\Category::all();
+        $this->visit = \App\Models\Visit::find($this->visit_id);
+        $this->setting = \App\Models\Setting::first();
+
         $this->changeLocation(-1);
     }
 
@@ -53,18 +58,22 @@ class VisitTest extends Component
 
     public function addTest(\App\Models\Test $test)
     {
-        if ($test->getAll) {
-            \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->delete();
-            $this->visitTest($test);
-            $this->addChildrenTests($test, $this->visit_test_id);
-        } else {
-            if ($test->children->isNotEmpty()) {
-                $this->chooseTest($test->id);
+        $check = \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->count();
+        if ($check == 0) {
+            if ($test->getAll) {
+                \App\Models\VisitTest::where('visit_id', $this->visit_id)->where('test_id', $test->id)->delete();
+                $this->visitTest($test);
+                $this->addChildrenTests($test, $this->visit_test_id);
             } else {
-                $this->visitTest($test, $this->visit_test_id);
-                $this->result($test);
+                if ($test->children->isNotEmpty()) {
+                    $this->chooseTest($test->id);
+                } else {
+                    $this->visitTest($test, $this->visit_test_id);
+                    $this->result($test);
+                }
             }
         }
+        $this->visit_test_id = null;
     }
 
     public function addChildrenTests(\App\Models\Test $test, $visit_test_id)

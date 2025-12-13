@@ -13,6 +13,7 @@ return [
             'visits' => 'c,r,u,d',
             'users' => 'c,r,u,d',
             'reports' => 'c,r,u,d',
+            'settings' => 'c,r,u,d',
         ],
         'user' => []
     ],

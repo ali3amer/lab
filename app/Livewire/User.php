@@ -36,6 +36,7 @@ class User extends Component
         ['users', 'المستخدمين'],
         ['expenses', 'المصروفات'],
         ['reports', 'التقارير'],
+        ['settings', 'الإعدادات'],
     ];
 
     public function mount()

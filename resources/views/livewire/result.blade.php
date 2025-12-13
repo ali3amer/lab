@@ -20,14 +20,16 @@
                         <tr>
                             <th class=" rounded-r-2xl py-2">رقم الزيارة</th>
                             <th class=" py-2">إسم المريض</th>
+                            <th class=" py-2">التخفيض</th>
                             <th class=" rounded-l-2xl py-2">المبلغ</th>
                         </tr>
                         </thead>
                         <tbody class="text-center">
                         @foreach($visits as $visit)
-                            <tr class="border-b-2 cursor-pointer" wire:click="chooseVisit({{$visit}})">
+                            <tr class="border-b-2 cursor-pointer" wire:click="chooseVisit({{$visit->id}})">
                                 <td class="py-2">{{$visit->id}}</td>
                                 <td class="py-2">{{$visit->patient->patientName ?? ""}}</td>
+                                <td>{{number_format($visit->discount, 2)}}</td>
                                 <td>{{number_format($visit->amount * ($visit->patientEndurance / 100), 2)}}</td>
                             </tr>
                         @endforeach
@@ -38,20 +40,51 @@
             </div>
         @else
 
-            <div class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+            <div class="p-5 flex text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
 
-                <input type="text" wire:model.live="currentPatient.patientName" disabled
-                       class="p-2 my-2 border-2 text-center font-extrabold">
+                <div class="w-1/4 px-3">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                           for="doctor">
+                        إسم المريض
+                    </label>
+                    <input autocomplete="off" wire:model="currentPatient.patientName" disabled
+                           class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                           id="patientName" type="text" placeholder="إسم المريض">
+                </div>
 
-                <button wire:click="save()" class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i
-                        class="fa fa-save"></i></button>
-{{--                <a id="printInvoiceResult" href="pdf" type="button" target="_blank"--}}
-{{--                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></a>--}}
-                <button id="printInvoiceResult" @click="$('.invoice').printThis()"
-                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></button>
-                <button id="resetData" wire:click="resetData()"
-                        class="py-1.5 px-2.5 bg-red-700 text-white rounded"><i class="fa fa-close"></i></button>
+                <div class="w-1/4 px-3">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                           for="doctor">
+                        التخفيض
+                    </label>
+                    <input autocomplete="off" wire:model.live="currentVisit.discount"
+                           class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                           id="patientName" type="text" placeholder="التخفيض">
+                </div>
+
+                <div class="w-1/4 px-3">
+                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                           for="doctor">
+                        الجمله
+                    </label>
+                    <input autocomplete="off" value="{{ round($currentVisit['amount']) }}" disabled
+                           class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                           id="patientName" type="text" placeholder="إسم المريض">
+                </div>
+
+                <div class="w-1/4 flex items-end gap-1">
+                    <button wire:click="save()" class="py-2.5 px-2.5 bg-cyan-700 text-white rounded"><i
+                            class="fa fa-save"></i></button>
+                    {{--                <a id="printInvoiceResult" href="pdf" type="button" target="_blank"--}}
+                    {{--                        class="py-1.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></a>--}}
+                    <button id="printInvoiceResult" @click="$('.invoice').printThis()"
+                            class="py-2.5 px-2.5 bg-cyan-700 text-white rounded"><i class="fa fa-print"></i></button>
+                    <button id="resetData" wire:click="resetData()"
+                            class="py-2.5 px-2.5 bg-red-700 text-white rounded"><i class="fa fa-close"></i></button>
+                </div>
+
                 <div class="invoice hidden print:block">
+
                     @if(!empty($printResults))
                         <div class="body relative">
                             @php $count = 0; @endphp
@@ -67,7 +100,7 @@
                                                     <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
                                                 </div>
                                                 <div class="w-3/5 items-center text-center">
-                                                    <h2 class="result-header">معمل النخبة للتحاليل الطبيه</h2>
+                                                    <h2 class="result-header">{{$setting->name}}</h2>
                                                 </div>
                                                 <div class="w-1/5 rounded-xl">
                                                     <img src="{{asset("js/newheader.jpg")}}" style="width: 100%;">
@@ -111,7 +144,8 @@
                                                     <div class="border-2 border-gray-100 ml-2">
                                                         <div class="flex">
                                                             <div class="w-1/6 px-2  bg-gray-100">التأمين</div>
-                                                            <div class="w-5/6 px-3"></div>
+                                                            <div
+                                                                class="w-5/6 px-3">{{ $currentVisit['insuranceName'] != null ? $currentVisit['insuranceName'] . " | " . $currentVisit['insuranceNumber'] : '' }}</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -174,7 +208,9 @@
                                                             {{ $result['numeric_ranges']["min_value"] . " - " . $result['numeric_ranges']["max_value"] . " " . $result["test"]["unit"] }}
                                                         @elseif($result["result_type"] == "text")
                                                             @foreach($result['text_ranges'] as $text)
-                                                                {{ $text['text']  }} @if(!$loop->last) <br/> @endif
+                                                                {{ $text['text']  }} @if(!$loop->last)
+                                                                    <br/>
+                                                                @endif
                                                             @endforeach
                                                         @endif
                                                     </td>
@@ -186,10 +222,10 @@
                                 </div>
                                 <div class="footer w-full">
                                     <div class="flex">
-                                        <div class="w-1/4 text-center font-serif">Dr.Kamal Magalad</div>
+                                        <div class="w-1/4 text-center font-serif">{{$setting->first_name}}</div>
                                         <div class="w-1/4 "></div>
                                         <div class="w-1/4 "></div>
-                                        <div class="w-1/4 text-center font-serif">Dr.Sami Hashim</div>
+                                        <div class="w-1/4 text-center font-serif">{{$setting->second_name}}</div>
                                     </div>
                                 </div>
                             @endforeach
@@ -212,7 +248,8 @@
                                 <tbody class="text-center">
                                 <tr class="border-b-2 cursor-pointer">
                                 @foreach($visitTests as $visitTest)
-                                    <tr class="cursor-pointer" id="{{$visitTest->id}}" wire:click="changeOption({{$visitTest->id}})">
+                                    <tr class="cursor-pointer" id="{{$visitTest->id}}"
+                                        wire:click="changeOption({{$visitTest->id}})">
                                         <td>{{ $visitTest->test->testName }}</td>
                                     </tr>
                                 @endforeach
@@ -226,7 +263,7 @@
                     @if(!empty($results))
                         @foreach($currentOptions as $optionKey => $option)
                             <div id="{{$optionKey}}"
-                                class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
+                                 class="p-5 text-cyan-800 bg-white font-extrabold border-2 border-dashed rounded-2xl my-2 mx-5">
                                 <h3>{{$option}}</h3>
                                 <div class="overflow-auto block max-h-96">
                                     <table class="table-fixed relative max-h-96 w-full overflow-auto">

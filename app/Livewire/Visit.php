@@ -25,8 +25,6 @@ class Visit extends Component
     public array $insurances = [];
 
     public $discount = 0;
-    public $amount = 0;
-    public $total_amount = 0;
     public $insuranceNumber = null;
     public $doctor = null;
     public $patientEndurance = null;
@@ -55,9 +53,7 @@ class Visit extends Component
                 'patient_id' => $this->patient_id,
                 'user_id' => auth()->id(),
                 'insurance_id' => $this->insurance_id,
-                'insuranceNumber' => $this->insuranceNumber,
-                'amount' => $this->amount,
-                'total_amount' => $this->total_amount,
+                'insuranceNumber' => $this->insurance_id != null ? $this->insuranceNumber : null,
                 'discount' => $this->discount,
                 'doctor' => $this->doctor,
                 'patientEndurance' => $this->insurance_id != null ? $this->insurances[$this->insurance_id]["patientEndurance"] : 100,
@@ -71,8 +67,7 @@ class Visit extends Component
             \App\Models\Visit::where('id', $this->id)->update([
                 'user_id' => auth()->id(),
                 'insurance_id' => $this->insurance_id,
-                'insuranceNumber' => $this->insuranceNumber,
-                'total_amount' => $this->total_amount,
+                'insuranceNumber' => $this->insurance_id != null ? $this->insuranceNumber : null,
                 'discount' => $this->discount,
                 'doctor' => $this->doctor,
                 'patientEndurance' => $this->insurance_id != null ? $this->insurances[$this->insurance_id]["patientEndurance"] : 100,
@@ -100,9 +95,7 @@ class Visit extends Component
         $this->id = $visit['id'];
         $this->insurance_id = $visit['insurance_id'];
         $this->insuranceNumber = $visit['insuranceNumber'];
-        $this->amount = $visit['amount'];
-        $this->total_amount = $visit['total_amount'];
-        $this->discount = $visit['discount'];
+        $this->discount = round($visit['discount']);
         $this->doctor = $visit['doctor'];
         $this->patientEndurance = $visit['patientEndurance'];
         $this->visit_date = $visit['visit_date'];
@@ -131,7 +124,7 @@ class Visit extends Component
 
     public function resetVisitData()
     {
-        $this->reset("id", "insurance_id", "insuranceNumber", "amount", "discount", "total_amount", "doctor", "patientEndurance", "visit_date", "currentVisit", "visitTestMode");
+        $this->reset("id", "insurance_id", "insuranceNumber", "discount", "doctor", "patientEndurance", "visit_date", "currentVisit", "visitTestMode");
     }
 
 

@@ -30,7 +30,7 @@
                             class="appearance-none text-center block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                             id="reportType">
                             <option value="">--------------</option>
-                            @foreach($insurances as $index => $insurance)
+                            @foreach($insurances->toArray() as $index => $insurance)
                                 <option value="{{ $insurance['id'] }}">{{ $insurance['insuranceName'] }}</option>
                             @endforeach
                         </select>
@@ -105,8 +105,12 @@
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>الإيرادات</td>
-                                    <td>{{ $incomes != null ? number_format($incomes->sum("total_amount"), 2) : 0 }}</td>
+                                    <td>إيرادات المرضى</td>
+                                    <td>{{ number_format($incomeSum, 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>إيرادات شركات التأمين</td>
+                                    <td>{{ number_format($insuranceSum, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <td>المصروفات</td>
@@ -135,18 +139,22 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    @php $total = 0; @endphp
                                     @foreach($incomes as $income)
+                                        @php $amount = $income->amount * ($income->patientEndurance / 100); @endphp
+                                        @php $total += $amount @endphp
+
                                         <tr>
                                             <td class="py-2">{{ $income->visit_date }}</td>
                                             <td>{{ $income->patient->patientName }}</td>
-                                            <td>{{ number_format($income->total_amount, 2) }}</td>
+                                            <td>{{ number_format($amount, 2) }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>
                                     <tfoot class="bg-cyan-700 font-extrabold text-white">
                                     <tr>
                                         <th class="py-2 " colspan="2">الجمله</th>
-                                        <th class="py-2 ">{{ number_format($incomes->sum("amount"), 2) }}</th>
+                                        <th class="py-2 ">{{ number_format($total, 2) }}</th>
                                     </tr>
                                     </tfoot>
                                 </table>
@@ -206,7 +214,7 @@
                                 </table>
                             @endif
                         @elseif($reportType == "insuranceReport" && !empty($visits))
-                            <h3>شركة تأمين : {{ $insurances[$insurance_id]['insuranceName'] }}</h3>
+                            <h3>شركة تأمين : {{ $insuranceName }}</h3>
                             <table class="w-full table-fixed text-center">
                                 <thead class="bg-cyan-700 font-extrabold text-white">
                                 <tr>
@@ -223,27 +231,29 @@
                                 @php
                                     $patientEndurance = 0;
                                     $insuranceEndurance = 0;
+                                    $total = 0;
                                 @endphp
                                 @foreach($visits as $visit)
                                     @php
-                                        $patientEndurance += floatval($visit->total_amount) * (floatval($visit->patientEndurance) / 100);
-                                        $insuranceEndurance += floatval($visit->total_amount) * ((100 - floatval($visit->patientEndurance)) / 100);
+                                        $patientEndurance += floatval($visit->amount) * (floatval($visit->patientEndurance) / 100);
+                                        $insuranceEndurance += floatval($visit->amount) * ((100 - floatval($visit->patientEndurance)) / 100);
+                                        $total += $visit->amount;
                                     @endphp
                                     <tr>
                                         <td class="py-2">{{ $visit->visit_date }}</td>
                                         <td>{{ $visit->patient->patientName }}</td>
                                         <td>{{ $visit->insuranceNumber }}</td>
-                                        <td>{{ number_format($visit->total_amount, 2) }}</td>
+                                        <td>{{ number_format($visit->amount, 2) }}</td>
                                         <td>{{ $visit->patientEndurance . "%" }}</td>
-                                        <td>{{ number_format($visit->total_amount * ($visit->patientEndurance / 100), 2) }}</td>
-                                        <td>{{ number_format($visit->total_amount * ((100 - $visit->patientEndurance) / 100), 2) }}</td>
+                                        <td>{{ number_format($visit->amount * ($visit->patientEndurance / 100), 2) }}</td>
+                                        <td>{{ number_format($visit->amount * ((100 - $visit->patientEndurance) / 100), 2) }}</td>
                                     </tr>
                                 @endforeach
                                 </tbody>
                                 <tfoot class="bg-cyan-700 font-extrabold text-white">
                                 <tr>
                                     <th class="py-2 " colspan="3">الجمله</th>
-                                    <th class="py-2 ">{{ number_format($visits->sum("total_amount"), 2) }}</th>
+                                    <th class="py-2 ">{{ number_format($total, 2) }}</th>
                                     <th></th>
                                     <th class="py-2 ">{{ number_format($patientEndurance, 2) }}</th>
                                     <th class="py-2 ">{{ number_format($insuranceEndurance, 2) }}</th>

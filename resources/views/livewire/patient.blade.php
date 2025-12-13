@@ -134,7 +134,7 @@
                                 <td class="py-2">{{$patient->id}}</td>
                                 <td>{{$patient->patientName}}</td>
                                 <td>{{$patient->gender == 'male' ? 'ذكر' : 'أنثى'}}</td>
-                                <td>{{$patient->age}}</td>
+                                <td>{{round($patient->age)}}</td>
                                 <td>{{$durations[$patient->duration]}}</td>
                                 <td>{{$patient->phone}}</td>
                                 <td>

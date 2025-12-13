@@ -53,38 +53,48 @@
 
                     </div>
 
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-full md:w-1/5 px-3">
+                        <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                               for="insuranceNumber">
+                            رقم التأمين
+                        </label>
+                        <input autocomplete="off" wire:model.live="insuranceNumber" @disabled($insurance_id == null) @disabled($visitTestMode)
+                        class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                               id="insuranceNumber" type="text" placeholder="رقم التأمين">
+                    </div>
+
+                    <div class="w-full md:w-1/5 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="amount">
                             الجمله
                         </label>
-                        <input autocomplete="off" wire:model.live="amount" disabled
+                        <input autocomplete="off" wire:model.live="total_amount" disabled
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="amount" type="text" placeholder="الجمله">
                     </div>
 
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-full md:w-1/5 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="discount">
                             التخفيض
                         </label>
-                        <input @disabled($visitTestMode) autocomplete="off"
-                               wire:model.live="discount"
+                        <input autocomplete="off"
+                               wire:model.live="discount" disabled
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="discount" type="text" placeholder="التخفيض">
                     </div>
 
-                    <div class="w-full md:w-1/4 px-3">
+                    <div class="w-full md:w-1/5 px-3">
                         <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                                for="total_amount">
                             الصافي
                         </label>
-                        <input autocomplete="off" wire:model="total_amount" disabled
+                        <input autocomplete="off" wire:model="amount" disabled
                                class="appearance-none text-center block w-full text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                id="total_amount" type="text" placeholder="الصافي">
                     </div>
 
-                    <div class="w-full md:w-1/4 px-2  flex items-end ">
+                    <div class="w-full md:w-1/5 px-2  flex items-end ">
                         @if(!$visitTestMode)
                             <button type="submit"
                                     class=" py-2.5 px-2.5 bg-cyan-800 hover:bg-cyan-700 w-full mt-2 rounded text-white">
@@ -129,9 +139,9 @@
                             <td>{{$visit->doctor}}</td>
                             <td>{{$visit->insurance_id ? $visit->insurance->insuranceName : ""}}</td>
                             <td>  {{$visit->patientEndurance}} %</td>
-                            <td>{{number_format($visit->amount, 2)}}</td>
+                            <td>{{number_format($visit->amount + $visit->discount, 2)}}</td>
                             <td>{{number_format($visit->discount, 2)}}</td>
-                            <td>{{number_format($visit->total_amount * ($visit->patientEndurance / 100), 2)}}</td>
+                            <td>{{number_format($visit->amount * ($visit->patientEndurance / 100), 2)}}</td>
                             <td>
                                 @if($user->hasPermission("visits-update"))
                                     <button class="bg-cyan-400 p-2 rounded text-xs text-white"
@@ -157,6 +167,6 @@
 
         </div>
     @else
-        <livewire:visit-test :$visit_id />
+        <livewire:visit-test :$visit_id/>
     @endif
 </div>

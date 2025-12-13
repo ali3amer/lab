@@ -33,7 +33,7 @@ class Patient extends Component
     public $duration = "year";
     public $gender = "male";
     public $age = 0;
-    public $phone = 0;
+    public $phone = null;
     public array $durations = [
         'year' => 'سنة',
         'month' => 'شهر',
@@ -92,7 +92,7 @@ class Patient extends Component
         $this->id = $patient['id'];
         $this->patientName = $patient['patientName'];
         $this->gender = $patient['gender'];
-        $this->age = $patient['age'];
+        $this->age = round($patient['age']);
         $this->phone = $patient['phone'];
     }
 
