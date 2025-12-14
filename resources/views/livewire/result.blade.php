@@ -212,6 +212,8 @@
                                                                     <br/>
                                                                 @endif
                                                             @endforeach
+                                                        @elseif($result['result_type'] == "multiple_choice")
+                                                            {{ $result['choiceName'] }}
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -246,9 +248,8 @@
                                 </tr>
                                 </thead>
                                 <tbody class="text-center">
-                                <tr class="border-b-2 cursor-pointer">
                                 @foreach($visitTests as $visitTest)
-                                    <tr class="cursor-pointer" id="{{$visitTest->id}}"
+                                    <tr class="cursor-pointer border-b-2" id="{{$visitTest->id}}"
                                         wire:click="changeOption({{$visitTest->id}})">
                                         <td>{{ $visitTest->test->testName }}</td>
                                     </tr>
@@ -274,10 +275,9 @@
                                         </tr>
                                         </thead>
                                         <tbody class="text-center">
-                                        <tr class="border-b-2 cursor-pointer">
                                         @foreach($results as $index => $test)
                                             @if($test['visit_test_id'] == $optionKey)
-                                                <tr class="cursor-pointer">
+                                                <tr class="cursor-pointer border-b-2">
                                                     <td>{{$test['test']['testName']}}</td>
                                                     <td>
                                                         @if($test['test']['result_type'] == "multiple_choice")

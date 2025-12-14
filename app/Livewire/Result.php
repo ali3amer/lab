@@ -144,16 +144,22 @@ class Result extends Component
 
     public function setResultDefault($index)
     {
+        $this->results[$index]["choiceName"] = null;
+
         foreach ($this->results[$index]["choices"] as $choice) {
             if ($choice["default"] && $this->results[$index]["result_choice"] == null) {
                 $this->results[$index]["result_choice"] = $choice['id'];
+                $this->results[$index]["choiceName"] = $choice['choiceName'];
             } elseif ($this->results[$index]["result_choice"] != null && $this->results[$index]["result_choice"] == $choice['id']) {
                 $this->results[$index]["result_choice"] = $choice['id'];
+
             }
         }
 
         if ($this->results[$index]["result_choice"] == null) {
-            $this->results[$index]["result_choice"] = array_key_first($this->results[$index]["choices"]);
+            $firstChoice = array_key_first($this->results[$index]["choices"]);
+            $this->results[$index]["result_choice"] = $firstChoice;
+            $this->results[$index]["choiceName"] = $this->results[$index]["choices"][$firstChoice]['choiceName'];
         }
 
 //        $this->results[$index]['result_choice'] = $this->results[$index]['choices'][0]['id'];
